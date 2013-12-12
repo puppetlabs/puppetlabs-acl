@@ -24,6 +24,7 @@ end
 
 # see http://projects.puppetlabs.com/issues/21698
 platforms :mswin, :mingw do
+  gem "ffi", "1.9.0", :require => false
   gem "sys-admin", "~> 1.5.6", :require => false
   gem "win32-api", "~> 1.4.8", :require => false
   gem "win32-dir", "~> 0.3.7", :require => false
