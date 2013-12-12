@@ -12,7 +12,7 @@ This module provides a type and provider for managing permissions. Currently, on
 
 ##Setup
 
-###Beginning with reboot
+###Beginning with ACL
 
 The best way to install this module is with the `puppet module` subcommand.  On your puppet master or local puppet install, execute the following command, optionally specifying your puppet master's `modulepath` in which to install the module:
 
