@@ -22,7 +22,21 @@ See the section [Installing Modules](http://docs.puppetlabs.com/puppet/2.7/refer
 
 ##Usage
 
+# SIDs reference - http://support.microsoft.com/kb/243330
 
+## Testing
+ `puppet apply tests\init.pp`
+ `mklink /D acl C:\code\puppetlabs\puppetlabs-acl`
+From a command line at the top level of the repository:
+
+ `puppet apply tests\hiera.pp --hiera_config %cd%\tests\hiera.yaml --path %cd%`
+
+ pry stuff:
+
+ ls
+ $temp = Puppet::Type::Acl.new(@tempAcl)
+ cd $Atemp
+ $temp.value(:permissions)
 
 ##Limitations
 
