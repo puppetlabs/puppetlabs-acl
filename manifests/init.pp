@@ -25,6 +25,4 @@
 # Copyright 2013 Puppet Labs, unless otherwise noted.
 #
 class acl {
-
-
 }
