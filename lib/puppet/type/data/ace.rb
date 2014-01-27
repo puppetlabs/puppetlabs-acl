@@ -13,7 +13,6 @@ class Puppet::Type::Data::Ace
    @type = permission_hash["type"] || "allow"
    @child_types = permission_hash["child_types"] || "all"
    @affects = permission_hash["affects"] || "all"
-   require 'pry';binding.pry
   end
 end
 
