@@ -63,6 +63,13 @@ Puppet::Type.newtype(:acl) do
     end
   end
 
+  newparam(:target_type) do
+    desc "The type of target for the Acl resource. In the first release
+      of ACL, only :file is allowed. Defaults to :file."
+    newvalues(:file)
+    defaultto(:file)
+  end
+
   newparam(:purge, :boolean => true) do
     desc "Purge specifies whether to remove other explicit permissions
       if not specified in the permissions set. This doesn't do anything

@@ -63,6 +63,23 @@ describe Puppet::Type.type(:acl) do
     end
   end
 
+  context "parameter :target_type" do
+    it "should default to :file" do
+      resource[:target_type].must == :file
+    end
+
+    it "should accept :file" do
+      resource[:target_type] = :file
+    end
+
+
+    it "should reject any other value" do
+      expect {
+        resource[:target_type] = :whenever
+      }.to raise_error(Puppet::ResourceError, /Invalid value :whenever. Valid values are file/)
+    end
+  end
+
   context "parameter :purge" do
     it "should default to nil" do
       resource[:purge].must be_nil
