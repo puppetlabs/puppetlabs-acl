@@ -1,0 +1,55 @@
+{
+  "name": "puppetlabs-acl",
+  "version": "0.1.0",
+  "summary": "This module provides the ability to manace ACLs on nodes",
+  "author": "puppetlabs",
+  "description": "This module provides the ability to manace ACLs on nodes. Currently the only operating system supported is Windows",
+  "dependencies": [],
+  "types": [
+    {
+      "properties": [
+        {
+          "name": "permissions",
+          "doc": "Permissions is an array containing Access Control Entries\n      (ACEs). Certain Operating Systems require these ACEs to be in\n      explicit order (Windows)."
+        },
+        {
+          "name": "owner",
+          "doc": "The owner identity is also known as a trustee or principal\n      that is said to own the particular acl/security descriptor. This\n      can be in the form of: 1. User - e.g. \u0027Bob\u0027 or \u0027TheNetBob\u0027,\n      2. Group e.g. \u0027Administrators\u0027 or \u0027BUILTINAdministrators\u0027, 3.\n      SID (Security ID) e.g. \u0027S-1-5-18\u0027. Defaults to \u0027S-1-5-32-544\u0027 (Administrators)."
+        },
+        {
+          "name": "inherit_parent_permissions",
+          "doc": "Inherit Parent Permissions specifies whether to inherit\n      permissions from parent ACLs or not. The default is true."
+        }
+      ],
+      "parameters": [
+        {
+          "name": "name",
+          "doc": "The name of the acl resource. Used for uniqueness. Will set\n      to the target if target is unset."
+        },
+        {
+          "name": "target",
+          "doc": "The location the acl resource is pointing to. In the first\n      release of ACL, this will be a file system location.\n      The default is the name."
+        },
+        {
+          "name": "target_type",
+          "doc": "The type of target for the Acl resource. In the first release\n      of ACL, only :file is allowed. Defaults to :file."
+        },
+        {
+          "name": "purge",
+          "doc": "Purge specifies whether to remove other explicit permissions\n      if not specified in the permissions set. This doesn\u0027t do anything\n      with permissions inherited from parents. The default is false."
+        }
+      ],
+      "providers": [
+        {
+          "name": "windows"
+        }
+      ],
+      "name": "acl",
+      "doc": "    Manages access control lists.  The `acl` type is typically\n    used when you need more complex management of permissions\n    e.g. Windows.\n\n    Sample usage:\n\n      ADD HERE LATER\n"
+    }
+  ],
+  "checksums": {},
+  "source": "git://github.com/puppetlabs/puppetlabs-acl.git",
+  "project_page": "https://github.com/puppetlabs/puppetlabs-acl",
+  "license": "Apache License, Version 2.0"
+}
