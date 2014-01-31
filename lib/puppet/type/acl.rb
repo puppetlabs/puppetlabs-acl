@@ -81,10 +81,15 @@ Puppet::Type.newtype(:acl) do
     defaultto(false)
   end
 
-  newproperty(:permissions) do
+  newproperty(:permissions, :array_matching => :all) do
     desc "Permissions is an array containing Access Control Entries
       (ACEs). Certain Operating Systems require these ACEs to be in
       explicit order (Windows)."
+
+    munge do |permission|
+      Puppet::Type::Acl::Ace.new(permission)
+    end
+
     defaultto []
   end
 
