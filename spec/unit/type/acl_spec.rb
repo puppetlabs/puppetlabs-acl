@@ -150,6 +150,102 @@ describe Puppet::Type.type(:acl) do
   end
 
   context "property :permissions" do
+
+    it "should default to []" do
+      resource[:permissions].must == []
+    end
+
+    it "should accept empty" do
+      resource[:permissions] = []
+    end
+
+    context ":identity" do
+
+    end
+
+    context ":rights" do
+
+    end
+
+    context ":type" do
+      it "should default to allow" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full']}
+        resource[:permissions][0].type.should == 'allow'
+      end
+
+      it "should accept allow" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'type'=>'allow'}
+      end
+
+      it "should accept deny" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'type'=>'deny'}
+      end
+
+      it "should reject any other value" do
+        expect {
+          resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'type'=>'what'}
+        }.to raise_error(Puppet::ResourceError, /Invalid value "what". Valid values are/)
+      end
+    end
+
+    context ":child_types" do
+      it "should default to all" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full']}
+        resource[:permissions][0].child_types.should == 'all'
+      end
+
+      it "should accept all" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'child_types'=>'all'}
+      end
+
+      it "should accept objects" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'child_types'=>'objects'}
+      end
+
+      it "should accept containers" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'child_types'=>'containers'}
+      end
+
+      it "should reject any other value" do
+        expect {
+          resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'child_types'=>'what'}
+        }.to raise_error(Puppet::ResourceError, /Invalid value "what". Valid values are/)
+      end
+    end
+
+    context ":affects" do
+      it "should default to all" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full']}
+        resource[:permissions][0].affects.should == 'all'
+      end
+
+      it "should accept all" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'all'}
+      end
+
+      it "should accept self_only" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'self_only'}
+      end
+
+      it "should accept children_only" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'children_only'}
+      end
+
+      it "should accept self_and_direct_children" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'self_and_direct_children'}
+      end
+
+      it "should accept direct_children_only" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'direct_children_only'}
+      end
+
+      it "should reject any other value" do
+        expect {
+          resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'what'}
+        }.to raise_error(Puppet::ResourceError, /Invalid value "what". Valid values are/)
+      end
+    end
+
     context "when working with a single permission" do
 
       before :each do
@@ -178,97 +274,12 @@ describe Puppet::Type.type(:acl) do
         resource[:permissions][0].child_types.should == 'all'
         resource[:permissions][0].affects.should == 'all'
       end
-
     end
-
-    context ":type" do
-      it "should default to allow" do
-        resource[:permissions] = {'identity' =>'bob','rights'=>['full']}
-        resource[:permissions][0].type.should == 'allow'
-      end
-
-      it "should allow to be set to allow" do
-        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'type'=>'allow'}
-      end
-
-      it "should allow to be set to deny" do
-        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'type'=>'deny'}
-      end
-
-      it "should not allow to be set to any other value" do
-        expect {
-          resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'type'=>'what'}
-        }.to raise_error(Puppet::ResourceError, /Invalid value "what". Valid values are/)
-      end
-    end
-
-    context ":child_types" do
-      it "should default to all" do
-        resource[:permissions] = {'identity' =>'bob','rights'=>['full']}
-        resource[:permissions][0].child_types.should == 'all'
-      end
-
-      it "should allow to be set to all" do
-        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'child_types'=>'all'}
-      end
-
-      it "should allow to be set to objects" do
-        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'child_types'=>'objects'}
-      end
-
-      it "should allow to be set to containers" do
-        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'child_types'=>'containers'}
-      end
-
-      it "should not allow to be set to any other value" do
-        expect {
-          resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'child_types'=>'what'}
-        }.to raise_error(Puppet::ResourceError, /Invalid value "what". Valid values are/)
-      end
-    end
-
-    context ":affects" do
-      it "should default to all" do
-        resource[:permissions] = {'identity' =>'bob','rights'=>['full']}
-        resource[:permissions][0].affects.should == 'all'
-      end
-
-      it "should allow to be set to all" do
-        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'all'}
-      end
-
-      it "should allow to be set to self_only" do
-        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'self_only'}
-      end
-
-      it "should allow to be set to children_only" do
-        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'children_only'}
-      end
-
-      it "should allow to be set to self_and_direct_children" do
-        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'self_and_direct_children'}
-      end
-
-      it "should allow to be set to direct_children_only" do
-        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'direct_children_only'}
-      end
-
-      it "should not allow to be set to any other value" do
-        expect {
-          resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'what'}
-        }.to raise_error(Puppet::ResourceError, /Invalid value "what". Valid values are/)
-      end
-    end
-
 
     it "should accept an array of hashes" do
       resource[:permissions] = ["{}","{}"]
     end
 
-    pending "should not accept incomplete aces" do
-      expect {
-        resource[:permissions] = ''
-      }.to raise_error(Puppet::ResourceError, /Invalid value for permissions/)
-    end
+
   end
 end
