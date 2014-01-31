@@ -1,6 +1,6 @@
-require 'puppet/type/data/ace'
-
 Puppet::Type.newtype(:acl) do
+  require 'puppet/type/acl/ace'
+
   @doc = <<-'EOT'
     Manages access control lists.  The `acl` type is typically
     used when you need more complex management of permissions
@@ -16,25 +16,28 @@ Puppet::Type.newtype(:acl) do
   feature :ace_order_required, "The provider determines if the order of access control entries (ACE) is required."
   feature :can_inherit_parent_permissions, "The provider can inherit permissions from the parent."
 
-  @permissions_internal
-
-  def self.permissions_internal
-    @permissions_internal
-  end
+  #@permissions_internal
+  #
+  #def self.permissions_internal
+  #  @permissions_internal
+  #end
 
   def initialize(*args)
     super
 
-    if parameters[:target] == nil then
-      newattr :target
-      parameters[:target].value = parameters[:name].value
+    # if target is unset, use the title
+    if self[:target].nil? then
+      self[:target] = self[:name]
     end
 
-    # # Look at what MySQL_grant does here: https://github.com/puppetlabs/puppetlabs-mysql/blob/master/lib/puppet/type/mysql_grant.rb#L8-L20
-    # # convert each permission in permissions to ace
+    # Look at what MySQL_grant does here: https://github.com/puppetlabs/puppetlabs-mysql/blob/master/lib/puppet/type/mysql_grant.rb#L8-L20
+
+    ## convert each permission in permissions to ace
     #@permissions_internal = []
-    #self[:permissions].each do |permission|
-    #  @permissions_internal << Puppet::Type::Data::Ace.new(permission)
+    #if self[:permissions]
+    #  self[:permissions].each do |permission|
+    #    @permissions_internal << Puppet::Type::Acl::Ace.new(permission)
+    #  end
     #end
   end
 
