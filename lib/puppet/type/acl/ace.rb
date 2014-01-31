@@ -1,5 +1,7 @@
-class Puppet::Type::Data::Ace
-  #attr_accessor :name
+require 'puppet/parameter/value_collection'
+
+class Puppet::Type::Acl::Ace
+
   attr_accessor :identity
   attr_accessor :rights
   attr_accessor :type
@@ -7,14 +9,24 @@ class Puppet::Type::Data::Ace
   attr_accessor :affects
 
   def initialize(permission_hash)
-   # @name = permission_hash[:name]
-   @identity = permission_hash["identity"]
-   @rights = permission_hash["rights"]
-   @type = permission_hash["type"] || "allow"
-   @child_types = permission_hash["child_types"] || "all"
-   @affects = permission_hash["affects"] || "all"
+    @identity = permission_hash["identity"]
+    @rights = permission_hash["rights"]
+    #newvalues(:full, :modify, :write, :list, :read, :execute)
+    @type = validate_and_return(permission_hash["type"] || "allow",:allow,:deny)
+    @child_types = validate_and_return(permission_hash["child_types"] || "all",:all, :objects, :containers)
+    @affects = validate_and_return(permission_hash["affects"] || "all",:all, :self_only, :children_only, :self_and_direct_children, :direct_children_only)
   end
+
+  def validate_and_return(value,*allowed_values)
+    validator = Puppet::Parameter::ValueCollection.new
+    validator.newvalues(*allowed_values)
+    validator.validate(value)
+
+    return value
+  end
+
 end
+
 
 # Puppet::Type.newtype(:ace) do
 #   @doc = <<-'EOT'
