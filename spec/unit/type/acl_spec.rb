@@ -171,12 +171,119 @@ describe Puppet::Type.type(:acl) do
       resource[:permissions] = []
     end
 
-    context ":identity" do
+    it "should not allow empty string" do
+      expect {
+        resource[:permissions] = ''
+      }.to raise_error(Puppet::ResourceError, /A non-empty identity must/)
+    end
 
+    it "should not allow nil" do
+      expect {
+        resource[:permissions] = nil
+      }.to raise_error(Puppet::Error, /Got nil value for permissions/)
+    end
+
+    it "should be of type Array" do
+      resource[:permissions].must be_an_instance_of Array
+    end
+
+    it "should be an array that has elements of type Puppet::Type::Acl::Ace" do
+      resource[:permissions] = {'identity' =>'bob','rights'=>['full']}
+      resource[:permissions].each do |permission|
+        permission.must be_an_instance_of Puppet::Type::Acl::Ace
+      end
+    end
+
+    context ":identity" do
+      it "should accept bob" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full']}
+      end
+
+      it "should accept Domain\\Bob" do
+        resource[:permissions] = {'identity' =>'Domain\Bob','rights'=>['full']}
+      end
+
+      it "should accept SIDs like S-1-5-32-544" do
+        resource[:permissions] = {'identity' =>'S-1-5-32-544','rights'=>['full']}
+      end
+
+      it "should reject empty" do
+        expect {
+          resource[:permissions] = {'rights'=>['full']}
+        }.to raise_error(Puppet::ResourceError, /A non-empty identity must/)
+      end
+
+      it "should reject nil" do
+        expect {
+          resource[:permissions] = {'identity'=>nil,'rights'=>['full']}
+        }.to raise_error(Puppet::ResourceError, /A non-empty identity must/)
+      end
     end
 
     context ":rights" do
+      it "should accept ['full']" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>['full']}
+      end
 
+      it "should accept ['modify']" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>['modify']}
+      end
+
+      it "should accept ['write']" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>['write']}
+      end
+
+      it "should accept ['list']" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>['list']}
+      end
+
+      it "should accept ['read']" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>['read']}
+      end
+
+      it "should accept ['execute']" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>['execute']}
+      end
+
+      it "should accept a combination of valid values" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>['read','execute']}
+      end
+
+      it "should reject any other value" do
+        expect {
+          resource[:permissions] = {'identity' =>'bob','rights'=>['what']}
+        }.to raise_error(Puppet::ResourceError, /Invalid value "what". Valid values are/)
+      end
+
+      it "should reject a value even if with valid values" do
+        expect {
+          resource[:permissions] = {'identity' =>'bob','rights'=>['modify','what']}
+        }.to raise_error(Puppet::ResourceError, /Invalid value "what". Valid values are/)
+      end
+
+      it "should reject non-array value" do
+        expect {
+          resource[:permissions] = {'identity'=>'bob','rights'=>'read'}
+        }.to raise_error(Puppet::ResourceError, /Value for rights should be an array. Perhaps try \['read'\]\?/)
+      end
+
+      it "should reject empty" do
+        expect {
+          resource[:permissions] = {'identity'=>'bob'}
+        }.to raise_error(Puppet::ResourceError, /A non-empty rights must/)
+      end
+
+      it "should reject nil" do
+        expect {
+          resource[:permissions] = {'identity'=>'bob','rights'=>nil}
+        }.to raise_error(Puppet::ResourceError, /A non-empty rights must/)
+      end
+
+      it "should reject emtpy array" do
+        expect {
+          resource[:permissions] = {'identity'=>'bob','rights'=>[]}
+        }.to raise_error(Puppet::ResourceError, /Value for rights should have least one element in the array/)
+      end
     end
 
     context ":type" do
@@ -197,6 +304,17 @@ describe Puppet::Type.type(:acl) do
         expect {
           resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'type'=>'what'}
         }.to raise_error(Puppet::ResourceError, /Invalid value "what". Valid values are/)
+      end
+
+      it "should reject empty" do
+        expect {
+          resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'type'=>''}
+        }.to raise_error(Puppet::ResourceError, /Invalid value "". Valid values are/)
+      end
+
+      it "should set default value on nil" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'type'=>nil}
+        resource[:permissions][0].type.should == 'allow'
       end
     end
 
@@ -222,6 +340,17 @@ describe Puppet::Type.type(:acl) do
         expect {
           resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'child_types'=>'what'}
         }.to raise_error(Puppet::ResourceError, /Invalid value "what". Valid values are/)
+      end
+
+      it "should reject empty" do
+        expect {
+          resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'child_types'=>''}
+        }.to raise_error(Puppet::ResourceError, /Invalid value "". Valid values are/)
+      end
+
+      it "should set default value on nil" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'child_types'=>nil}
+        resource[:permissions][0].child_types.should == 'all'
       end
     end
 
@@ -256,22 +385,23 @@ describe Puppet::Type.type(:acl) do
           resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'what'}
         }.to raise_error(Puppet::ResourceError, /Invalid value "what". Valid values are/)
       end
+
+      it "should reject empty" do
+        expect {
+          resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'affects'=>''}
+        }.to raise_error(Puppet::ResourceError, /Invalid value "". Valid values are/)
+      end
+
+      it "should set default value on nil" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'affects'=>nil}
+        resource[:permissions][0].affects.should == 'all'
+      end
     end
 
     context "when working with a single permission" do
 
       before :each do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full']}
-      end
-
-      it "should be of type Array" do
-        resource[:permissions].must be_an_instance_of Array
-      end
-
-      it "should have an array that has elements of type Puppet::Type::Acl::Ace" do
-        resource[:permissions].each do |permission|
-          permission.must be_an_instance_of Puppet::Type::Acl::Ace
-        end
       end
 
       it "should convert the values appropriately" do
@@ -288,10 +418,20 @@ describe Puppet::Type.type(:acl) do
       end
     end
 
-    it "should accept an array of hashes" do
-      resource[:permissions] = ["{}","{}"]
-    end
+    context "when working with multiple permissions" do
+      before :each do
+        resource[:permissions] = [{'identity'=> 'bob','rights'=>['full']},{'identity'=> 'tim','rights'=>['full']}]
+      end
 
+      it "should contain the number of items set" do
+        resource[:permissions].count.must == 2
+      end
+
+      it "should be in the exact order set" do
+        resource[:permissions][0].identity.must == 'bob'
+        resource[:permissions][1].identity.must == 'tim'
+      end
+    end
 
   end
 end
