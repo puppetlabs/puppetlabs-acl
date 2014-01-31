@@ -110,6 +110,18 @@ describe Puppet::Type.type(:acl) do
       resource[:owner].must == 'S-1-5-32-544'
     end
 
+    it "should accept bob" do
+      resource[:owner] = 'bob'
+    end
+
+    it "should accept Domain\\Bob" do
+      resource[:owner] = 'Domain\Bob'
+    end
+
+    it "should accept SIDs like S-1-5-32-544" do
+      resource[:owner] = 'S-1-5-32-544'
+    end
+
     it "should not allow nil" do
       expect {
         resource[:owner] = nil
