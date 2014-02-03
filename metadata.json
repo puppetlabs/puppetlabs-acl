@@ -14,7 +14,7 @@
         },
         {
           "name": "owner",
-          "doc": "The owner identity is also known as a trustee or principal\n      that is said to own the particular acl/security descriptor. This\n      can be in the form of: 1. User - e.g. \u0027Bob\u0027 or \u0027TheNetBob\u0027,\n      2. Group e.g. \u0027Administrators\u0027 or \u0027BUILTINAdministrators\u0027, 3.\n      SID (Security ID) e.g. \u0027S-1-5-18\u0027. Defaults to \u0027S-1-5-32-544\u0027 (Administrators)."
+          "doc": "The owner identity is also known as a trustee or principal\n      that is said to own the particular acl/security descriptor. This\n      can be in the form of: 1. User - e.g. \u0027Bob\u0027 or \u0027TheNet\\Bob\u0027,\n      2. Group e.g. \u0027Administrators\u0027 or \u0027BUILTIN\\Administrators\u0027, 3.\n      SID (Security ID) e.g. \u0027S-1-5-18\u0027. Defaults to \u0027S-1-5-32-544\u0027\n      (Administrators) on Windows."
         },
         {
           "name": "inherit_parent_permissions",
