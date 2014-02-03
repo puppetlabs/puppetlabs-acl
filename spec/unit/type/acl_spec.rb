@@ -162,18 +162,16 @@ describe Puppet::Type.type(:acl) do
 
   context "property :permissions" do
 
-    it "should default to []" do
-      resource[:permissions].must == []
-    end
-
-    it "should accept empty" do
-      resource[:permissions] = []
+    it "should not accept empty array" do
+      expect {
+        Puppet::Type.type(:acl).new(:name => "acl",:permissions =>[])
+      }.to raise_error(Puppet::ResourceError, /Value for permissions should be an array with at least one element specified/)
     end
 
     it "should not allow empty string" do
       expect {
         resource[:permissions] = ''
-      }.to raise_error(Puppet::ResourceError, /A non-empty identity must/)
+      }.to raise_error(Puppet::ResourceError, /A non-empty permissions must be/)
     end
 
     it "should not allow nil" do
@@ -183,6 +181,7 @@ describe Puppet::Type.type(:acl) do
     end
 
     it "should be of type Array" do
+      resource[:permissions] = [{'identity'=>'bob','rights'=>['full']}]
       resource[:permissions].must be_an_instance_of Array
     end
 

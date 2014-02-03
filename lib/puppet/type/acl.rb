@@ -72,11 +72,15 @@ Puppet::Type.newtype(:acl) do
       (ACEs). Certain Operating Systems require these ACEs to be in
       explicit order (Windows)."
 
+    validate do |value|
+      if value.nil? or value.empty?
+        raise ArgumentError, "A non-empty permissions must be specified."
+      end
+    end
+
     munge do |permission|
       Puppet::Type::Acl::Ace.new(permission)
     end
-
-    defaultto []
   end
 
   newproperty(:owner) do
@@ -102,5 +106,11 @@ Puppet::Type.newtype(:acl) do
       permissions from parent ACLs or not. The default is true."
     newvalues(:true, :false)
     defaultto(true)
+  end
+
+  validate do
+    if self[:permissions] == []
+      raise ArgumentError, "Value for permissions should be an array with at least one element specified."
+    end
   end
 end
