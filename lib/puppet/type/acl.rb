@@ -82,9 +82,10 @@ Puppet::Type.newtype(:acl) do
   newproperty(:owner) do
     desc "The owner identity is also known as a trustee or principal
       that is said to own the particular acl/security descriptor. This
-      can be in the form of: 1. User - e.g. 'Bob' or 'TheNet\Bob',
-      2. Group e.g. 'Administrators' or 'BUILTIN\Administrators', 3.
-      SID (Security ID) e.g. 'S-1-5-18'. Defaults to 'S-1-5-32-544' (Administrators)."
+      can be in the form of: 1. User - e.g. 'Bob' or 'TheNet\\Bob',
+      2. Group e.g. 'Administrators' or 'BUILTIN\\Administrators', 3.
+      SID (Security ID) e.g. 'S-1-5-18'. Defaults to 'S-1-5-32-544'
+      (Administrators) on Windows."
 
     validate do |value|
       if value.nil? or value == ""
