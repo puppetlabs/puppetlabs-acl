@@ -93,6 +93,7 @@ Puppet::Type.newtype(:acl) do
       end
     end
 
+    #todo check platform and return specific default - this may not always be windows
     defaultto 'S-1-5-32-544'
   end
 
