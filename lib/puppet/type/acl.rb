@@ -32,7 +32,7 @@ Puppet::Type.newtype(:acl) do
       to the target if target is unset."
 
     validate do |value|
-      if value.nil? or value == ""
+      if value.nil? or value.empty?
         raise ArgumentError, "A non-empty name must be specified."
       end
     end
@@ -46,7 +46,7 @@ Puppet::Type.newtype(:acl) do
       The default is the name."
 
     validate do |value|
-      if value.nil? or value == ""
+      if value.nil? or value.empty?
         raise ArgumentError, "A non-empty target must be specified."
       end
     end
@@ -88,7 +88,7 @@ Puppet::Type.newtype(:acl) do
       (Administrators) on Windows."
 
     validate do |value|
-      if value.nil? or value == ""
+      if value.nil? or value.empty?
         raise ArgumentError, "A non-empty owner must be specified."
       end
     end

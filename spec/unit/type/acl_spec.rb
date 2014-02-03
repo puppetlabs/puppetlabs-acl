@@ -77,7 +77,6 @@ describe Puppet::Type.type(:acl) do
       resource[:target_type] = :file
     end
 
-
     it "should reject any other value" do
       expect {
         resource[:target_type] = :whenever
