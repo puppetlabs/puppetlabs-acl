@@ -9,6 +9,7 @@ class Puppet::Type::Acl
     attr_accessor :child_types
     attr_accessor :affects
     attr_accessor :is_inherited
+    attr_accessor :mask
 
     def initialize(permission_hash)
       @identity = validate_non_empty('identity',permission_hash['identity'])
@@ -17,12 +18,13 @@ class Puppet::Type::Acl
             'rights',
             validate_non_empty('rights',permission_hash['rights'])
           ),
-          :full, :modify, :write, :list, :read, :execute)
+          :full, :modify, :write, :list, :read, :execute, :mask_specific)
       # binary hex flags
       @type = validate(permission_hash['type'] || 'allow', :allow, :deny)
       @child_types = validate(permission_hash['child_types'] || 'all', :all, :objects, :containers)
       @affects = validate(permission_hash['affects'] || 'all', :all, :self_only, :children_only, :self_and_direct_children, :direct_children_only)
       @is_inherited = permission_hash['is_inherited'] || false
+      @mask = permission_hash['mask']
     end
 
     def validate(value,*allowed_values)
