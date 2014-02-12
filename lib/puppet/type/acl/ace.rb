@@ -23,7 +23,7 @@ class Puppet::Type::Acl
           :full, :modify, :write, :list, :read, :execute, :mask_specific)
       # binary hex flags
       @type = validate(permission_hash['type'] || 'allow', :allow, :deny)
-      @child_types = validate(permission_hash['child_types'] || 'all', :all, :objects, :containers)
+      @child_types = validate(permission_hash['child_types'] || 'all', :all, :objects, :containers, :none)
       @affects = validate(permission_hash['affects'] || 'all', :all, :self_only, :children_only, :self_and_direct_children, :direct_children_only)
       @is_inherited = permission_hash['is_inherited'] || false
       @mask = permission_hash['mask']
