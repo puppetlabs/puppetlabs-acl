@@ -66,5 +66,19 @@ class Puppet::Type::Acl
       values
     end
 
+    def to_s
+      formatted_ace ="\n"
+      formatted_ace << '{'
+      formatted_ace << "identity => '#{identity}',"
+      formatted_ace << " rights => #{rights},"
+      formatted_ace << " type => '#{type}'," unless type == 'allow'
+      formatted_ace << " child_types => '#{child_types}'," unless child_types == 'all'
+      formatted_ace << " affects => '#{affects}'," unless affects == 'all'
+      formatted_ace << " is_inherited => '#{is_inherited}'," if is_inherited
+      formatted_ace << '}'
+
+      formatted_ace
+    end
+
   end
 end
