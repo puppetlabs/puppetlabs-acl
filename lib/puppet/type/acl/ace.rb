@@ -4,6 +4,7 @@ class Puppet::Type::Acl
   class Ace
 
     attr_accessor :identity
+    attr_accessor :sid
     attr_accessor :rights
     attr_accessor :type
     attr_accessor :child_types
@@ -12,7 +13,8 @@ class Puppet::Type::Acl
     attr_accessor :mask
 
     def initialize(permission_hash)
-      @identity = validate_non_empty('identity',permission_hash['identity'])
+      @sid = permission_hash['sid']
+      @identity = validate_non_empty('identity',permission_hash['identity'] || permission_hash['sid'])
       @rights = validate_individual_values(
           validate_array(
             'rights',
