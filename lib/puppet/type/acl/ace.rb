@@ -8,6 +8,7 @@ class Puppet::Type::Acl
     attr_accessor :type
     attr_accessor :child_types
     attr_accessor :affects
+    attr_accessor :is_inherited
 
     def initialize(permission_hash)
       @identity = validate_non_empty('identity',permission_hash['identity'])
@@ -21,6 +22,7 @@ class Puppet::Type::Acl
       @type = validate(permission_hash['type'] || 'allow', :allow, :deny)
       @child_types = validate(permission_hash['child_types'] || 'all', :all, :objects, :containers)
       @affects = validate(permission_hash['affects'] || 'all', :all, :self_only, :children_only, :self_and_direct_children, :direct_children_only)
+      @is_inherited = permission_hash['is_inherited'] || false
     end
 
     def validate(value,*allowed_values)
@@ -29,6 +31,10 @@ class Puppet::Type::Acl
       validator.validate(value)
 
       value
+    end
+
+    def is_inherited?
+      return is_inherited
     end
 
     def validate_non_empty(name,value)
