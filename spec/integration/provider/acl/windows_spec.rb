@@ -42,6 +42,20 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     it "should grab current owner" do
       provider.owner.must == 'S-1-5-32-544'
     end
+
+    context ".insync?" do
+      it "should return true for Administrators and S-1-5-32-544" do
+        provider.is_owner_insync?("S-1-5-32-544","Administrators").must be_true
+      end
+
+      it "should return true for Administrators and Administrators" do
+        provider.is_owner_insync?("Administrators","Administrators").must be_true
+      end
+
+      it "should return false for Administrators and Administrator (user)" do
+        provider.is_owner_insync?("Administrators","Administrator").must be_false
+      end
+    end
   end
 
   context ":inherit_parent_permissions" do

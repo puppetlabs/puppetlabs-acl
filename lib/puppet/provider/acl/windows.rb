@@ -64,6 +64,14 @@ Puppet::Type.type(:acl).provide :windows do
     @property_flush[:owner] = value
   end
 
+  def owner_insync?(current, should)
+    is_owner_insync?(current,should)
+  end
+
+  def owner_to_s(current_value)
+    get_account_name(current_value)
+  end
+
   def inherit_parent_permissions
     is_inheriting_permissions?
   end

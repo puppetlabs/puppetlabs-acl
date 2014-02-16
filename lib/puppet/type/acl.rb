@@ -99,6 +99,23 @@ Puppet::Type.newtype(:acl) do
 
     #todo check platform and return specific default - this may not always be windows
     defaultto 'S-1-5-32-544'
+
+    def insync?(current)
+      if provider.respond_to?(:owner_insync?)
+        return provider.owner_insync?(current, should)
+      end
+
+      super(current)
+    end
+
+    def is_to_s(currentvalue)
+      if provider.respond_to?(:owner_to_s)
+        return provider.owner_to_s(currentvalue)
+      end
+
+      super(currentvalue)
+    end
+    alias :should_to_s :is_to_s
   end
 
   newproperty(:inherit_parent_permissions, :boolean => true) do
