@@ -124,6 +124,10 @@ Puppet::Type.newtype(:acl) do
     #todo set this based on :can_inherit_parent_permissions
     newvalues(:true,:false)
     defaultto(true)
+
+    def insync?(current)
+      super(resource.munge_boolean(current))
+    end
   end
 
   validate do
@@ -160,4 +164,16 @@ Puppet::Type.newtype(:acl) do
 
     required_file
   end
+
+  def munge_boolean(value)
+    case value
+      when true, "true", :true
+        :true
+      when false, "false", :false
+        :false
+      else
+        fail("munge_boolean only takes booleans")
+    end
+  end
+
 end
