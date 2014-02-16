@@ -1,3 +1,5 @@
+require 'puppet/type'
+
 Puppet::Type.type(:acl).provide :windows do
   #confine :feature => :microsoft_windows
   confine :operatingsystem => :windows
@@ -43,7 +45,7 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def destroy
-    #todo what are we removing? The aces listed in the dacl
+    #todo what are we removing? The aces listed in the dacl that would no longer be managed
   end
 
   def permissions
@@ -76,5 +78,4 @@ Puppet::Type.type(:acl).provide :windows do
     # set permissions
     # last set inherit parent perms
   end
-
 end

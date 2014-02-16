@@ -1,18 +1,9 @@
 #! /usr/bin/env ruby
 require 'spec_helper'
 require 'puppet/type'
+require 'puppet/provider/acl/windows'
 
 describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.microsoft_windows? do
-
-  require 'puppet/util/windows/security'
-  require 'puppet/util/windows/access_control_entry'
-  require 'puppet/util/windows/access_control_list'
-  require 'puppet/provider/acl/windows'
-  require 'puppet/provider/acl/windows/base'
-  require 'win32/security'
-  require 'windows/security'
-  require 'windows/file'
-
 
   let (:resource) { Puppet::Type.type(:acl).new(:provider => :windows, :name => "windows_acl") }
   let (:provider) { resource.provider}

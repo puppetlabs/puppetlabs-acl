@@ -10,15 +10,12 @@ if Puppet.features.microsoft_windows?
   end
 end
 
-
 describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.microsoft_windows? do
   let (:resource) { Puppet::Type.type(:acl).new(:provider => :windows, :name => "windows_acl") }
   let (:provider) { resource.provider}
-
   let (:top_level_path) do
     Dir.mktmpdir('acl_playground')
   end
-
   let (:path) { top_level_path }
 
   def set_path(sub_directory)
@@ -127,5 +124,4 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     end
 
   end
-
 end

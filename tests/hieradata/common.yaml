@@ -15,7 +15,7 @@ acls:
           - list
           - execute
   dir2:
-    target: 'C\temp'
+    target: 'C:\temp'
     ensure: present
     permissions:
       - identity: 'tim'

@@ -67,7 +67,8 @@ class Puppet::Type::Acl
     end
 
     def to_s
-      formatted_ace ="\n"
+      formatted_ace =""
+      #formatted_ace ="\n"
       formatted_ace << '{'
       formatted_ace << "identity => '#{identity}',"
       formatted_ace << " rights => #{rights},"

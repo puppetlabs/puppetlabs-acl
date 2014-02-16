@@ -51,4 +51,5 @@ acl { 'temp_dir_module2_name':
 
 $tempAcl2 = Acl['c:/temp']
 
-# $foo = inline_template("<% require 'pry';binding.pry %>")
+#pry()
+#$foo = inline_template("<% require 'pry';binding.pry %>")

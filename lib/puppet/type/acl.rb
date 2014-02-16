@@ -23,8 +23,6 @@ Puppet::Type.newtype(:acl) do
     if self[:target].nil? then
       self[:target] = self[:name]
     end
-
-    # Look at what MySQL_grant does here: https://github.com/puppetlabs/puppetlabs-mysql/blob/master/lib/puppet/type/mysql_grant.rb#L8-L20
   end
 
   newparam(:name) do
@@ -104,7 +102,8 @@ Puppet::Type.newtype(:acl) do
   newproperty(:inherit_parent_permissions, :boolean => true) do
     desc "Inherit Parent Permissions specifies whether to inherit
       permissions from parent ACLs or not. The default is true."
-    newvalues(:true, :false)
+    #todo set this based on :can_inherit_parent_permissions
+    newvalues(:true,:false)
     defaultto(true)
   end
 
