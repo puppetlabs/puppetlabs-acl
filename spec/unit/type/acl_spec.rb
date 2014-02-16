@@ -6,6 +6,7 @@ require 'puppet/type/acl'
 describe Puppet::Type.type(:acl) do
   let(:resource) { Puppet::Type.type(:acl).new(:name => "acl") }
   let(:provider) { Puppet::Provider.new(resource) }
+  let(:catalog) { Puppet::Resource::Catalog.new }
 
   before :each do
     resource.provider = provider
@@ -81,6 +82,121 @@ describe Puppet::Type.type(:acl) do
       expect {
         resource[:target_type] = :whenever
       }.to raise_error(Puppet::ResourceError, /Invalid value :whenever. Valid values are file/)
+    end
+  end
+
+  context "autorequiring resources" do
+    # :as_platform => :windows - doesn't exist outside of puppet?
+    context "when :target_type => :file", :if => Puppet.features.microsoft_windows? do
+      it "should autorequire an existing file resource when acl.target matches file.path exactly" do
+        resource[:target] = 'c:/temp'
+        dir = Puppet::Type.type(:file).new(:path => "c:/temp")
+        catalog.add_resource resource
+        catalog.add_resource dir
+        reqs = resource.autorequire
+        reqs[0].source.must == dir
+        reqs[0].target.must == resource
+        reqs.count.must == 1
+      end
+
+      it "should autorequire an existing file resource when acl.target uses back slashes and file.path uses forward slashes" do
+        resource[:target] = 'c:\temp'
+        dir = Puppet::Type.type(:file).new(:path => "c:/temp")
+        catalog.add_resource resource
+        catalog.add_resource dir
+        reqs = resource.autorequire
+        reqs[0].source.must == dir
+        reqs[0].target.must == resource
+        reqs.count.must == 1
+      end
+
+      it "should autorequire an existing file resource when acl.target uses forward slashes and file.path uses back slashes" do
+        resource[:target] = 'c:/temp'
+        dir = Puppet::Type.type(:file).new(:path => 'c:\temp')
+        catalog.add_resource resource
+        catalog.add_resource dir
+        reqs = resource.autorequire
+        reqs[0].source.must == dir
+        reqs[0].target.must == resource
+        reqs.count.must == 1
+      end
+
+      it "should autorequire an existing file resource when acl.target is lowercase but file.path has different casing" do
+        resource[:target] = 'c:/temp'
+        dir = Puppet::Type.type(:file).new(:path => "c:/Temp")
+        catalog.add_resource resource
+        catalog.add_resource dir
+        reqs = resource.autorequire
+        reqs[0].source.must == dir
+        reqs[0].target.must == resource
+        reqs.count.must == 1
+      end
+
+      it "should autorequire an existing file resource when acl.target has uppercasing but file.path has different casing" do
+        resource[:target] = 'c:/Temp'
+        dir = Puppet::Type.type(:file).new(:path => "c:/tEmp")
+        catalog.add_resource resource
+        catalog.add_resource dir
+        reqs = resource.autorequire
+        reqs[0].source.must == dir
+        reqs[0].target.must == resource
+        reqs.count.must == 1
+      end
+
+      it "should autorequire an existing file resource when acl.target has different casing than file.path" do
+        resource[:target] = 'c:/Temp'
+        dir = Puppet::Type.type(:file).new(:path => "c:/temp")
+        catalog.add_resource resource
+        catalog.add_resource dir
+        reqs = resource.autorequire
+
+        reqs[0].source.must == dir
+        reqs[0].target.must == resource
+        reqs.count.must == 1
+      end
+
+      it "should autorequire an existing file resource when acl.target volume is uppercase C and file.path is uppercase C" do
+        resource[:target] = 'C:/temp'
+        dir = Puppet::Type.type(:file).new(:path => "C:/temp")
+        catalog.add_resource resource
+        catalog.add_resource dir
+        reqs = resource.autorequire
+        reqs[0].source.must == dir
+        reqs[0].target.must == resource
+        reqs.count.must == 1
+      end
+
+      it "should autorequire an existing file resource when acl.target volume is uppercase C and file.path is lowercase c" do
+        resource[:target] = 'C:/temp'
+        dir = Puppet::Type.type(:file).new(:path => "c:/temp")
+        catalog.add_resource resource
+        catalog.add_resource dir
+        reqs = resource.autorequire
+        reqs[0].source.must == dir
+        reqs[0].target.must == resource
+        reqs.count.must == 1
+      end
+
+      it "should autorequire an existing file resource when acl.target volume is lowercase C and file.path is uppercase C" do
+        resource[:target] = 'c:/temp'
+        dir = Puppet::Type.type(:file).new(:path => "C:/temp")
+        catalog.add_resource resource
+        catalog.add_resource dir
+        reqs = resource.autorequire
+        reqs[0].source.must == dir
+        reqs[0].target.must == resource
+        reqs.count.must == 1
+      end
+
+      it "should not autorequire an existing file resource when it is different than acl.target" do
+        resource[:target] = 'c:/temp'
+        dir = Puppet::Type.type(:file).new(:path => "c:/temp/something")
+        catalog.add_resource resource
+        catalog.add_resource dir
+        reqs = resource.autorequire
+
+        reqs.must be_empty
+      end
     end
   end
 

@@ -5,7 +5,15 @@ create_resources(acl, $acls)
 
 $tempAcl = Acl['tempdir']
 
-acl { 'c:/temp':
+file {'c:/temp':
+  ensure => 'directory',
+}
+#
+#file {'C:/temp':
+#  ensure => 'directory',
+#}
+
+acl { 'c:\temp':
   ensure      => present,
   permissions => [
     {

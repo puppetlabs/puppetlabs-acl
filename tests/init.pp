@@ -9,3 +9,26 @@
 # Learn more about module testing here: http://docs.puppetlabs.com/guides/tests_smoke.html
 #
 include acl
+
+file { 'C:/temp':
+  ensure => directory,
+}
+
+acl { 'c:/temp':
+  ensure      => present,
+  permissions => [
+   {
+    identity => 'rob',
+    rights   => [full]
+   }
+  ],
+  owner       => 'Administrators',
+  inherit_parent_permissions => 'true',
+}
+
+$file_resource = File['c:/temp']
+$acl_resource = Acl['c:/temp']
+
+#pry()
+#$foo = inline_template("<% require 'pry';binding.pry %>")
+

@@ -1,3 +1,5 @@
+require 'puppet/type'
+
 Puppet::Type.newtype(:acl) do
   require 'puppet/type/acl/ace'
 
@@ -111,5 +113,34 @@ Puppet::Type.newtype(:acl) do
     if self[:permissions] == []
       raise ArgumentError, "Value for permissions should be an array with at least one element specified."
     end
+  end
+
+  autorequire(:file) do
+    # review - autorequire is a soft dependency, is it a waste of cycles to attempt to find one versus just soft require?
+    required_file = []
+    if self[:target] && self[:target_type] == :file
+      target_path = File.expand_path(self[:target]).to_s
+
+      if file_resource = catalog.resource(:file, target_path)
+        required_file << file_resource.to_s
+      end
+
+      if required_file == []
+        # There is a bug with the casing on the volume (c:/ versus C:/) causing resources to not be found by the catalog
+        #  checking against lowercase and uppercase corrects that.
+        target_path_length = target_path.length
+        if target_path_length && target_path_length > 2
+          if file_resource = catalog.resource(:file, target_path[0].downcase << target_path[1, target_path_length - 1])
+            required_file << file_resource.to_s
+          end
+
+          if required_file == [] && file_resource = catalog.resource(:file, target_path[0].upcase << target_path[1, target_path_length - 1])
+            required_file << file_resource.to_s
+          end
+        end
+      end
+    end
+
+    required_file
   end
 end
