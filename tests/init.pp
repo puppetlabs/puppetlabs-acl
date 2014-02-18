@@ -19,7 +19,7 @@ acl { 'c:/temp':
   permissions => [
    {
     identity => 'rob',
-    rights   => [full]
+    rights   => ['full']
    }
   ],
   owner       => 'Administrators',
