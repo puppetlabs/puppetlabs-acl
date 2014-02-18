@@ -182,6 +182,8 @@ Puppet::Type.newtype(:acl) do
     required_file
   end
 
+  #todo autorequire all users specified in permissions and owner
+
   def munge_boolean(value)
     case value
       when true, "true", :true
