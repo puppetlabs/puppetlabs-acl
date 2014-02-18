@@ -1,3 +1,8 @@
+#
+# == How to run this ==
+# Please see ReadMe at the top of the repository for instructions on setup and running.
+#
+
 $acls = hiera_hash('acls', {})
 
 notify { $acls: }
