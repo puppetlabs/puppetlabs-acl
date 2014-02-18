@@ -147,10 +147,39 @@ class Puppet::Provider::Acl
         end
         module_function :get_ace_propagation
 
-        def are_permissions_insync?(current_permissions,updated_permissions)
-          current_local_permissions = current_permissions.select { |p| !p.is_inherited }
+        def are_permissions_insync?(current_permissions, specified_permissions, should_purge)
+          return false if current_permissions.nil? && !specified_permissions.nil?
 
-          current_local_permissions == updated_permissions
+          current_local_permissions = current_permissions.select { |p| !p.is_inherited? }
+
+          current_sync_check_perms = get_sync_checking_permissions(current_local_permissions)
+          specified_sync_check_perms = get_sync_checking_permissions(specified_permissions)
+
+          if should_purge
+            current_sync_check_perms == specified_sync_check_perms
+          else
+            return true if specified_sync_check_perms.nil?
+
+            # intersect permissions equal specified?
+            specified_sync_check_perms == current_sync_check_perms & specified_sync_check_perms
+          end
+        end
+
+        def get_sync_checking_permissions(permissions)
+          return permissions if permissions.nil?
+
+          sync_checking_permissions = []
+          permissions.each do |perm|
+            sync_checking_permissions << {'identity'=>get_account_name(perm.identity),
+                                   'sid'=> perm.sid || get_account_sid(perm.identity),
+                                   'rights'=>perm.rights,
+                                   'type'=>perm.type,
+                                   'child_types'=>perm.child_types,
+                                   'affects'=>perm.affects
+            }
+          end
+
+          sync_checking_permissions
         end
 
         def get_current_owner
@@ -169,11 +198,15 @@ class Puppet::Provider::Acl
 
           return false if current_owner.empty? != should_empty
 
-          Puppet::Util::Windows::Security.name_to_sid(current_owner) == Puppet::Util::Windows::Security.name_to_sid(updated_owner)
+          get_account_sid(current_owner) == get_account_sid(updated_owner)
+        end
+
+        def get_account_sid(name)
+          Puppet::Util::Windows::Security.name_to_sid(name)
         end
 
         def get_account_name(current_value)
-          Puppet::Util::Windows::Security.sid_to_name(Puppet::Util::Windows::Security.name_to_sid(current_value))
+          Puppet::Util::Windows::Security.sid_to_name(get_account_sid(current_value))
         end
 
         def is_inheriting_permissions?

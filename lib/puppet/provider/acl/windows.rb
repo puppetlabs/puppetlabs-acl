@@ -56,6 +56,24 @@ Puppet::Type.type(:acl).provide :windows do
     @property_flush[:permissions] = value
   end
 
+  def permissions_insync?(current, should)
+    are_permissions_insync?(current, should, @resource[:purge] == :true)
+  end
+
+  def permissions_to_s(permissions)
+    return '' if permissions.nil? or !permissions.kind_of?(Array)
+
+    perms = permissions.select { |p| !p.is_inherited}
+
+    unless perms.nil?
+      perms.each do |perm|
+        perm.identity = get_account_name(perm.identity)
+      end
+    end
+
+    perms
+  end
+
   def owner
    get_current_owner
   end

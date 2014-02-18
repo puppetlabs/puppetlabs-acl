@@ -81,6 +81,23 @@ Puppet::Type.newtype(:acl) do
     munge do |permission|
       Puppet::Type::Acl::Ace.new(permission)
     end
+
+    def insync?(current)
+      if provider.respond_to?(:permissions_insync?)
+        return provider.permissions_insync?(current, @should)
+      end
+
+      super(current)
+    end
+
+    def is_to_s(currentvalue)
+      if provider.respond_to?(:permissions_to_s)
+        return provider.permissions_to_s(currentvalue)
+      end
+
+      super(currentvalue)
+    end
+    alias :should_to_s :is_to_s
   end
 
   newproperty(:owner) do
