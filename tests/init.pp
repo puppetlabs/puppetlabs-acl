@@ -18,7 +18,7 @@ acl { 'c:/temp':
   ensure      => present,
   permissions => [
    {
-    identity => 'rob',
+    identity => 'SYSTEM',
     rights   => ['full']
    }
   ],
