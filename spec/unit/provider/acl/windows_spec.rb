@@ -153,6 +153,12 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == ['full']
       end
 
+      it "should have only full if ace.mask contains FILE_ALL_ACCESS" do
+        ace.expects(:mask).returns( ::Windows::File::FILE_ALL_ACCESS).times(0..10)
+
+        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == ['full']
+      end
+
       it "should contain read, write, execute if ace.mask contains GENERIC_WRITE, GENERIC_READ, and GENERIC_EXECUTE" do
         ace.expects(:mask).returns(::Windows::Security::GENERIC_WRITE |
                                    ::Windows::Security::GENERIC_READ |

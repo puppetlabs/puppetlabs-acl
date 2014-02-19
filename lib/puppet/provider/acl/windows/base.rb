@@ -53,9 +53,8 @@ class Puppet::Provider::Acl
           return rights if ace.nil?
 
           # full
-          if ace.mask & ::Windows::File::GENERIC_ALL != 0 #||
-             #ace.mask & ::Windows::File::STANDARD_RIGHTS_ALL != 0
-             #::Windows::File::FILE_ALL_ACCESS
+          if ace.mask & ::Windows::File::GENERIC_ALL != 0 ||
+             (ace.mask & ::Windows::File::FILE_ALL_ACCESS) == ::Windows::File::FILE_ALL_ACCESS
             rights << 'full'
           end
 
