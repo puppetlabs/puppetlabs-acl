@@ -182,6 +182,7 @@ Puppet::Type.newtype(:acl) do
     required_file
   end
 
+  # review: which is a more accepted practice, finding the auto required item in the catalog or letting autorequire weed out the items you autorequired here?
   autorequire(:user) do
     required_users = []
 
