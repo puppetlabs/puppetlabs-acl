@@ -182,7 +182,7 @@ class Puppet::Provider::Acl
         end
 
         def get_current_owner
-          sd = get_security_descriptor(DO_NOT_REFRESH_SD)
+          sd = get_security_descriptor
 
           sd.owner unless sd.nil?
         end
@@ -209,7 +209,7 @@ class Puppet::Provider::Acl
         end
 
         def is_inheriting_permissions?
-          sd = get_security_descriptor(DO_NOT_REFRESH_SD)
+          sd = get_security_descriptor
 
           return !sd.protect unless sd.nil?
 
@@ -217,7 +217,7 @@ class Puppet::Provider::Acl
           true
         end
 
-        def get_security_descriptor(refresh_sd)
+        def get_security_descriptor(refresh_sd = DO_NOT_REFRESH_SD)
           refresh_sd ||= false
           if @security_descriptor.nil? || refresh_sd
             sd = nil
