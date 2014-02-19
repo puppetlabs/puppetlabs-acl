@@ -146,7 +146,7 @@ class Puppet::Provider::Acl
         end
         module_function :get_ace_propagation
 
-        def are_permissions_insync?(current_permissions, specified_permissions, should_purge)
+        def are_permissions_insync?(current_permissions, specified_permissions, should_purge = false)
           return false if current_permissions.nil? && !specified_permissions.nil?
 
           current_local_permissions = current_permissions.select { |p| !p.is_inherited? }
