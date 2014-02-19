@@ -70,6 +70,7 @@ We override path (--path) so that we can use it in the hiera config to override 
 
 ##Limitations
 
+ * The Windows Provider in the first release (at least) will not handle permissions with Symlinks. Please explicitly manage the permissions of the target.
 
 ##License
 
