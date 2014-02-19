@@ -7,6 +7,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
   let (:resource) { Puppet::Type.type(:acl).new(:provider => :windows, :name => "windows_acl") }
   let (:provider) { resource.provider}
+  let(:catalog) { Puppet::Resource::Catalog.new }
 
   it "should be an instance of Puppet::Type::Acl::ProviderWindows" do
     provider.must be_an_instance_of Puppet::Type::Acl::ProviderWindows
@@ -15,6 +16,54 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
   context "self.instances" do
     it "should return an empty array" do
       provider.class.instances.should == []
+    end
+  end
+
+  context "autorequiring resources" do
+    context "users" do
+      def test_should_set_autorequired_user(user_name)
+        user = Puppet::Type.type(:user).new(:name => user_name)
+        catalog.add_resource resource
+        catalog.add_resource user
+
+        reqs = resource.autorequire
+        reqs.count.must == 1
+        reqs[0].source.must == user
+        reqs[0].target.must == resource
+      end
+
+      def test_should_not_set_autorequired_user(user_name)
+        user = Puppet::Type.type(:user).new(:name => user_name)
+        catalog.add_resource resource
+        catalog.add_resource user
+
+        reqs = resource.autorequire
+        reqs.must be_empty
+      end
+
+      it "should autorequire identities in permissions" do
+        user_name = 'Administrator'
+        resource[:permissions] = [{'identity'=>'bill','rights'=>['modify']},{'identity'=>user_name,'rights'=>['full']}]
+        test_should_set_autorequired_user(user_name)
+      end
+
+      it "should not autorequire 'Administrators' if owner is set to the default Administrators SID" do
+        # unfortunately we get the full account name 'BUILTIN\Administrators' which doesn't match Administrators
+        test_should_not_set_autorequired_user('Administrators')
+      end
+
+      it "should autorequire BUILTIN\\Administrators if owner is set to the default Administrators SID" do
+        test_should_set_autorequired_user('BUILTIN\Administrators')
+      end
+
+      it "should autorequire fully qualified identities in permissions even if identities use SIDS" do
+        resource[:owner] = 'Administrator'
+        user_name = 'BUILTIN\Administrators'
+        user_sid = 'S-1-5-32-544'
+
+        resource[:permissions] = [{'identity'=>'bill','rights'=>['modify']},{'identity'=>user_sid,'rights'=>['full']}]
+        test_should_set_autorequired_user(user_name)
+      end
     end
   end
 

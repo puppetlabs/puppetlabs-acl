@@ -182,7 +182,31 @@ Puppet::Type.newtype(:acl) do
     required_file
   end
 
-  #todo autorequire all users specified in permissions and owner
+  autorequire(:user) do
+    required_users = []
+
+    unless provider.respond_to?(:get_account_name)
+      return_same_value = lambda { |current_value| return current_value}
+      provider.class.send(:define_method,'get_account_name', &return_same_value)
+    end
+
+    owner_name = provider.get_account_name(self[:owner])
+
+    # add both qualified and unqualified items
+    required_users << "User[#{self[:owner]}]"
+    required_users << "User[#{owner_name}]"
+
+    permissions = self[:permissions]
+    unless permissions.nil?
+      permissions.each do |permission|
+        account_name = provider.get_account_name(permission.identity)
+        required_users << "User[#{permission.identity}]"
+        required_users << "User[#{account_name}]"
+      end
+    end
+
+    required_users.uniq
+  end
 
   def munge_boolean(value)
     case value
