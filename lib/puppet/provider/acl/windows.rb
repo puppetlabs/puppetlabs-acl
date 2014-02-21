@@ -90,7 +90,7 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def owner_to_s(current_value)
-    get_account_name(current_value)
+    get_account_name(current_value) || current_value
   end
 
   def inherit_parent_permissions
