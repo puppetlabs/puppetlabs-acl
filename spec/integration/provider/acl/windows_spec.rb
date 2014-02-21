@@ -29,6 +29,14 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     resource.provider = provider
   end
 
+  it "should throw an error for an invalid target" do
+    resource[:target] = "c:/somwerhaear2132312323123123123123123_does_not_exist"
+
+    expect {
+      provider.owner.must_not be_nil
+    }.to raise_error(Exception, /Failed to get security descriptor for path/)
+  end
+
   context ":owner" do
     before :each do
       path = set_path('owner_stuff')
