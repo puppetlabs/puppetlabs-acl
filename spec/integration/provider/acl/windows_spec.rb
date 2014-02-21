@@ -179,6 +179,22 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
       at_least_one.must be_true
     end
+
+    context ".flush" do
+      before :each do
+        path = set_path('set_perms')
+        resource[:target] = path
+      end
+
+
+      it "should not allow permissions to be set to a user that does not exist" do
+        permissions = [Puppet::Type::Acl::Ace.new({'identity' => 'someuser1231235123112312312','rights' => ['full']})]
+
+        expect {
+          provider.permissions = permissions
+        }.to raise_error(Exception, /User or users do not exist/)
+      end
+    end
   end
 
   context ".set_security_descriptor" do

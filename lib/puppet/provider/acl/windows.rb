@@ -54,6 +54,12 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def permissions=(value)
+    non_existing_users = []
+    value.each do |permission|
+      non_existing_users << permission.identity unless get_account_sid(permission.identity)
+    end
+    raise Puppet::Error.new("Failed to set permissions for '#{non_existing_users.join(', ')}': User or users do not exist.") unless non_existing_users.empty?
+
     @property_flush[:permissions] = value
   end
 
