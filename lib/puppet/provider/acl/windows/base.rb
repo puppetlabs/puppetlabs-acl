@@ -228,6 +228,20 @@ class Puppet::Provider::Acl
 
           @security_descriptor
         end
+
+        def set_security_descriptor(security_descriptor)
+          case @resource[:target_type]
+            when :file
+              begin
+                Puppet::Util::Windows::Security.set_security_descriptor(@resource[:target], security_descriptor)
+              rescue => detail
+                raise Puppet::Error, "Failed to set security descriptor for path '#{@resource[:target]}': #{detail}", detail.backtrace
+              end
+          end
+
+          # flush out the cached sd
+          get_security_descriptor(REFRESH_SD)
+        end
       end
     end
   end

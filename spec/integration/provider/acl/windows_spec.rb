@@ -42,6 +42,28 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     it "should grab current owner" do
       provider.owner.must == 'S-1-5-32-544'
     end
+
+    context ".flush" do
+      before :each do
+        path = set_path('set_owner')
+        resource[:target] = path
+      end
+
+       it "should update owner to Administrator properly" do
+         provider.owner.must == 'S-1-5-32-544'
+         provider.owner = 'Administrator'
+
+         resource.provider.flush
+
+         provider.owner.must == provider.get_account_sid('Administrator')
+       end
+
+       it "should not update owner to a user that does not exist" do
+          expect {
+            provider.owner = 'someuser1231235123112312312'
+         }.to raise_error(Exception, /User does not exist/)
+       end
+    end
   end
 
   context ":inherit_parent_permissions" do
@@ -121,6 +143,14 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       end
 
       at_least_one.must be_true
+    end
+  end
+
+  context ".set_security_descriptor" do
+    it "should handle nil security descriptor appropriately" do
+      expect {
+        provider.set_security_descriptor(nil)
+      }.to raise_error(Exception, /Failed to set security descriptor for path/)
     end
   end
 end

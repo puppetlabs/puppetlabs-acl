@@ -80,6 +80,8 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def owner=(value)
+    raise Puppet::Error.new("Failed to set owner to '#{value}': User does not exist.") unless get_account_sid(value)
+
     @property_flush[:owner] = value
   end
 
@@ -100,9 +102,12 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def flush
-    #todo implement setters for each
-    # set OWNER FIRST
-    # set permissions
-    # last set inherit parent perms
+    sd = get_security_descriptor
+
+    sd.owner = get_account_sid(@property_flush[:owner]) if @property_flush[:owner]
+
+    set_security_descriptor(sd) unless @property_flush.empty?
+
+    @property_flush.clear
   end
 end
