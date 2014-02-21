@@ -68,7 +68,7 @@ Puppet::Type.type(:acl).provide :windows do
 
     unless perms.nil?
       perms.each do |perm|
-        perm.identity = get_account_name(perm.identity)
+        perm.identity = get_account_name(perm.identity) || perm.identity
       end
     end
 
