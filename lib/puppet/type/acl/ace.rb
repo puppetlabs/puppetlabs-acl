@@ -14,7 +14,8 @@ class Puppet::Type::Acl
 
     def initialize(permission_hash)
       @sid = permission_hash['sid']
-      @identity = validate_non_empty('identity',permission_hash['identity'] || permission_hash['sid'])
+      @identity = permission_hash['identity']
+      @identity = validate_non_empty('identity', @identity.nil? ||  @identity.empty? ? @sid : @identity )
       @rights = validate_individual_values(
           validate_array(
             'rights',

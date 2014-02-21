@@ -332,6 +332,10 @@ describe Puppet::Type.type(:acl) do
         resource[:permissions] = {'identity' =>'S-1-5-32-544','rights'=>['full']}
       end
 
+      it "should use the SID when the system returns a non-existing user" do
+        resource[:permissions] = {'identity'=>'', 'sid' =>'S-1-5-32-544','rights'=>['full']}
+      end
+
       it "should reject empty" do
         expect {
           resource[:permissions] = {'rights'=>['full']}
