@@ -190,9 +190,6 @@ class Puppet::Provider::Acl
         def is_owner_insync?(current_owner, updated_owner)
           return false unless current_owner
 
-          # By comparing account SIDs we don't have to worry about case
-          # sensitivity, or canonicalization of account names.
-
           should_empty = updated_owner.nil? or updated_owner.empty?
 
           return false if current_owner.empty? != should_empty
