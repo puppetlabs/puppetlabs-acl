@@ -106,6 +106,8 @@ Puppet::Type.type(:acl).provide :windows do
 
     sd.owner = get_account_sid(@property_flush[:owner]) if @property_flush[:owner]
 
+    sd.protect = resource.munge_boolean(@property_flush[:inherit_parent_permissions]) == :false if @property_flush[:inherit_parent_permissions]
+
     set_security_descriptor(sd) unless @property_flush.empty?
 
     @property_flush.clear

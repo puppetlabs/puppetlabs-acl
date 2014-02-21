@@ -79,6 +79,33 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     it "should be true by default" do
       provider.inherit_parent_permissions.must be_true
     end
+
+    context ".flush" do
+      before :each do
+        path = set_path('set_inheritance')
+        resource[:target] = path
+      end
+
+      it "should do nothing if inheritance is set to true (default)" do
+        provider.inherit_parent_permissions.must be_true
+
+        # puppet won't make this call if values are in sync
+        #provider.inherit_parent_permissions = :true
+
+        resource.provider.expects(:set_security_descriptor).never
+
+        resource.provider.flush
+      end
+
+      it "should update inheritance to false when set to :false" do
+        provider.inherit_parent_permissions.must be_true
+        provider.inherit_parent_permissions = :false
+
+        resource.provider.flush
+
+        provider.inherit_parent_permissions.must be_false
+      end
+    end
   end
 
   context ":permissions" do
