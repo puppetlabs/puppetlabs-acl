@@ -135,6 +135,41 @@ Puppet::Type.newtype(:acl) do
     alias :should_to_s :is_to_s
   end
 
+  newproperty(:group) do
+    desc "The group identity is also known as a trustee or principal
+      that is said to have access to the particular acl/security descriptor.
+      This can be in the form of: 1. User - e.g. 'Bob' or 'TheNet\\Bob',
+      2. Group e.g. 'Administrators' or 'BUILTIN\\Administrators', 3.
+      SID (Security ID) e.g. 'S-1-5-18'. Defaults to 'None' on Windows."
+
+    validate do |value|
+      if value.nil? or value.empty?
+        raise ArgumentError, "A non-empty group must be specified."
+      end
+    end
+
+    #todo check platform and return specific default - this may not always be windows
+    defaultto 'None'
+
+    def insync?(current)
+      if provider.respond_to?(:group_insync?)
+        return provider.group_insync?(current, should)
+      end
+
+      super(current)
+    end
+
+    def is_to_s(currentvalue)
+      if provider.respond_to?(:group_to_s)
+        return provider.group_to_s(currentvalue)
+      end
+
+      super(currentvalue)
+    end
+    alias :should_to_s :is_to_s
+  end
+
+
   newproperty(:inherit_parent_permissions, :boolean => true) do
     desc "Inherit Parent Permissions specifies whether to inherit
       permissions from parent ACLs or not. The default is true."

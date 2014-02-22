@@ -268,6 +268,42 @@ describe Puppet::Type.type(:acl) do
     end
   end
 
+  context "property :group" do
+    it "should default to None" do
+      resource[:group].must == 'None'
+    end
+
+    it "should accept bob" do
+      resource[:group] = 'bob'
+    end
+
+    it "should accept Domain\\Bob" do
+      resource[:group] = 'Domain\Bob'
+    end
+
+    it "should accept SIDs like S-1-5-32-544" do
+      resource[:group] = 'S-1-5-32-544'
+    end
+
+    it "should not allow nil" do
+      expect {
+        resource[:group] = nil
+      }.to raise_error(Puppet::Error, /Got nil value for group/)
+    end
+
+    it "should not allow empty" do
+      expect {
+        resource[:group] = ''
+      }.to raise_error(Puppet::ResourceError, /A non-empty group must/)
+    end
+
+    it "should accept any string value" do
+      resource[:group] = 'value'
+      resource[:group] = "c:/thisstring-location/value/somefile.txt"
+      resource[:group] = "c:\\thisstring-location\\value\\somefile.txt"
+    end
+  end
+
   context "property :inherit_parent_permissions" do
     it "should default to true" do
       resource[:inherit_parent_permissions].must == :true
