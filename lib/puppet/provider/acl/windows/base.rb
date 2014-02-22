@@ -187,14 +187,19 @@ class Puppet::Provider::Acl
           sd.owner unless sd.nil?
         end
 
-        def is_owner_insync?(current_owner, updated_owner)
-          return false unless current_owner
+        def get_current_group
+          sd = get_security_descriptor
 
-          should_empty = updated_owner.nil? or updated_owner.empty?
+          sd.group unless sd.nil?
+        end
 
-          return false if current_owner.empty? != should_empty
+        def is_account_insync?(current, should)
+          return false unless current
 
-          get_account_sid(current_owner) == get_account_sid(updated_owner)
+          should_empty = should.nil? or should.empty?
+          return false if current.empty? != should_empty
+
+          get_account_sid(current) == get_account_sid(should)
         end
 
         def get_account_sid(name)

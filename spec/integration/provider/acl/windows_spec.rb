@@ -74,6 +74,43 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     end
   end
 
+  context ":group" do
+    before :each do
+      path = set_path('group_stuff')
+      resource[:target] = path
+    end
+
+    it "should not be nil" do
+      provider.group.must_not be_nil
+    end
+
+    it "should grab current group" do
+      provider.group.must == provider.get_account_sid('None')
+    end
+
+    context ".flush" do
+      before :each do
+        path = set_path('set_group')
+        resource[:target] = path
+      end
+
+       it "should update group to Administrator properly" do
+         provider.group.must == provider.get_account_sid('None')
+         provider.group = 'Administrator'
+
+         resource.provider.flush
+
+         provider.group.must == provider.get_account_sid('Administrator')
+       end
+
+       it "should not update group to a group that does not exist" do
+          expect {
+            provider.group = 'somegroup1231235123112312312'
+         }.to raise_error(Exception, /Group does not exist/)
+       end
+    end
+  end
+
   context ":inherit_parent_permissions" do
     before :each do
       path = set_path('inheritance_stuff')

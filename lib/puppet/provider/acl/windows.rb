@@ -92,10 +92,28 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def owner_insync?(current, should)
-    is_owner_insync?(current,should)
+    is_account_insync?(current,should)
   end
 
   def owner_to_s(current_value)
+    get_account_name(current_value) || current_value
+  end
+
+  def group
+   get_current_group
+  end
+
+  def group=(value)
+    raise Puppet::Error.new("Failed to set group to '#{value}': Group does not exist.") unless get_account_sid(value)
+
+    @property_flush[:group] = value
+  end
+
+  def group_insync?(current, should)
+    is_account_insync?(current,should)
+  end
+
+  def group_to_s(current_value)
     get_account_name(current_value) || current_value
   end
 
@@ -111,7 +129,7 @@ Puppet::Type.type(:acl).provide :windows do
     sd = get_security_descriptor
 
     sd.owner = get_account_sid(@property_flush[:owner]) if @property_flush[:owner]
-
+    sd.group = get_account_sid(@property_flush[:group]) if @property_flush[:group]
     sd.protect = resource.munge_boolean(@property_flush[:inherit_parent_permissions]) == :false if @property_flush[:inherit_parent_permissions]
 
     set_security_descriptor(sd) unless @property_flush.empty?
