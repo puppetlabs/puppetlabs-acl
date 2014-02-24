@@ -198,19 +198,15 @@ Puppet::Type.newtype(:acl) do
         required_file << file_resource.to_s
       end
 
-      if required_file == []
+      if required_file.empty?
         # There is a bug with the casing on the volume (c:/ versus C:/) causing resources to not be found by the catalog
         #  checking against lowercase and uppercase corrects that.
-        target_path_length = target_path.length
-        if target_path_length && target_path_length > 2
-          if file_resource = catalog.resource(:file, target_path[0].downcase << target_path[1, target_path_length - 1])
-            required_file << file_resource.to_s
-          end
-
-          if required_file == [] && file_resource = catalog.resource(:file, target_path[0].upcase << target_path[1, target_path_length - 1])
-            required_file << file_resource.to_s
-          end
+        target_path[0] = target_path[0].downcase
+        unless file_resource = catalog.resource(:file, target_path)
+          target_path[0] = target_path[0].upcase
+          file_resource = catalog.resource(:file, target_path)
         end
+        required_file << file_resource.to_s if file_resource
       end
     end
 
