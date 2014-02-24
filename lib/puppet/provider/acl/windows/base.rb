@@ -2,7 +2,6 @@ class Puppet::Provider::Acl
   module Windows
     module Base
       if Puppet::Util::Platform.windows?
-        # include all requires here
         require 'puppet/type/acl/ace'
         require 'puppet/util/windows/security'
         require 'win32/security'
@@ -30,8 +29,7 @@ class Puppet::Provider::Acl
         end
 
         def convert_to_permissions_hash(ace)
-          hash = {}
-          hash if ace.nil?
+          return {} if ace.nil?
 
           sid = ace.sid
           identity = ace.sid_to_name(sid)
@@ -93,12 +91,11 @@ class Puppet::Provider::Acl
         module_function :get_ace_rights_from_mask
 
         def get_ace_type(ace)
-          ace_type = 'allow'
-          return ace_type if ace.nil?
+          return 'allow' if ace.nil?
 
-          case ace.type
-            when 0 then ace_type ='allow'
-            when 1 then ace_type = 'deny'
+          ace_type = case ace.type
+            when 0 then 'allow'
+            when 1 then 'deny'
           end
 
           ace_type
@@ -106,8 +103,7 @@ class Puppet::Provider::Acl
         module_function :get_ace_type
 
         def get_ace_child_types(ace)
-          child_types = 'all'
-          return child_types if ace.nil?
+          return 'all' if ace.nil?
 
           # the order is on purpose
           child_types = 'none'
@@ -121,8 +117,7 @@ class Puppet::Provider::Acl
 
         def get_ace_propagation(ace)
           # http://msdn.microsoft.com/en-us/library/ms229747.aspx
-          affects = 'all'
-          return affects if ace.nil?
+          return 'all' if ace.nil?
 
           targets_self = true unless ace.inherit_only?
           targets_children = true if ace.object_inherit? || ace.container_inherit?
@@ -160,6 +155,7 @@ class Puppet::Provider::Acl
             return true if specified_sync_check_perms.nil?
 
             # intersect permissions equal specified?
+            # todo this will not guarantee order, so more work will need to be done here
             specified_sync_check_perms == current_sync_check_perms & specified_sync_check_perms
           end
         end
@@ -196,7 +192,7 @@ class Puppet::Provider::Acl
         def is_account_insync?(current, should)
           return false unless current
 
-          should_empty = should.nil? or should.empty?
+          should_empty = should.nil? || should.empty?
           return false if current.empty? != should_empty
 
           get_account_sid(current) == get_account_sid(should)
@@ -230,7 +226,6 @@ class Puppet::Provider::Acl
                 rescue => detail
                   raise Puppet::Error, "Failed to get security descriptor for path '#{@resource[:target]}': #{detail}", detail.backtrace
                 end
-
             end
 
             @security_descriptor = sd
