@@ -85,7 +85,9 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     end
 
     it "should grab current group" do
-      provider.group.must == provider.get_account_sid('None')
+      # there really isn't a default group, it depends on the primary group of the original CREATOR OWNER of a resource.
+      # http://msdn.microsoft.com/en-us/library/windows/desktop/ms676927(v=vs.85).aspx
+      provider.group.must_not == Puppet::Type::Acl::Constants::GROUP_UNSPECIFIED
     end
 
     context ".flush" do
@@ -95,7 +97,12 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       end
 
        it "should update group to Administrator properly" do
-         provider.group.must == provider.get_account_sid('None')
+         provider.group.must_not == Puppet::Type::Acl::Constants::GROUP_UNSPECIFIED
+         if provider.group == provider.get_account_sid('Administrator')
+           provider.group = 'Users'
+           resource.provider.flush
+         end
+         provider.group.must_not == provider.get_account_sid('Administrator')
          provider.group = 'Administrator'
 
          resource.provider.flush

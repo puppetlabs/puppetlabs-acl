@@ -269,8 +269,8 @@ describe Puppet::Type.type(:acl) do
   end
 
   context "property :group" do
-    it "should default to None" do
-      resource[:group].must == 'None'
+    it "should default to use the default unspecified group" do
+      resource[:group].must == Puppet::Type::Acl::Constants::GROUP_UNSPECIFIED
     end
 
     it "should accept bob" do
