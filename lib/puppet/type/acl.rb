@@ -135,6 +135,41 @@ Puppet::Type.newtype(:acl) do
     alias :should_to_s :is_to_s
   end
 
+  newproperty(:group) do
+    desc "The group identity is also known as a trustee or principal
+      that is said to have access to the particular acl/security descriptor.
+      This can be in the form of: 1. User - e.g. 'Bob' or 'TheNet\\Bob',
+      2. Group e.g. 'Administrators' or 'BUILTIN\\Administrators', 3.
+      SID (Security ID) e.g. 'S-1-5-18'. Defaults to 'None' on Windows."
+
+    validate do |value|
+      if value.nil? or value.empty?
+        raise ArgumentError, "A non-empty group must be specified."
+      end
+    end
+
+    #todo check platform and return specific default - this may not always be windows
+    defaultto 'None'
+
+    def insync?(current)
+      if provider.respond_to?(:group_insync?)
+        return provider.group_insync?(current, should)
+      end
+
+      super(current)
+    end
+
+    def is_to_s(currentvalue)
+      if provider.respond_to?(:group_to_s)
+        return provider.group_to_s(currentvalue)
+      end
+
+      super(currentvalue)
+    end
+    alias :should_to_s :is_to_s
+  end
+
+
   newproperty(:inherit_parent_permissions, :boolean => true) do
     desc "Inherit Parent Permissions specifies whether to inherit
       permissions from parent ACLs or not. The default is true."
@@ -163,26 +198,47 @@ Puppet::Type.newtype(:acl) do
         required_file << file_resource.to_s
       end
 
-      if required_file == []
+      if required_file.empty?
         # There is a bug with the casing on the volume (c:/ versus C:/) causing resources to not be found by the catalog
         #  checking against lowercase and uppercase corrects that.
-        target_path_length = target_path.length
-        if target_path_length && target_path_length > 2
-          if file_resource = catalog.resource(:file, target_path[0].downcase << target_path[1, target_path_length - 1])
-            required_file << file_resource.to_s
-          end
-
-          if required_file == [] && file_resource = catalog.resource(:file, target_path[0].upcase << target_path[1, target_path_length - 1])
-            required_file << file_resource.to_s
-          end
+        target_path[0] = target_path[0].downcase
+        unless file_resource = catalog.resource(:file, target_path)
+          target_path[0] = target_path[0].upcase
+          file_resource = catalog.resource(:file, target_path)
         end
+        required_file << file_resource.to_s if file_resource
       end
     end
 
     required_file
   end
 
-  #todo autorequire all users specified in permissions and owner
+  # review: which is a more accepted practice, finding the auto required item in the catalog or letting autorequire weed out the items you autorequired here?
+  autorequire(:user) do
+    required_users = []
+
+    unless provider.respond_to?(:get_account_name)
+      return_same_value = lambda { |current_value| return current_value}
+      provider.class.send(:define_method,'get_account_name', &return_same_value)
+    end
+
+    owner_name = provider.get_account_name(self[:owner])
+
+    # add both qualified and unqualified items
+    required_users << "User[#{self[:owner]}]"
+    required_users << "User[#{owner_name}]"
+
+    permissions = self[:permissions]
+    unless permissions.nil?
+      permissions.each do |permission|
+        account_name = provider.get_account_name(permission.identity)
+        required_users << "User[#{permission.identity}]"
+        required_users << "User[#{account_name}]"
+      end
+    end
+
+    required_users.uniq
+  end
 
   def munge_boolean(value)
     case value

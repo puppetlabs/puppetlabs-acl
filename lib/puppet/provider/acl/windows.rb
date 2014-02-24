@@ -22,7 +22,8 @@ Puppet::Type.type(:acl).provide :windows do
     []
   end
 
-  #def self.prefetch
+
+  #todo def self.prefetch
   #  # not entirely sure yet if this will be needed
   #end
 
@@ -53,6 +54,12 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def permissions=(value)
+    non_existing_users = []
+    value.each do |permission|
+      non_existing_users << permission.identity unless get_account_sid(permission.identity)
+    end
+    raise Puppet::Error.new("Failed to set permissions for '#{non_existing_users.join(', ')}': User or users do not exist.") unless non_existing_users.empty?
+
     @property_flush[:permissions] = value
   end
 
@@ -67,7 +74,7 @@ Puppet::Type.type(:acl).provide :windows do
 
     unless perms.nil?
       perms.each do |perm|
-        perm.identity = get_account_name(perm.identity)
+        perm.identity = get_account_name(perm.identity) || perm.identity
       end
     end
 
@@ -79,15 +86,35 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def owner=(value)
+    raise Puppet::Error.new("Failed to set owner to '#{value}': User does not exist.") unless get_account_sid(value)
+
     @property_flush[:owner] = value
   end
 
   def owner_insync?(current, should)
-    is_owner_insync?(current,should)
+    is_account_insync?(current,should)
   end
 
   def owner_to_s(current_value)
-    get_account_name(current_value)
+    get_account_name(current_value) || current_value
+  end
+
+  def group
+   get_current_group
+  end
+
+  def group=(value)
+    raise Puppet::Error.new("Failed to set group to '#{value}': Group does not exist.") unless get_account_sid(value)
+
+    @property_flush[:group] = value
+  end
+
+  def group_insync?(current, should)
+    is_account_insync?(current,should)
+  end
+
+  def group_to_s(current_value)
+    get_account_name(current_value) || current_value
   end
 
   def inherit_parent_permissions
@@ -99,9 +126,14 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def flush
-    #todo implement setters for each
-    # set OWNER FIRST
-    # set permissions
-    # last set inherit parent perms
+    sd = get_security_descriptor
+
+    sd.owner = get_account_sid(@property_flush[:owner]) if @property_flush[:owner]
+    sd.group = get_account_sid(@property_flush[:group]) if @property_flush[:group]
+    sd.protect = resource.munge_boolean(@property_flush[:inherit_parent_permissions]) == :false if @property_flush[:inherit_parent_permissions]
+
+    set_security_descriptor(sd) unless @property_flush.empty?
+
+    @property_flush.clear
   end
 end

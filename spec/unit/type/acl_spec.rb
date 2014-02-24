@@ -86,9 +86,73 @@ describe Puppet::Type.type(:acl) do
   end
 
   context "autorequiring resources" do
+    context "users" do
+      def test_should_set_autorequired_user(user_name)
+        user = Puppet::Type.type(:user).new(:name => user_name)
+        catalog.add_resource resource
+        catalog.add_resource user
+
+        reqs = resource.autorequire
+        reqs.count.must == 1
+        reqs[0].source.must == user
+        reqs[0].target.must == resource
+      end
+
+      def test_should_not_set_autorequired_user(user_name)
+        user = Puppet::Type.type(:user).new(:name => user_name)
+        catalog.add_resource resource
+        catalog.add_resource user
+
+        reqs = resource.autorequire
+        reqs.must be_empty
+      end
+
+      it "should autorequire owner" do
+        test_should_set_autorequired_user(resource[:owner])
+      end
+
+      it "should not autorequire Administrators if owner is set to the default Administrators SID" do
+        # we have no way at the type level of knowing that Administrators == S-1-5-32-544 - this would require a call to the provider
+        # unfortunately even in the provider we get the full account name 'BUILTIN\Administrators' which doesn't match Administrators
+        test_should_not_set_autorequired_user('Administrators')
+      end
+
+      it "should not autorequire BUILTIN\\Administrators if owner is set to the default Administrators SID" do
+        # we have no way at the type level of knowing that BUILTIN\Administrators == S-1-5-32-544 - this would require a call to the provider
+        # check the provider for a similar test that notes the require works
+        test_should_not_set_autorequired_user('BUILTIN\Administrators')
+      end
+
+      it "should autorequire identities in permissions" do
+        user_name = 'bob'
+        resource[:permissions] = [{'identity'=>'bill','rights'=>['modify']},{'identity'=>user_name,'rights'=>['full']}]
+        test_should_set_autorequired_user(user_name)
+      end
+
+      it "should autorequire identities in permissions once even when included more than once" do
+        user_name = 'bob'
+        resource[:permissions] = [{'identity'=>user_name,'rights'=>['modify'],'affects'=>'children_only'},{'identity'=>user_name,'rights'=>['full']}]
+        test_should_set_autorequired_user(user_name)
+      end
+
+      it "should not autorequire users that are not part of the owner or permission identities" do
+        resource[:permissions] = [{'identity'=>'bob','rights'=>['modify']}]
+        test_should_not_set_autorequired_user('bill')
+      end
+
+      it "should not autorequire identities/owner if their is not a match to a user in the catalog" do
+        resource[:owner] = 'Administrators'
+        resource[:permissions] = [{'identity'=>'bob','rights'=>['modify']}]
+        catalog.add_resource resource
+
+        reqs = resource.autorequire
+        reqs.must be_empty
+      end
+    end
+
     # :as_platform => :windows - doesn't exist outside of puppet?
     context "when :target_type => :file", :if => Puppet.features.microsoft_windows? do
-      def test_should_set_autorequire(resource_path,file_path)
+      def test_should_set_autorequired_file(resource_path,file_path)
         resource[:target] = resource_path
         dir = Puppet::Type.type(:file).new(:path => file_path)
         catalog.add_resource resource
@@ -101,39 +165,39 @@ describe Puppet::Type.type(:acl) do
       end
 
       it "should autorequire an existing file resource when acl.target matches file.path exactly" do
-        test_should_set_autorequire('c:/temp',"c:/temp")
+        test_should_set_autorequired_file('c:/temp',"c:/temp")
       end
 
       it "should autorequire an existing file resource when acl.target uses back slashes and file.path uses forward slashes" do
-        test_should_set_autorequire('c:\temp',"c:/temp")
+        test_should_set_autorequired_file('c:\temp',"c:/temp")
       end
 
       it "should autorequire an existing file resource when acl.target uses forward slashes and file.path uses back slashes" do
-        test_should_set_autorequire('c:/temp','c:\temp')
+        test_should_set_autorequired_file('c:/temp','c:\temp')
       end
 
       it "should autorequire an existing file resource when acl.target is lowercase but file.path has different casing" do
-        test_should_set_autorequire('c:/temp',"c:/Temp")
+        test_should_set_autorequired_file('c:/temp',"c:/Temp")
       end
 
       it "should autorequire an existing file resource when acl.target has uppercase but file.path has different casing" do
-        test_should_set_autorequire('c:/Temp',"c:/tEmp")
+        test_should_set_autorequired_file('c:/Temp',"c:/tEmp")
       end
 
       it "should autorequire an existing file resource when acl.target has different casing than file.path" do
-        test_should_set_autorequire('c:/Temp',"c:/temp")
+        test_should_set_autorequired_file('c:/Temp',"c:/temp")
       end
 
       it "should autorequire an existing file resource when acl.target volume is uppercase C and file.path is uppercase C" do
-        test_should_set_autorequire('C:/temp',"C:/temp")
+        test_should_set_autorequired_file('C:/temp',"C:/temp")
       end
 
       it "should autorequire an existing file resource when acl.target volume is uppercase C and file.path is lowercase c" do
-        test_should_set_autorequire('C:/temp',"c:/temp")
+        test_should_set_autorequired_file('C:/temp',"c:/temp")
       end
 
       it "should autorequire an existing file resource when acl.target volume is lowercase C and file.path is uppercase C" do
-        test_should_set_autorequire('c:/temp',"C:/temp")
+        test_should_set_autorequired_file('c:/temp',"C:/temp")
       end
 
       it "should not autorequire an existing file resource when it is different than acl.target" do
@@ -204,6 +268,42 @@ describe Puppet::Type.type(:acl) do
     end
   end
 
+  context "property :group" do
+    it "should default to None" do
+      resource[:group].must == 'None'
+    end
+
+    it "should accept bob" do
+      resource[:group] = 'bob'
+    end
+
+    it "should accept Domain\\Bob" do
+      resource[:group] = 'Domain\Bob'
+    end
+
+    it "should accept SIDs like S-1-5-32-544" do
+      resource[:group] = 'S-1-5-32-544'
+    end
+
+    it "should not allow nil" do
+      expect {
+        resource[:group] = nil
+      }.to raise_error(Puppet::Error, /Got nil value for group/)
+    end
+
+    it "should not allow empty" do
+      expect {
+        resource[:group] = ''
+      }.to raise_error(Puppet::ResourceError, /A non-empty group must/)
+    end
+
+    it "should accept any string value" do
+      resource[:group] = 'value'
+      resource[:group] = "c:/thisstring-location/value/somefile.txt"
+      resource[:group] = "c:\\thisstring-location\\value\\somefile.txt"
+    end
+  end
+
   context "property :inherit_parent_permissions" do
     it "should default to true" do
       resource[:inherit_parent_permissions].must == :true
@@ -266,6 +366,10 @@ describe Puppet::Type.type(:acl) do
 
       it "should accept SIDs like S-1-5-32-544" do
         resource[:permissions] = {'identity' =>'S-1-5-32-544','rights'=>['full']}
+      end
+
+      it "should use the SID when the system returns a non-existing user" do
+        resource[:permissions] = {'identity'=>'', 'sid' =>'S-1-5-32-544','rights'=>['full']}
       end
 
       it "should reject empty" do

@@ -2,7 +2,6 @@ class Puppet::Provider::Acl
   module Windows
     module Base
       if Puppet::Util::Platform.windows?
-        # include all requires here
         require 'puppet/type/acl/ace'
         require 'puppet/util/windows/security'
         require 'win32/security'
@@ -30,8 +29,7 @@ class Puppet::Provider::Acl
         end
 
         def convert_to_permissions_hash(ace)
-          hash = {}
-          hash if ace.nil?
+          return {} if ace.nil?
 
           sid = ace.sid
           identity = ace.sid_to_name(sid)
@@ -53,9 +51,8 @@ class Puppet::Provider::Acl
           return rights if ace.nil?
 
           # full
-          if ace.mask & ::Windows::File::GENERIC_ALL != 0 #||
-             #ace.mask & ::Windows::File::STANDARD_RIGHTS_ALL != 0
-             #::Windows::File::FILE_ALL_ACCESS
+          if ace.mask & ::Windows::File::GENERIC_ALL != 0 ||
+             (ace.mask & ::Windows::File::FILE_ALL_ACCESS) == ::Windows::File::FILE_ALL_ACCESS
             rights << 'full'
           end
 
@@ -94,12 +91,11 @@ class Puppet::Provider::Acl
         module_function :get_ace_rights_from_mask
 
         def get_ace_type(ace)
-          ace_type = 'allow'
-          return ace_type if ace.nil?
+          return 'allow' if ace.nil?
 
-          case ace.type
-            when 0 then ace_type ='allow'
-            when 1 then ace_type = 'deny'
+          ace_type = case ace.type
+            when 0 then 'allow'
+            when 1 then 'deny'
           end
 
           ace_type
@@ -107,8 +103,7 @@ class Puppet::Provider::Acl
         module_function :get_ace_type
 
         def get_ace_child_types(ace)
-          child_types = 'all'
-          return child_types if ace.nil?
+          return 'all' if ace.nil?
 
           # the order is on purpose
           child_types = 'none'
@@ -122,8 +117,7 @@ class Puppet::Provider::Acl
 
         def get_ace_propagation(ace)
           # http://msdn.microsoft.com/en-us/library/ms229747.aspx
-          affects = 'all'
-          return affects if ace.nil?
+          return 'all' if ace.nil?
 
           targets_self = true unless ace.inherit_only?
           targets_children = true if ace.object_inherit? || ace.container_inherit?
@@ -147,7 +141,7 @@ class Puppet::Provider::Acl
         end
         module_function :get_ace_propagation
 
-        def are_permissions_insync?(current_permissions, specified_permissions, should_purge)
+        def are_permissions_insync?(current_permissions, specified_permissions, should_purge = false)
           return false if current_permissions.nil? && !specified_permissions.nil?
 
           current_local_permissions = current_permissions.select { |p| !p.is_inherited? }
@@ -161,6 +155,7 @@ class Puppet::Provider::Acl
             return true if specified_sync_check_perms.nil?
 
             # intersect permissions equal specified?
+            # todo this will not guarantee order, so more work will need to be done here
             specified_sync_check_perms == current_sync_check_perms & specified_sync_check_perms
           end
         end
@@ -183,22 +178,24 @@ class Puppet::Provider::Acl
         end
 
         def get_current_owner
-          sd = get_security_descriptor(DO_NOT_REFRESH_SD)
+          sd = get_security_descriptor
 
           sd.owner unless sd.nil?
         end
 
-        def is_owner_insync?(current_owner, updated_owner)
-          return false unless current_owner
+        def get_current_group
+          sd = get_security_descriptor
 
-          # By comparing account SIDs we don't have to worry about case
-          # sensitivity, or canonicalization of account names.
+          sd.group unless sd.nil?
+        end
 
-          should_empty = updated_owner.nil? or updated_owner.empty?
+        def is_account_insync?(current, should)
+          return false unless current
 
-          return false if current_owner.empty? != should_empty
+          should_empty = should.nil? || should.empty?
+          return false if current.empty? != should_empty
 
-          get_account_sid(current_owner) == get_account_sid(updated_owner)
+          get_account_sid(current) == get_account_sid(should)
         end
 
         def get_account_sid(name)
@@ -210,7 +207,7 @@ class Puppet::Provider::Acl
         end
 
         def is_inheriting_permissions?
-          sd = get_security_descriptor(DO_NOT_REFRESH_SD)
+          sd = get_security_descriptor
 
           return !sd.protect unless sd.nil?
 
@@ -218,19 +215,37 @@ class Puppet::Provider::Acl
           true
         end
 
-        def get_security_descriptor(refresh_sd)
+        def get_security_descriptor(refresh_sd = DO_NOT_REFRESH_SD)
           refresh_sd ||= false
           if @security_descriptor.nil? || refresh_sd
             sd = nil
             case @resource[:target_type]
               when :file
-                sd = Puppet::Util::Windows::Security.get_security_descriptor(@resource[:target])
+                begin
+                  sd = Puppet::Util::Windows::Security.get_security_descriptor(@resource[:target])
+                rescue => detail
+                  raise Puppet::Error, "Failed to get security descriptor for path '#{@resource[:target]}': #{detail}", detail.backtrace
+                end
             end
 
             @security_descriptor = sd
           end
 
           @security_descriptor
+        end
+
+        def set_security_descriptor(security_descriptor)
+          case @resource[:target_type]
+            when :file
+              begin
+                Puppet::Util::Windows::Security.set_security_descriptor(@resource[:target], security_descriptor)
+              rescue => detail
+                raise Puppet::Error, "Failed to set security descriptor for path '#{@resource[:target]}': #{detail}", detail.backtrace
+              end
+          end
+
+          # flush out the cached sd
+          get_security_descriptor(REFRESH_SD)
         end
       end
     end
