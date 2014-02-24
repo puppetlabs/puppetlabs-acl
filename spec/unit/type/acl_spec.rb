@@ -176,15 +176,15 @@ describe Puppet::Type.type(:acl) do
         test_should_set_autorequired_file('c:/temp','c:\temp')
       end
 
-      it "should autorequire an existing file resource when acl.target is lowercase but file.path has different casing" do
+      it "should autorequire an existing file resource when acl.target is lowercase but file.path has different casing", :if => Puppet.version.to_f >= 3.5 do
         test_should_set_autorequired_file('c:/temp',"c:/Temp")
       end
 
-      it "should autorequire an existing file resource when acl.target has uppercase but file.path has different casing" do
+      it "should autorequire an existing file resource when acl.target has uppercase but file.path has different casing", :if => Puppet.version.to_f >= 3.5 do
         test_should_set_autorequired_file('c:/Temp',"c:/tEmp")
       end
 
-      it "should autorequire an existing file resource when acl.target has different casing than file.path" do
+      it "should autorequire an existing file resource when acl.target has different casing than file.path", :if => Puppet.version.to_f >= 3.5 do
         test_should_set_autorequired_file('c:/Temp',"c:/temp")
       end
 
