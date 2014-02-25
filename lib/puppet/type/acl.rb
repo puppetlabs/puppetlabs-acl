@@ -2,6 +2,7 @@ require 'puppet/type'
 
 Puppet::Type.newtype(:acl) do
   require 'puppet/type/acl/ace'
+  require 'puppet/type/acl/constants'
 
   @doc = <<-'EOT'
     Manages access control lists.  The `acl` type is typically
@@ -24,6 +25,10 @@ Puppet::Type.newtype(:acl) do
     # if target is unset, use the title
     if self[:target].nil? then
       self[:target] = self[:name]
+    end
+
+    if self[:group].nil? then
+      self[:group] = Puppet::Type::Acl::Constants::GROUP_UNSPECIFIED
     end
   end
 
@@ -140,7 +145,9 @@ Puppet::Type.newtype(:acl) do
       that is said to have access to the particular acl/security descriptor.
       This can be in the form of: 1. User - e.g. 'Bob' or 'TheNet\\Bob',
       2. Group e.g. 'Administrators' or 'BUILTIN\\Administrators', 3.
-      SID (Security ID) e.g. 'S-1-5-18'. Defaults to 'None' on Windows."
+      SID (Security ID) e.g. 'S-1-5-18'. Defaults to not specified on
+      Windows. This allows group to stay set to whatever it is currently
+      set to (group can vary depending on the original CREATOR OWNER)."
 
     validate do |value|
       if value.nil? or value.empty?
@@ -148,10 +155,9 @@ Puppet::Type.newtype(:acl) do
       end
     end
 
-    #todo check platform and return specific default - this may not always be windows
-    defaultto 'None'
-
     def insync?(current)
+      return true if should == Puppet::Type::Acl::Constants::GROUP_UNSPECIFIED
+
       if provider.respond_to?(:group_insync?)
         return provider.group_insync?(current, should)
       end
@@ -250,5 +256,4 @@ Puppet::Type.newtype(:acl) do
         fail("munge_boolean only takes booleans")
     end
   end
-
 end
