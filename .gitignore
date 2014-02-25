@@ -1,6 +1,7 @@
 .rspec
 .*.sw[op]
 .bundle/
+coverage/
 Gemfile.lock
 Gemfile.local
 
