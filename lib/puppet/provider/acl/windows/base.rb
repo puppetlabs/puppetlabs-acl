@@ -23,8 +23,8 @@ class Puppet::Provider::Acl
           permissions = []
           permissions if sd.nil? || sd.dacl.nil?
 
-          sd.dacl.each do |perm|
-            permissions << Puppet::Type::Acl::Ace.new(convert_to_permissions_hash(perm))
+          sd.dacl.each do |ace|
+            permissions << Puppet::Type::Acl::Ace.new(convert_to_permissions_hash(ace))
           end
 
           permissions
@@ -84,9 +84,6 @@ class Puppet::Provider::Acl
           #todo decide on list
           #FILE_EXECUTE                 = 32
           #FILE_TRAVERSE                = 32
-          #todo decide whether STANDARD_RIGHTS_ALL is part of full access
-          #STANDARD_RIGHTS_ALL          = 0x1F0000
-          #SPECIFIC_RIGHTS_ALL          = 0xFFFF
 
           rights
         end
