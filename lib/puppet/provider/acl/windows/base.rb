@@ -255,7 +255,7 @@ class Puppet::Provider::Acl
 
           return !sd.protect unless sd.nil?
 
-          # assume true
+          # default true
           true
         end
 
