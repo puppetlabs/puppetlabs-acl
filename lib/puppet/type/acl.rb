@@ -1,8 +1,9 @@
 require 'puppet/type'
+require 'pathname'
 
 Puppet::Type.newtype(:acl) do
-  require 'puppet/type/acl/ace'
-  require 'puppet/type/acl/constants'
+  require Pathname.new(__FILE__).dirname + '../../' + 'puppet/type/acl/ace'
+  require Pathname.new(__FILE__).dirname + '../../' + 'puppet/type/acl/constants'
 
   @doc = <<-'EOT'
     Manages access control lists.  The `acl` type is typically
