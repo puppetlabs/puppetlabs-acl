@@ -241,6 +241,14 @@ Puppet::Type.newtype(:acl) do
       required_users << "User[#{owner_name}]"
     end
 
+    unless self[:group] == Puppet::Type::Acl::Constants::GROUP_UNSPECIFIED
+      group_name = provider.get_account_name(self[:group])
+
+      # add both qualified and unqualified items
+      required_users << "User[#{self[:group]}]"
+      required_users << "User[#{group_name}]"
+    end
+
     permissions = self[:permissions]
     unless permissions.nil?
       permissions.each do |permission|

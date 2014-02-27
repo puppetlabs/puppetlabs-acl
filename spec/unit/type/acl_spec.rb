@@ -116,6 +116,15 @@ describe Puppet::Type.type(:acl) do
         test_should_set_autorequired_user(resource[:owner])
       end
 
+      it "should not autorequire group when set to unspecified" do
+        test_should_not_set_autorequired_user('Administrators')
+      end
+
+      it "should autorequire group when set to Administrators" do
+        resource[:group] = 'Administrators'
+        test_should_set_autorequired_user(resource[:group])
+      end
+
       it "should not autorequire Administrators if owner is set to the default Administrators SID" do
         # we have no way at the type level of knowing that Administrators == S-1-5-32-544 - this would require a call to the provider
         # unfortunately even in the provider we get the full account name 'BUILTIN\Administrators' which doesn't match Administrators
