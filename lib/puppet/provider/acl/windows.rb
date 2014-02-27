@@ -134,6 +134,19 @@ Puppet::Type.type(:acl).provide :windows do
     sd.group = get_account_sid(@property_flush[:group]) if @property_flush[:group]
     sd.protect = resource.munge_boolean(@property_flush[:inherit_parent_permissions]) == :false if @property_flush[:inherit_parent_permissions]
 
+    if @property_flush[:inherit_parent_permissions] || @property_flush[:owner] || @property_flush[:group]
+      # If owner/group/protect change, we should save the SD and reevaluate for sync of permissions
+      set_security_descriptor(sd)
+      sd = get_security_descriptor
+    end
+
+    # There is a possibility someone will get a message of permissions changing the first time they make
+    # changes to owner/group/protect even if the outcome of making those changes would have resulted in
+    # the DACL being in sync. Since there is a change on the resource, I think we are fine with the extra
+    # message in the report as Puppet figures things out. It will apply the sync based on what the actual
+    # permissions are after setting owner, group, and protect
+    sync_dacl_current_to_should(sd.dacl, convert_to_dacl(@property_flush[:permissions])) if @property_flush[:permissions]
+
     set_security_descriptor(sd) unless @property_flush.empty?
 
     @property_flush.clear

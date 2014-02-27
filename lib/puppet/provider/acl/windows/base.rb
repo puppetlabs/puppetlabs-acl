@@ -176,6 +176,33 @@ class Puppet::Provider::Acl
           sync_checking_permissions
         end
 
+        def convert_to_dacl(permissions)
+          dacl = Puppet::Util::Windows::AccessControlList.new
+          return dacl if permissions.nil? || permissions.empty?
+
+          permissions.each do |permission|
+            sid = get_account_sid(permission.identity)
+            mask = get_account_mask(permission)
+            flags = get_account_flags(permission)
+            case permission.type
+              when 'allow'
+                dacl.allow(sid, mask, flags)
+              when 'deny'
+                dacl.deny(sid, mask, flags)
+            end
+          end
+
+          dacl
+        end
+
+        def sync_dacl_current_to_should(current,should, should_purge = false)
+          # todo: ensure the work is done here  - make changes on current and return it every time
+
+
+          #require 'pry';binding.pry
+          return current
+        end
+
         def get_current_owner
           sd = get_security_descriptor
 
@@ -203,6 +230,24 @@ class Puppet::Provider::Acl
 
         def get_account_name(current_value)
           Puppet::Util::Windows::Security.sid_to_name(get_account_sid(current_value))
+        end
+
+        def get_account_mask(permission)
+          return permission.mask if permission.mask
+
+          mask = case @resource[:target_type]
+            when :file
+              begin
+                #todo generate proper mask based on permissions
+              end
+          end
+
+          mask
+        end
+
+        def get_account_flags(permission)
+          return 0
+          #todo return for inherit only and propagation
         end
 
         def is_inheriting_permissions?
