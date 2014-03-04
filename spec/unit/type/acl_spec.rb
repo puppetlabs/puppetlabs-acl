@@ -107,7 +107,12 @@ describe Puppet::Type.type(:acl) do
         reqs.must be_empty
       end
 
-      it "should autorequire owner" do
+      it "should not autorequire owner when set to unspecified" do
+        test_should_not_set_autorequired_user('Administrators')
+      end
+
+      it "should autorequire owner when set to Administrators" do
+        resource[:owner] = 'Administrators'
         test_should_set_autorequired_user(resource[:owner])
       end
 
@@ -233,8 +238,8 @@ describe Puppet::Type.type(:acl) do
   end
 
   context "property :owner" do
-    it "should default to S-1-5-32-544 (Administrators)" do
-      resource[:owner].must == 'S-1-5-32-544'
+    it "should default to use the default unspecified group" do
+      resource[:owner].must ==  Puppet::Type::Acl::Constants::OWNER_UNSPECIFIED
     end
 
     it "should accept bob" do

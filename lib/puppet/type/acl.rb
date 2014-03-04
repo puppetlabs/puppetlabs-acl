@@ -28,6 +28,10 @@ Puppet::Type.newtype(:acl) do
       self[:target] = self[:name]
     end
 
+    if self[:owner].nil? then
+      self[:owner] = Puppet::Type::Acl::Constants::OWNER_UNSPECIFIED
+    end
+
     if self[:group].nil? then
       self[:group] = Puppet::Type::Acl::Constants::GROUP_UNSPECIFIED
     end
@@ -111,8 +115,9 @@ Puppet::Type.newtype(:acl) do
       that is said to own the particular acl/security descriptor. This
       can be in the form of: 1. User - e.g. 'Bob' or 'TheNet\\Bob',
       2. Group e.g. 'Administrators' or 'BUILTIN\\Administrators', 3.
-      SID (Security ID) e.g. 'S-1-5-18'. Defaults to 'S-1-5-32-544'
-      (Administrators) on Windows."
+      SID (Security ID) e.g. 'S-1-5-18'. Defaults to not specified on
+      Windows. This allows owner to stay set to whatever it is currently
+      set to (owner can vary depending on the original CREATOR OWNER)."
 
     validate do |value|
       if value.nil? or value.empty?
@@ -120,10 +125,9 @@ Puppet::Type.newtype(:acl) do
       end
     end
 
-    #todo check platform and return specific default - this may not always be windows
-    defaultto 'S-1-5-32-544'
-
     def insync?(current)
+      return true if should == Puppet::Type::Acl::Constants::OWNER_UNSPECIFIED
+
       if provider.respond_to?(:owner_insync?)
         return provider.owner_insync?(current, should)
       end
@@ -229,11 +233,13 @@ Puppet::Type.newtype(:acl) do
       provider.class.send(:define_method,'get_account_name', &return_same_value)
     end
 
-    owner_name = provider.get_account_name(self[:owner])
+    unless self[:owner] == Puppet::Type::Acl::Constants::OWNER_UNSPECIFIED
+      owner_name = provider.get_account_name(self[:owner])
 
-    # add both qualified and unqualified items
-    required_users << "User[#{self[:owner]}]"
-    required_users << "User[#{owner_name}]"
+      # add both qualified and unqualified items
+      required_users << "User[#{self[:owner]}]"
+      required_users << "User[#{owner_name}]"
+    end
 
     permissions = self[:permissions]
     unless permissions.nil?

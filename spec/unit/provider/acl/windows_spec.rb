@@ -56,7 +56,8 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         test_should_not_set_autorequired_user('Administrators')
       end
 
-      it "should autorequire BUILTIN\\Administrators if owner is set to the default Administrators SID" do
+      it "should autorequire BUILTIN\\Administrators if owner is set to the Administrators SID" do
+        resource[:owner] = 'S-1-5-32-544'
         test_should_set_autorequired_user('BUILTIN\Administrators')
       end
 
@@ -72,8 +73,8 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
   end
 
   context ":owner" do
-    it "should be set to Administrator SID by default" do
-      resource[:owner].must == 'S-1-5-32-544'
+    it "should be set to the default unspecified value by default" do
+      resource[:owner].must == Puppet::Type::Acl::Constants::OWNER_UNSPECIFIED
     end
 
     context ".insync?" do
