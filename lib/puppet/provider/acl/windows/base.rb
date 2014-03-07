@@ -246,9 +246,37 @@ class Puppet::Provider::Acl
         end
 
         def get_account_flags(permission)
-          return 0
-          #todo return for inherit only and propagation
+          # http://msdn.microsoft.com/en-us/library/ms229747.aspx
+          flags = 0x0
+
+          case permission.child_types
+            when "all"
+              flags = flags | Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE
+            when "objects"
+              flags = flags | Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE
+            when "containers"
+              flags = flags | Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE
+          end
+
+          case permission.affects
+            when "self_only"
+              flags =  0x0
+            when "children_only"
+              flags = flags | Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE
+            when "self_and_direct_children_only"
+              flags = flags | Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE
+            when "direct_children_only"
+              flags = flags | Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE
+          end
+
+          if (permission.child_types == "none" && flags != 0x0)
+            Puppet.warning("If child_types => 'none', affects => value will be ignored. Please remove affects or set affects => 'all' or affects => 'self_only' to remove this warning.")
+            flags = 0x0
+          end
+
+          flags
         end
+        module_function :get_account_flags
 
         def is_inheriting_permissions?
           sd = get_security_descriptor

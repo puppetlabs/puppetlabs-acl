@@ -22,10 +22,10 @@ class Puppet::Type::Acl
             validate_non_empty('rights',permission_hash['rights'])
           ),
           :full, :modify, :write, :list, :read, :execute, :mask_specific)
-      # binary hex flags
       @type = validate(permission_hash['type'] || 'allow', :allow, :deny)
       @child_types = validate(permission_hash['child_types'] || 'all', :all, :objects, :containers, :none)
-      @affects = validate(permission_hash['affects'] || 'all', :all, :self_only, :children_only, :self_and_direct_children, :direct_children_only)
+      # todo do we want to have a note when a user has set child_types => none, and affects to anything?
+      @affects = validate(permission_hash['affects'] || 'all', :all, :self_only, :children_only, :self_and_direct_children_only, :direct_children_only)
       @is_inherited = permission_hash['is_inherited'] || false
       @mask = permission_hash['mask']
     end

@@ -497,5 +497,157 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         end
       end
     end
+
+    context ".get_account_flags" do
+      let (:ace) { Puppet::Type::Acl::Ace.new({'identity'=>'Administrator', 'rights'=>['full']}) }
+
+      it "should return (OI)(CI) for child_types => 'all', affects => 'all' (defaults)" do
+        flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
+        (flags & (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE)
+        ).must be (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+                   Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE)
+      end
+
+      it "should return 0x0 (no flags) when child_types => 'none'" do
+        ace.child_types = "none"
+        flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
+        flags.must == 0x0
+      end
+
+      it "should return 0x0 (no flags) when affects => 'self_only'" do
+        ace.affects = "self_only"
+        flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
+        flags.must == 0x0
+      end
+
+      it "should return (CI) for child_types => 'containers', affects => 'all'" do
+        ace.child_types = "containers"
+        flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
+        (flags & (Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE)
+        ).must be (Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE)
+      end
+
+      it "should return (OI) for child_types => 'objects', affects => 'all'" do
+        ace.child_types = "objects"
+        flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
+        (flags & (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE)
+        ).must be (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE)
+      end
+
+      it "should return (OI)(CI)(IO) for child_types => 'all', affects => 'children_only'" do
+        ace.affects = "children_only"
+        flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
+        (flags & (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
+        ).must be (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+                   Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
+                   Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
+      end
+
+      it "should return (CI)(IO) for child_types => 'containers', affects => 'children_only'" do
+        ace.child_types = "containers"
+        ace.affects = "children_only"
+        flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
+        (flags & (Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
+        ).must be (Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
+                   Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
+      end
+
+      it "should return (OI)(IO) for child_types => 'objects', affects => 'children_only'" do
+        ace.child_types = "objects"
+        ace.affects = "children_only"
+        flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
+        (flags & (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
+        ).must be (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+                   Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
+      end
+
+      it "should return (OI)(CI) No_Propagate for child_types => 'all', affects => 'self_and_direct_children_only'" do
+        ace.affects = "self_and_direct_children_only"
+        flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
+        (flags & (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE)
+        ).must be (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+                   Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
+                   Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE)
+      end
+
+      it "should return (CI) No_Propagate for child_types => 'containers', affects => 'self_and_direct_children_only'" do
+        ace.child_types = "containers"
+        ace.affects = "self_and_direct_children_only"
+        flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
+        (flags & (Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE)
+        ).must be (Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
+                   Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE)
+      end
+
+      it "should return (OI) No_Propagate for child_types => 'objects', affects => 'self_and_direct_children_only'" do
+        ace.child_types = "objects"
+        ace.affects = "self_and_direct_children_only"
+        flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
+        (flags & (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE)
+        ).must be (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+                   Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE)
+      end
+
+      it "should return (OI)(CI)(IO) No_Propagate for child_types => 'all', affects => 'direct_children_only'" do
+        ace.affects = "direct_children_only"
+        flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
+        (flags & (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
+        ).must be (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+                   Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
+                   Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE |
+                   Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
+      end
+
+      it "should return (CI)(IO) No_Propagate for child_types => 'containers', affects => 'direct_children_only'" do
+        ace.child_types = "containers"
+        ace.affects = "direct_children_only"
+        flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
+        (flags & (Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
+        ).must be (Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
+                   Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE |
+                   Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
+      end
+
+      it "should return (OI)(IO) No_Propagate for child_types => 'objects', affects => 'direct_children_only'" do
+        ace.child_types = "objects"
+        ace.affects = "direct_children_only"
+        flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
+        (flags & (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
+        ).must be (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+                   Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE |
+                   Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
+      end
+
+      it "should return 0x0 (no flags) when child_types => 'none', affects=> 'children_only' (effectively ignoring affects)" do
+        ace.child_types = "none"
+        ace.affects = "children_only"
+        flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
+        flags.must == 0x0
+      end
+
+      it "should log a warning when child_types => 'none' and affects is not 'all' or 'self_only'" do
+        ace.child_types = "none"
+        ace.affects = "children_only"
+        Puppet.expects(:warning).with("If child_types => 'none', affects => value will be ignored. Please remove affects or set affects => 'all' or affects => 'self_only' to remove this warning.")
+
+        Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
+      end
+    end
   end
 end

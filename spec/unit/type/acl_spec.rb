@@ -557,8 +557,8 @@ describe Puppet::Type.type(:acl) do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'children_only'}
       end
 
-      it "should accept self_and_direct_children" do
-        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'self_and_direct_children'}
+      it "should accept self_and_direct_children_only" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'self_and_direct_children_only'}
       end
 
       it "should accept direct_children_only" do
