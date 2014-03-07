@@ -232,18 +232,45 @@ class Puppet::Provider::Acl
           Puppet::Util::Windows::Security.sid_to_name(get_account_sid(current_value))
         end
 
-        def get_account_mask(permission)
+        def get_account_mask(permission, target_resource_type = :file)
+          return 0 if permission.nil?
           return permission.mask if permission.mask
+          return 0 if permission.rights.nil? || permission.rights.empty?
 
-          mask = case @resource[:target_type]
+          mask = case target_resource_type
             when :file
               begin
-                #todo generate proper mask based on permissions
+                if permission.rights.include?('full')
+                  return ::Windows::File::FILE_ALL_ACCESS
+                end
+
+                if permission.rights.include?('modify')
+                  return ::Windows::File::DELETE |
+                         ::Windows::File::FILE_GENERIC_WRITE |
+                         ::Windows::File::FILE_GENERIC_READ  |
+                         ::Windows::File::FILE_GENERIC_EXECUTE
+                end
+
+                filemask = 0x0
+                if permission.rights.include?('write')
+                  filemask = filemask | ::Windows::File::FILE_GENERIC_WRITE
+                end
+
+                if permission.rights.include?('read')
+                  filemask = filemask | ::Windows::File::FILE_GENERIC_READ
+                end
+
+                if permission.rights.include?('execute')
+                  filemask = filemask | ::Windows::File::FILE_GENERIC_EXECUTE
+                end
+
+                filemask
               end
           end
 
           mask
         end
+        module_function :get_account_mask
 
         def get_account_flags(permission)
           # http://msdn.microsoft.com/en-us/library/ms229747.aspx

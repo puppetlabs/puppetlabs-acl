@@ -498,6 +498,131 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       end
     end
 
+    context ".get_account_mask" do
+      let (:ace) { Puppet::Type::Acl::Ace.new({'identity'=>'Administrator', 'rights'=>['full']}) }
+
+      it "should retun 0 if the ace is nil" do
+        Puppet::Provider::Acl::Windows::Base.get_account_mask(nil).must be 0
+      end
+
+      it "should return ace.mask if the mask has a value" do
+        ace.mask = 0x31
+        Puppet::Provider::Acl::Windows::Base.get_account_mask(ace).must be 0x31
+      end
+
+      it "should return 0 if ace.rights.nil?" do
+        ace.rights = nil
+        Puppet::Provider::Acl::Windows::Base.get_account_mask(ace).must be 0
+      end
+
+      it "should return FILE_ALL_ACCESS if ace.rights includes 'full'" do
+        ace.rights = ['full']
+        Puppet::Provider::Acl::Windows::Base.get_account_mask(ace).must be ::Windows::File::FILE_ALL_ACCESS
+      end
+
+      it "should return mask including FILE_DELETE if ace.rights includes 'modify'" do
+        ace.rights = ['modify']
+        mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
+        (mask & ::Windows::File::DELETE).must be ::Windows::File::DELETE
+      end
+
+      it "should return mask including FILE_GENERIC_WRITE if ace.rights includes 'modify'" do
+        ace.rights = ['modify']
+        mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
+        (mask & ::Windows::File::FILE_GENERIC_WRITE).must be ::Windows::File::FILE_GENERIC_WRITE
+      end
+
+      it "should return mask including FILE_GENERIC_READ if ace.rights includes 'modify'" do
+        ace.rights = ['modify']
+        mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
+        (mask & ::Windows::File::FILE_GENERIC_READ).must be ::Windows::File::FILE_GENERIC_READ
+      end
+
+      it "should return mask including FILE_GENERIC_EXECUTE if ace.rights includes 'modify'" do
+        ace.rights = ['modify']
+        mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
+        (mask & ::Windows::File::FILE_GENERIC_EXECUTE).must be ::Windows::File::FILE_GENERIC_EXECUTE
+      end
+
+      it "should return mask that doesn't include FILE_ALL_ACCESS if ace.rights includes 'modify'" do
+        ace.rights = ['modify']
+        mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
+        (mask & ::Windows::File::FILE_ALL_ACCESS).must_not be ::Windows::File::FILE_ALL_ACCESS
+      end
+
+      it "should return mask including FILE_GENERIC_WRITE if ace.rights includes 'write'" do
+        ace.rights = ['write']
+        mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
+        (mask & ::Windows::File::FILE_GENERIC_WRITE).must be ::Windows::File::FILE_GENERIC_WRITE
+      end
+
+      it "should return mask that doesn't include FILE_GENERIC_READ if ace.rights only includes 'write'" do
+        ace.rights = ['write']
+        mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
+        (mask & ::Windows::File::FILE_GENERIC_READ).must_not be ::Windows::File::FILE_GENERIC_READ
+      end
+
+      it "should return mask that doesn't include FILE_GENERIC_EXECUTE if ace.rights only includes 'write'" do
+        ace.rights = ['write']
+        mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
+        (mask & ::Windows::File::FILE_GENERIC_EXECUTE).must_not be ::Windows::File::FILE_GENERIC_EXECUTE
+      end
+
+      it "should return mask including FILE_GENERIC_READ if ace.rights includes 'read'" do
+        ace.rights = ['read']
+        mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
+        (mask & ::Windows::File::FILE_GENERIC_READ).must be ::Windows::File::FILE_GENERIC_READ
+      end
+
+      it "should return mask that doesn't include FILE_GENERIC_WRITE if ace.rights only includes 'read'" do
+        ace.rights = ['read']
+        mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
+        (mask & ::Windows::File::FILE_GENERIC_WRITE).must_not be ::Windows::File::FILE_GENERIC_WRITE
+      end
+
+      it "should return mask that doesn't include FILE_GENERIC_EXECUTE if ace.rights only includes 'read'" do
+        ace.rights = ['read']
+        mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
+        (mask & ::Windows::File::FILE_GENERIC_EXECUTE).must_not be ::Windows::File::FILE_GENERIC_EXECUTE
+      end
+
+      it "should return mask including FILE_GENERIC_EXECUTE if ace.rights only includes 'execute'" do
+        ace.rights = ['execute']
+        mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
+        (mask & ::Windows::File::FILE_GENERIC_EXECUTE).must be ::Windows::File::FILE_GENERIC_EXECUTE
+      end
+
+      it "should return mask that doesn't include FILE_GENERIC_WRITE if ace.rights only includes 'execute'" do
+        ace.rights = ['execute']
+        mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
+        (mask & ::Windows::File::FILE_GENERIC_WRITE).must_not be ::Windows::File::FILE_GENERIC_WRITE
+      end
+
+      it "should return mask that doesn't include FILE_GENERIC_READ if ace.rights only includes 'execute'" do
+        ace.rights = ['execute']
+        mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
+        (mask & ::Windows::File::FILE_GENERIC_READ).must_not be ::Windows::File::FILE_GENERIC_READ
+      end
+
+      it "should return mask that doesn't include FILE_GENERIC_READ if ace.rights only includes 'execute'" do
+        ace.rights = ['execute']
+        mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
+        (mask & ::Windows::File::FILE_GENERIC_READ).must_not be ::Windows::File::FILE_GENERIC_READ
+      end
+
+      it "should return mask that includes FILE_GENERIC_READ if ace.rights == ['read',execute']" do
+        ace.rights = ['read','execute']
+        mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
+        (mask & ::Windows::File::FILE_GENERIC_READ).must be ::Windows::File::FILE_GENERIC_READ
+      end
+
+      it "should return mask that includes FILE_GENERIC_EXECUTE if ace.rights == ['read',execute']" do
+        ace.rights = ['read','execute']
+        mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
+        (mask & ::Windows::File::FILE_GENERIC_EXECUTE).must be ::Windows::File::FILE_GENERIC_EXECUTE
+      end
+    end
+
     context ".get_account_flags" do
       let (:ace) { Puppet::Type::Acl::Ace.new({'identity'=>'Administrator', 'rights'=>['full']}) }
 
