@@ -774,5 +774,16 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
       end
     end
+
+    context ".convert_to_dacl" do
+      it "should return properly" do
+        resource[:permissions] = {'identity'=>'Administrator','rights'=>['full']}
+        dacl = provider.convert_to_dacl(resource[:permissions])
+        dacl.each do |ace|
+          ace.sid.must == provider.get_account_sid('Administrator')
+          (ace.mask & ::Windows::File::FILE_ALL_ACCESS).must be ::Windows::File::FILE_ALL_ACCESS
+        end
+      end
+    end
   end
 end
