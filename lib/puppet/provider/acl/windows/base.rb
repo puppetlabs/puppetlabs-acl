@@ -59,13 +59,13 @@ class Puppet::Provider::Acl
           end
 
           if rights == []
-            if ace.mask & ACL_FLAGS_WRITE != 0
+            if (ace.mask & ACL_FLAGS_WRITE) != 0
               rights << 'write'
             end
-            if ace.mask & ACL_FLAGS_READ != 0
+            if (ace.mask & ACL_FLAGS_READ) != 0
               rights << 'read'
             end
-            if ace.mask & ACL_FLAGS_EXECUTE != 0
+            if (ace.mask & ACL_FLAGS_EXECUTE) != 0
               rights << 'execute'
             end
           end

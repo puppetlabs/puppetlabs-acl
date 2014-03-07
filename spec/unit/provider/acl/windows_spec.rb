@@ -121,7 +121,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
   end
 
   context ":permissions" do
-    let (:ace) { Puppet::Util::Windows::AccessControlEntry.new('S-1-5-32-544',0x31)}
+    let (:ace) { Puppet::Util::Windows::AccessControlEntry.new('S-1-5-32-544',0x31) }
 
     context ".get_ace_type" do
       it "should return allow if ace is nil" do
