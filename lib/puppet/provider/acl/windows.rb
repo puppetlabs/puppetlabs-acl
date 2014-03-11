@@ -75,6 +75,7 @@ Puppet::Type.type(:acl).provide :windows do
       end
     end
 
+    # todo This can cause issues when the current displays the unmanaged items (that are not purged) while the should displays something that is being appended to the current set
     perms
   end
 
