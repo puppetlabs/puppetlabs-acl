@@ -434,6 +434,27 @@ describe Puppet::Type.type(:acl) do
         resource[:permissions] = {'identity'=>'bob','rights'=>['read','execute']}
       end
 
+      it "should reorder [:execute,:read] to [:read,:execute]" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>[:execute,:read]}
+        resource[:permissions][0].rights.should == [:read,:execute]
+      end
+
+      it "should set ['read','read'] to [:read]" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>['read','read']}
+        resource[:permissions][0].rights.should == [:read]
+      end
+
+      it "should not allow improperly cased rights like ['READ']" do
+        expect {
+          resource[:permissions] = {'identity' =>'bob','rights'=>['READ']}
+        }.to raise_error(Puppet::ResourceError, /Invalid value "READ". Valid values are/)
+      end
+
+      it "should set ['read',:read] to [:read]" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>['read',:read]}
+        resource[:permissions][0].rights.should == [:read]
+      end
+
       it "should reject any other value" do
         expect {
           resource[:permissions] = {'identity' =>'bob','rights'=>['what']}

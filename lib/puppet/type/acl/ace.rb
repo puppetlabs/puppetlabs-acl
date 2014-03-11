@@ -1,7 +1,9 @@
 require 'puppet/parameter/value_collection'
+require 'pathname'
 
 class Puppet::Type::Acl
   class Ace
+    require Pathname.new(__FILE__).dirname + '../../../' + 'puppet/type/acl/rights'
 
     attr_accessor :identity
     attr_accessor :sid
@@ -86,6 +88,10 @@ class Puppet::Type::Acl
       values
     end
 
+    def ensure_rights_order
+      @rights.sort_by! { |r| Puppet::Type::Acl::Rights.new(r).order }
+    end
+
     def ensure_unique_values(values)
       if values.kind_of?(Array)
         return values.uniq
@@ -119,6 +125,7 @@ class Puppet::Type::Acl
                validate_non_empty('rights', value)
           ),
           :full, :modify, :write, :list, :read, :execute, :mask_specific)))
+      ensure_rights_order
     end
 
     def type=(value)
