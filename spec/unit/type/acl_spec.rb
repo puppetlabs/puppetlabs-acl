@@ -375,6 +375,35 @@ describe Puppet::Type.type(:acl) do
       }.to raise_error(Puppet::ResourceError, /Puppet can not manage inherited ACEs/)
     end
 
+    it "should not log a warning when an ace contains child_types => 'none' and affects => 'self_only'" do
+      Puppet.expects(:warning).never
+      resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'child_types'=>'none','affects'=>'self_only'}
+    end
+
+    it "should not log a warning when an ace contains child_types => 'none' and affects is set to 'all' (default)" do
+      Puppet.expects(:warning).never
+      resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'child_types'=>'none'}
+    end
+
+    it "should not log a warning when an ace contains affects => 'self_only' and child_types is set to 'all' (default)" do
+      Puppet.expects(:warning).never
+      resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'affects'=>'self_only'}
+    end
+
+    it "should log a warning when an ace contains child_types => 'none' and affects is not 'all' (default) or 'self_only'" do
+      Puppet.expects(:warning).with() do |v|
+        /If child_types => 'none', affects => value/.match(v)
+      end
+      resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'child_types'=>'none','affects'=>'children_only'}
+    end
+
+    it "should log a warning when an ace contains affects => 'self_only' and child_types is not 'all' (default) or 'none'" do
+      Puppet.expects(:warning).with() do |v|
+        /If affects => 'self_only', child_types => value/.match(v)
+      end
+      resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'child_types'=>'containers','affects'=>'self_only'}
+    end
+
     context ":identity" do
       it "should accept bob" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full']}

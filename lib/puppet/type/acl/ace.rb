@@ -92,6 +92,22 @@ class Puppet::Type::Acl
       @rights.sort_by! { |r| Puppet::Type::Acl::Rights.new(r).order }
     end
 
+    def ensure_rights_values_compatible
+      if @rights.include?(:full) && rights.count != 1
+        Puppet.warning("In each ace, when specifying rights, if you include 'full', it should be without anything else e.g. rights => ['full']. Please remove the extraneous rights from the manifest to remove this warning. Reference: #{to_s}")
+        @rights = [:full]
+      end
+      if @rights.include?(:modify) && rights.count != 1
+        Puppet.warning("In each ace, when specifying rights, if you include 'modify', it should be without anything else e.g. rights => ['modify']. Please remove the extraneous rights from the manifest to remove this warning. Reference: #{to_s}")
+        @rights = [:modify]
+
+      end
+      if @rights.include?(:mask_specific) && rights.count != 1
+        Puppet.warning("In each ace, when specifying rights, if you include 'mask_specific', it should be without anything else e.g. rights => ['mask_specific']. 'mask_specific' will be ignored unless it is by itself. Please remove the extraneous rights from the manifest to remove this warning. Reference: #{to_s}")
+        @rights.delete_if { |r| r ==:mask_specific }
+      end
+    end
+
     def ensure_unique_values(values)
       if values.kind_of?(Array)
         return values.uniq
@@ -126,6 +142,7 @@ class Puppet::Type::Acl
           ),
           :full, :modify, :write, :list, :read, :execute, :mask_specific)))
       ensure_rights_order
+      ensure_rights_values_compatible
     end
 
     def type=(value)
