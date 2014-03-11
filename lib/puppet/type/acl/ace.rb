@@ -5,10 +5,10 @@ class Puppet::Type::Acl
 
     attr_accessor :identity
     attr_accessor :sid
-    attr_accessor :rights
-    attr_accessor :type
-    attr_accessor :child_types
-    attr_accessor :affects
+    attr_reader :rights
+    attr_reader :type
+    attr_reader :child_types
+    attr_reader :affects
     attr_accessor :is_inherited
     attr_accessor :mask
 
@@ -16,16 +16,10 @@ class Puppet::Type::Acl
       @sid = permission_hash['sid']
       id = permission_hash['identity']
       @identity = validate_non_empty('identity', id.nil? || id.empty? ? @sid : id)
-      @rights = validate_individual_values(
-          validate_array(
-            'rights',
-            validate_non_empty('rights',permission_hash['rights'])
-          ),
-          :full, :modify, :write, :list, :read, :execute, :mask_specific)
-      @type = validate(permission_hash['type'] || 'allow', :allow, :deny)
-      @child_types = validate(permission_hash['child_types'] || 'all', :all, :objects, :containers, :none)
-      # todo do we want to have a note when a user has set child_types => none, and affects to anything?
-      @affects = validate(permission_hash['affects'] || 'all', :all, :self_only, :children_only, :self_and_direct_children_only, :direct_children_only)
+      self.rights = permission_hash['rights']
+      self.type = permission_hash['type']
+      self.child_types = permission_hash['child_types']
+      self.affects = permission_hash['affects']
       @is_inherited = permission_hash['is_inherited'] || false
       @mask = permission_hash['mask']
     end
@@ -40,6 +34,13 @@ class Puppet::Type::Acl
 
     def is_inherited?
       return is_inherited
+    end
+
+    def convert_to_symbol(value)
+      return nil if (value.nil? || value.empty?)
+      return value if value.is_a?(Symbol)
+
+      value.downcase.to_sym
     end
 
     def validate_non_empty(name,value)
@@ -65,6 +66,73 @@ class Puppet::Type::Acl
       end
 
       values
+    end
+
+    def convert_to_symbols(values)
+      value_syms = []
+      values.each do |value|
+        value_syms << convert_to_symbol(value)
+      end
+
+      value_syms
+    end
+
+    def convert_from_symbols(symbols)
+      values = []
+      symbols.each do |value|
+        values << value.to_s
+      end
+
+      values
+    end
+
+    def ensure_unique_values(values)
+      if values.kind_of?(Array)
+        return values.uniq
+      end
+
+      values
+    end
+
+    def ensure_none_or_self_only_sync
+      return if @child_types.nil? ||@affects.nil?
+      return if @child_types == :none && @affects == :self_only
+      return unless @child_types == :none || @affects == :self_only
+
+      if @child_types == :none && (@affects != :all && @affects != :self_only)
+        Puppet.warning("If child_types => 'none', affects => value will be ignored. Please remove affects or set affects => 'self_only' to remove this warning. Reference: #{to_s}")
+      end
+      @affects = :self_only if @child_types == :none
+
+      if @affects == :self_only && (@child_types != :all && @child_types != :none)
+        Puppet.warning("If affects => 'self_only', child_types => value will be ignored. Please remove child_types or set child_types => 'none' to remove this warning. Reference: #{to_s}")
+      end
+      @child_types = :none if @affects == :self_only
+    end
+
+    def rights=(value)
+      @rights = ensure_unique_values(
+          convert_to_symbols(
+          validate_individual_values(
+          validate_array(
+               'rights',
+               validate_non_empty('rights', value)
+          ),
+          :full, :modify, :write, :list, :read, :execute, :mask_specific)))
+    end
+
+    def type=(value)
+      @type = convert_to_symbol(validate(value || :allow, :allow, :deny))
+    end
+
+    def child_types=(value)
+      @child_types = convert_to_symbol(validate(value || :all, :all, :objects, :containers, :none))
+      ensure_none_or_self_only_sync
+    end
+
+    def affects=(value)
+      @affects = convert_to_symbol(validate(value || :all, :all, :self_only, :children_only, :self_and_direct_children_only, :direct_children_only))
+      ensure_none_or_self_only_sync
     end
 
     def to_s

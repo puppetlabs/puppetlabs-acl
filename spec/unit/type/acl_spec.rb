@@ -474,7 +474,7 @@ describe Puppet::Type.type(:acl) do
     context ":type" do
       it "should default to allow" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full']}
-        resource[:permissions][0].type.should == 'allow'
+        resource[:permissions][0].type.should == :allow
       end
 
       it "should accept allow" do
@@ -499,25 +499,34 @@ describe Puppet::Type.type(:acl) do
 
       it "should set default value on nil" do
         resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'type'=>nil}
-        resource[:permissions][0].type.should == 'allow'
+        resource[:permissions][0].type.should == :allow
       end
     end
 
     context ":child_types" do
-      it "should default to all" do
+      it "should default to 'all'" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full']}
-        resource[:permissions][0].child_types.should == 'all'
+        resource[:permissions][0].child_types.should == :all
       end
 
-      it "should accept all" do
+      it "should accept 'all'" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'child_types'=>'all'}
       end
 
-      it "should accept objects" do
+      it "should accept 'none'" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'child_types'=>'none'}
+      end
+
+      it "when set to 'none' should update affects to 'self_only'" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'child_types'=>'none'}
+        resource[:permissions][0].affects.should == :self_only
+      end
+
+      it "should accept 'objects'" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'child_types'=>'objects'}
       end
 
-      it "should accept containers" do
+      it "should accept 'containers'" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'child_types'=>'containers'}
       end
 
@@ -535,33 +544,38 @@ describe Puppet::Type.type(:acl) do
 
       it "should set default value on nil" do
         resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'child_types'=>nil}
-        resource[:permissions][0].child_types.should == 'all'
+        resource[:permissions][0].child_types.should == :all
       end
     end
 
     context ":affects" do
-      it "should default to all" do
+      it "should default to 'all'" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full']}
-        resource[:permissions][0].affects.should == 'all'
+        resource[:permissions][0].affects.should == :all
       end
 
-      it "should accept all" do
+      it "should accept 'all'" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'all'}
       end
 
-      it "should accept self_only" do
+      it "should accept 'self_only'" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'self_only'}
       end
 
-      it "should accept children_only" do
+     it "when set to 'self_only' should update child_types to 'none'" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'self_only'}
+        resource[:permissions][0].child_types.should == :none
+      end
+
+      it "should accept 'children_only'" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'children_only'}
       end
 
-      it "should accept self_and_direct_children_only" do
+      it "should accept 'self_and_direct_children_only'" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'self_and_direct_children_only'}
       end
 
-      it "should accept direct_children_only" do
+      it "should accept 'direct_children_only'" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'direct_children_only'}
       end
 
@@ -579,7 +593,7 @@ describe Puppet::Type.type(:acl) do
 
       it "should set default value on nil" do
         resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'affects'=>nil}
-        resource[:permissions][0].affects.should == 'all'
+        resource[:permissions][0].affects.should == :all
       end
     end
 
@@ -593,13 +607,13 @@ describe Puppet::Type.type(:acl) do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full']}
 
         resource[:permissions][0].identity.should == 'bob'
-        resource[:permissions][0].rights.should == ['full']
+        resource[:permissions][0].rights.should == [:full]
       end
 
       it "should set defaults" do
-        resource[:permissions][0].type.should == 'allow'
-        resource[:permissions][0].child_types.should == 'all'
-        resource[:permissions][0].affects.should == 'all'
+        resource[:permissions][0].type.should == :allow
+        resource[:permissions][0].child_types.should == :all
+        resource[:permissions][0].affects.should == :all
       end
     end
 

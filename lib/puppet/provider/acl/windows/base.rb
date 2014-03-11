@@ -56,30 +56,30 @@ class Puppet::Provider::Acl
           # full
           if ace.mask & ::Windows::File::GENERIC_ALL != 0 ||
              (ace.mask & ::Windows::File::FILE_ALL_ACCESS) == ::Windows::File::FILE_ALL_ACCESS
-            rights << 'full'
+            rights << :full
           end
 
           if rights == []
             if (ace.mask & ACL_FLAGS_WRITE) != 0
-              rights << 'write'
+              rights << :write
             end
             if (ace.mask & ACL_FLAGS_READ) != 0
-              rights << 'read'
+              rights << :read
             end
             if (ace.mask & ACL_FLAGS_EXECUTE) != 0
-              rights << 'execute'
+              rights << :execute
             end
           end
 
           # modify
-          if rights == ['write','read','execute'] &&
+          if rights == [:write,:read,:execute] &&
              ace.mask & ::Windows::File::DELETE != 0
-            rights = ['modify']
+            rights = [:modify]
           end
 
           # rights are too specific, use mask
           if rights == []
-            rights << 'mask_specific'
+            rights << :mask_specific
           end
 
           #todo decide on list
@@ -91,11 +91,11 @@ class Puppet::Provider::Acl
         module_function :get_ace_rights_from_mask
 
         def get_ace_type(ace)
-          return 'allow' if ace.nil?
+          return :allow if ace.nil?
 
           ace_type = case ace.type
-            when 0 then 'allow'
-            when 1 then 'deny'
+            when 0 then :allow
+            when 1 then :deny
           end
 
           ace_type
@@ -103,13 +103,13 @@ class Puppet::Provider::Acl
         module_function :get_ace_type
 
         def get_ace_child_types(ace)
-          return 'all' if ace.nil?
+          return :all if ace.nil?
 
           # the order is on purpose
-          child_types = 'none'
-          child_types = 'objects' if ace.object_inherit?
-          child_types = 'containers' if ace.container_inherit?
-          child_types = 'all' if ace.object_inherit? && ace.container_inherit?
+          child_types = :none
+          child_types = :objects if ace.object_inherit?
+          child_types = :containers if ace.container_inherit?
+          child_types = :all if ace.object_inherit? && ace.container_inherit?
 
           child_types
         end
@@ -117,24 +117,24 @@ class Puppet::Provider::Acl
 
         def get_ace_propagation(ace)
           # http://msdn.microsoft.com/en-us/library/ms229747.aspx
-          return 'all' if ace.nil?
+          return :all if ace.nil?
 
           targets_self = true unless ace.inherit_only?
           targets_children = true if ace.object_inherit? || ace.container_inherit?
           targets_children_only = true if ace.inherit_only?
 
           # the order is on purpose
-          affects = 'self_only' if targets_self
-          affects = 'children_only' if targets_children_only
-          affects = 'all' if targets_self && targets_children
+          affects = :self_only if targets_self
+          affects = :children_only if targets_children_only
+          affects = :all if targets_self && targets_children
 
           # Puppet::Util::Windows::AccessControlEntry defines the propagation flag but doesn't provide a method
           # http://msdn.microsoft.com/en-us/library/windows/desktop/ms692524(v=vs.85).aspx
           no_propagate_flag = 0x4
           propagate = ace.flags & no_propagate_flag != no_propagate_flag
           unless propagate
-            affects = 'self_and_direct_children' if targets_self && targets_children
-            affects = 'direct_children_only' if targets_children_only
+            affects = :self_and_direct_children_only if targets_self && targets_children
+            affects = :direct_children_only if targets_children_only
           end
 
           affects
@@ -186,9 +186,9 @@ class Puppet::Provider::Acl
             mask = get_account_mask(permission)
             flags = get_account_flags(permission)
             case permission.type
-              when 'allow'
+              when :allow
                 dacl.allow(sid, mask, flags)
-              when 'deny'
+              when :deny
                 dacl.deny(sid, mask, flags)
             end
           end
@@ -196,12 +196,113 @@ class Puppet::Provider::Acl
           dacl
         end
 
-        def sync_dacl_current_to_should(current,should, should_purge = false)
-          # todo: ensure the work is done here  - make changes on current and return it every time
+        def get_account_mask(permission, target_resource_type = :file)
+          return 0 if permission.nil?
+          return permission.mask.to_i if permission.mask
+          return 0 if permission.rights.nil? || permission.rights.empty?
 
+          mask = case target_resource_type
+             when :file
+               begin
+                 if permission.rights.include?(:full)
+                   return ::Windows::File::FILE_ALL_ACCESS
+                 end
 
-          #require 'pry';binding.pry
-          return current
+                 if permission.rights.include?(:modify)
+                   return ::Windows::File::DELETE |
+                       ::Windows::File::FILE_GENERIC_WRITE |
+                       ::Windows::File::FILE_GENERIC_READ  |
+                       ::Windows::File::FILE_GENERIC_EXECUTE
+                 end
+
+                 filemask = 0x0
+                 if permission.rights.include?(:write)
+                   filemask = filemask | ::Windows::File::FILE_GENERIC_WRITE
+                 end
+
+                 if permission.rights.include?(:read)
+                   filemask = filemask | ::Windows::File::FILE_GENERIC_READ
+                 end
+
+                 if permission.rights.include?(:execute)
+                   filemask = filemask | ::Windows::File::FILE_GENERIC_EXECUTE
+                 end
+
+                 filemask
+               end
+           end
+
+          mask
+        end
+        module_function :get_account_mask
+
+        def get_account_flags(permission)
+          # http://msdn.microsoft.com/en-us/library/ms229747.aspx
+          flags = 0x0
+
+          case permission.child_types
+            when :all
+              flags = flags |
+                      Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+                      Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE
+            when :objects
+              flags = flags |
+                      Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE
+            when :containers
+              flags = flags |
+                      Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE
+          end
+
+          case permission.affects
+            when :self_only
+              flags =  0x0
+            when :children_only
+              flags = flags |
+                      Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE
+            when :self_and_direct_children_only
+              flags = flags |
+                      Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE
+            when :direct_children_only
+              flags = flags |
+                      Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE |
+                      Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE
+          end
+
+          if (permission.child_types == :none && flags != 0x0)
+            flags = 0x0
+          end
+
+          flags
+        end
+        module_function :get_account_flags
+
+        def sync_aces(current_dacl, should_aces, should_purge = false)
+          unless should_purge
+            current_dacl.each do |ace|
+              # todo v2 should we warn if we have an existing inherited ace that matches?
+              next if ace.inherited?
+
+              current_ace = Puppet::Type::Acl::Ace.new(convert_to_permissions_hash(ace))
+              existing_aces = should_aces.select { |a|
+                  get_account_sid(a.identity) == current_ace.sid &&
+                  get_account_flags(a) == get_account_flags(current_ace) &&
+                  a.type == current_ace.type # the types may not need to match
+              }
+              next unless existing_aces.empty?
+
+              # munge in existing unmanaged aces
+              case current_ace.type
+                when :deny
+                  last_allow_index = should_aces.index{ |a| a.type == :allow}
+                  should_aces.insert(last_allow_index,current_ace) if last_allow_index
+                  should_aces << current_ace unless last_allow_index
+                when :allow
+                  should_aces << current_ace
+              end
+            end
+          end
+
+          should_aces
         end
 
         def get_current_owner
@@ -232,79 +333,6 @@ class Puppet::Provider::Acl
         def get_account_name(current_value)
           Puppet::Util::Windows::Security.sid_to_name(get_account_sid(current_value))
         end
-
-        def get_account_mask(permission, target_resource_type = :file)
-          return 0 if permission.nil?
-          return permission.mask if permission.mask
-          return 0 if permission.rights.nil? || permission.rights.empty?
-
-          mask = case target_resource_type
-            when :file
-              begin
-                if permission.rights.include?('full')
-                  return ::Windows::File::FILE_ALL_ACCESS
-                end
-
-                if permission.rights.include?('modify')
-                  return ::Windows::File::DELETE |
-                         ::Windows::File::FILE_GENERIC_WRITE |
-                         ::Windows::File::FILE_GENERIC_READ  |
-                         ::Windows::File::FILE_GENERIC_EXECUTE
-                end
-
-                filemask = 0x0
-                if permission.rights.include?('write')
-                  filemask = filemask | ::Windows::File::FILE_GENERIC_WRITE
-                end
-
-                if permission.rights.include?('read')
-                  filemask = filemask | ::Windows::File::FILE_GENERIC_READ
-                end
-
-                if permission.rights.include?('execute')
-                  filemask = filemask | ::Windows::File::FILE_GENERIC_EXECUTE
-                end
-
-                filemask
-              end
-          end
-
-          mask
-        end
-        module_function :get_account_mask
-
-        def get_account_flags(permission)
-          # http://msdn.microsoft.com/en-us/library/ms229747.aspx
-          flags = 0x0
-
-          case permission.child_types
-            when "all"
-              flags = flags | Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE
-            when "objects"
-              flags = flags | Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE
-            when "containers"
-              flags = flags | Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE
-          end
-
-          case permission.affects
-            when "self_only"
-              flags =  0x0
-            when "children_only"
-              flags = flags | Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE
-            when "self_and_direct_children_only"
-              flags = flags | Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE
-            when "direct_children_only"
-              flags = flags | Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE
-          end
-
-          if (permission.child_types == "none" && flags != 0x0)
-            Puppet.warning("If child_types => 'none', affects => value will be ignored. Please remove affects or set affects => 'all' or affects => 'self_only' to remove this warning.")
-            flags = 0x0
-          end
-
-          flags
-        end
-        module_function :get_account_flags
 
         def is_inheriting_permissions?
           sd = get_security_descriptor

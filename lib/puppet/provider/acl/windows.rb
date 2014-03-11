@@ -140,10 +140,11 @@ Puppet::Type.type(:acl).provide :windows do
     # changes to owner/group/protect even if the outcome of making those changes would have resulted in
     # the DACL being in sync. Since there is a change on the resource, I think we are fine with the extra
     # message in the report as Puppet figures things out. It will apply the sync based on what the actual
-    # permissions are after setting owner, group, and protect
-    sync_dacl_current_to_should(sd.dacl, convert_to_dacl(@property_flush[:permissions])) if @property_flush[:permissions]
-
-    set_security_descriptor(sd) unless @property_flush.empty?
+    # permissions are after setting owner, group, and protect.
+    if @property_flush[:permissions]
+      dacl = convert_to_dacl(sync_aces(sd.dacl,@property_flush[:permissions],@resource[:purge] == :true))
+      set_security_descriptor(Puppet::Util::Windows::SecurityDescriptor.new(sd.owner,sd.group,dacl,sd.protect))
+    end
 
     @property_flush.clear
   end

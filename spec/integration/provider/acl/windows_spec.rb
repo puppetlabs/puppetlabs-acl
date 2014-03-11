@@ -177,7 +177,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     it "should contain aces that are access allowed" do
        at_least_one = false
        provider.permissions.each do |ace|
-         if ace.type == 'allow'
+         if ace.type == :allow
            at_least_one = true
            break
          end
@@ -190,7 +190,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       at_least_one = false
       provider.permissions.each do |ace|
         case ace.child_types
-          when 'all','objects','containers'
+          when :all, :objects, :containers
             at_least_one = true
             break
         end
@@ -215,7 +215,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       at_least_one = false
       provider.permissions.each do |ace|
         case ace.affects
-          when 'all','children_only','self_and_direct_children_only','direct_children_only'
+          when :all, :children_only, :self_and_direct_children_only, :direct_children_only
             at_least_one = true
             break
         end
