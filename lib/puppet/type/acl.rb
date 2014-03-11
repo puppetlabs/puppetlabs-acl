@@ -188,7 +188,6 @@ Puppet::Type.newtype(:acl) do
     alias :should_to_s :is_to_s
   end
 
-
   newproperty(:inherit_parent_permissions, :boolean => true) do
     desc "Inherit Parent Permissions specifies whether to inherit
       permissions from parent ACLs or not. The default is true."
@@ -232,7 +231,6 @@ Puppet::Type.newtype(:acl) do
     required_file
   end
 
-  # review: which is a more accepted practice, finding the auto required item in the catalog or letting autorequire weed out the items you autorequired here?
   autorequire(:user) do
     required_users = []
 

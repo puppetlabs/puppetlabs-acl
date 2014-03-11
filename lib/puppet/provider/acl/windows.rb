@@ -24,11 +24,6 @@ Puppet::Type.type(:acl).provide :windows do
     []
   end
 
-
-  #todo def self.prefetch
-  #  # not entirely sure yet if this will be needed
-  #end
-
   def exists?
     #begin
       case @resource[:target_type]

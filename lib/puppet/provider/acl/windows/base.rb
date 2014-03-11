@@ -351,4 +351,4 @@ class Puppet::Provider::Acl
   end
 end
 
-#todo legacy - check to see if method exists for Puppet::Util::Windows::Security.get_security_descriptor, if not - we'll need to create it
+#todo v2 legacy - check to see if method exists for Puppet::Util::Windows::Security.get_security_descriptor, if not - we'll need to create it

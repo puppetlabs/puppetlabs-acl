@@ -5,7 +5,6 @@ end
 if Puppet::Util::Platform.windows?
 
   require 'win32/security'
-
   # http://stackoverflow.com/a/2954632/18475
   # only monkey patch older versions that have the flaw with certain accounts
   # and stripping what appears to be whitespace
