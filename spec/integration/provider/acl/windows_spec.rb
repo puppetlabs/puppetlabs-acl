@@ -39,8 +39,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
   context ":owner" do
     before :each do
-      path = set_path('owner_stuff')
-      resource[:target] = path
+      resource[:target] = set_path('owner_stuff')
     end
 
     it "should not be nil" do
@@ -53,8 +52,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
     context ".flush" do
       before :each do
-        path = set_path('set_owner')
-        resource[:target] = path
+        resource[:target] = set_path('set_owner')
       end
 
        it "should update owner to Administrator properly" do
@@ -76,8 +74,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
   context ":group" do
     before :each do
-      path = set_path('group_stuff')
-      resource[:target] = path
+      resource[:target] = set_path('group_stuff')
     end
 
     it "should not be nil" do
@@ -92,8 +89,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
     context ".flush" do
       before :each do
-        path = set_path('set_group')
-        resource[:target] = path
+        resource[:target] = set_path('set_group')
       end
 
        it "should update group to Administrator properly" do
@@ -120,8 +116,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
   context ":inherit_parent_permissions" do
     before :each do
-      path = set_path('inheritance_stuff')
-      resource[:target] = path
+      resource[:target] = set_path('inheritance_stuff')
     end
 
     it "should not be nil" do
@@ -134,14 +129,13 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
     context ".flush" do
       before :each do
-        path = set_path('set_inheritance')
-        resource[:target] = path
+        resource[:target] = set_path('set_inheritance')
       end
 
       it "should do nothing if inheritance is set to true (default)" do
         provider.inherit_parent_permissions.must be_true
 
-        # puppet won't make this call if values are in sync
+        # puppet will not make this call if values are in sync
         #provider.inherit_parent_permissions = :true
 
         resource.provider.expects(:set_security_descriptor).never
@@ -162,8 +156,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
   context ":permissions" do
     before :each do
-      path = set_path('permissions_stuff')
-      resource[:target] = path
+      resource[:target] = set_path('permissions_stuff')
     end
 
     it "should not be nil" do
@@ -224,10 +217,9 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       at_least_one.must be_true
     end
 
-    context ".flush" do
+    context "when setting permissions" do
       before :each do
-        path = set_path('set_perms')
-        resource[:target] = path
+        resource[:target] = set_path('set_perms')
       end
 
 

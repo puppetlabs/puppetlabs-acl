@@ -25,7 +25,6 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def exists?
-    #begin
       case @resource[:target_type]
         when :file
           # todo find the acl and determine if it exists with the identified aces
@@ -33,9 +32,6 @@ Puppet::Type.type(:acl).provide :windows do
         else
           raise Puppet::ResourceError, "At present only :target_type => :file is supported on Windows."
       end
-    #rescue
-    #  raise Puppet
-    #end
   end
 
   def create
@@ -75,7 +71,7 @@ Puppet::Type.type(:acl).provide :windows do
       end
     end
 
-    # todo This can cause issues when the current displays the unmanaged items (that are not purged) while the should displays something that is being appended to the current set
+    # bug This can cause issues when the current displays the unmanaged items (that are not purged) while the should displays something that is being appended to the current set
     perms
   end
 

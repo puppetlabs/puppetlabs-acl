@@ -160,6 +160,7 @@ class Puppet::Provider::Acl
           end
         end
 
+        # review - would like to get away from needing this but it seems the array anding doesn't use each element's ==.
         def get_sync_checking_permissions(permissions)
           return permissions if permissions.nil?
 
