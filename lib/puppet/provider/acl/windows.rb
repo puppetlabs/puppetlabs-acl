@@ -124,9 +124,9 @@ Puppet::Type.type(:acl).provide :windows do
 
     sd.owner = get_account_sid(@property_flush[:owner]) if @property_flush[:owner]
     sd.group = get_account_sid(@property_flush[:group]) if @property_flush[:group]
-    sd.protect = resource.munge_boolean(@property_flush[:inherit_parent_permissions]) == :false if @property_flush[:inherit_parent_permissions]
+    sd.protect = resource.munge_boolean(@property_flush[:inherit_parent_permissions]) == :false if @property_flush.has_key?(:inherit_parent_permissions)
 
-    if @property_flush[:inherit_parent_permissions] || @property_flush[:owner] || @property_flush[:group]
+    if @property_flush.has_key?(:inherit_parent_permissions) || @property_flush[:owner] || @property_flush[:group]
       # If owner/group/protect change, we should save the SD and reevaluate for sync of permissions
       set_security_descriptor(sd)
       sd = get_security_descriptor
