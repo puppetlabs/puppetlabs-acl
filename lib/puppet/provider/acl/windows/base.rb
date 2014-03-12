@@ -166,8 +166,7 @@ class Puppet::Provider::Acl
 
           sync_checking_permissions = []
           permissions.each do |perm|
-            sync_checking_permissions << {'identity'=>get_account_name(perm.identity),
-                                   'sid'=> perm.sid || get_account_sid(perm.identity),
+            sync_checking_permissions << {'sid'=> perm.sid || get_account_sid(perm.identity),
                                    'rights'=>perm.rights,
                                    'type'=>perm.type,
                                    'child_types'=>perm.child_types,
