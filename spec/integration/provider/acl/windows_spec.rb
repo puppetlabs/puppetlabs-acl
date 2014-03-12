@@ -351,6 +351,8 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         actual_perms.must == permissions
       end
 
+      #todo deny - this will be as the bug is fixed.
+
       it "should handle the same user with differing permissions appropriately" do
         permissions = [
             { 'identity' => 'SYSTEM', 'rights' => ['modify'], 'child_types' => 'none' },
