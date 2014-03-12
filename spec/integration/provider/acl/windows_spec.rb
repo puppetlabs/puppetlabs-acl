@@ -233,6 +233,17 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         end
       end
 
+      def get_permissions_for_path(path)
+        sd = Puppet::Util::Windows::Security.get_security_descriptor(path)
+
+        permissions = []
+        sd.dacl.each do |ace|
+          permissions << Puppet::Type::Acl::Ace.new(provider.convert_to_permissions_hash(ace), self)
+        end
+
+        permissions
+      end
+
       it "should not allow permissions to be set to a user that does not exist" do
         permissions = [Puppet::Type::Acl::Ace.new({'identity' => 'someuser1231235123112312312','rights' => ['full']})]
 
@@ -247,6 +258,127 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         set_perms(permissions).must == permissions
       end
 
+      it "should handle fully specified permissions" do
+        permissions = [Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full'], 'type'=>'allow','child_types'=>'all','affects'=>'all'}, provider)]
+        set_perms(permissions).must == permissions
+      end
+
+      it "should handle multiple users" do
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['modify']}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Authenticated Users','rights' => ['write','read','execute']}, provider)
+        ]
+        set_perms(permissions).must == permissions
+      end
+
+      it "should handle setting folder protected" do
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider)
+        ]
+        provider.inherit_parent_permissions = :false
+
+        set_perms(permissions).must == permissions
+
+        perms_not_empty = false
+        all_perms = get_permissions_for_path(resource[:target])
+        all_perms.each do |perm|
+          perms_not_empty = true
+          perm.is_inherited?.must == false
+        end
+
+        perms_not_empty.must == true
+      end
+
+      it "should handle setting ace inheritance" do
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full'], 'child_types' => 'containers'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['full'], 'child_types' => 'objects'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['full'], 'child_types' => 'none'}, provider)
+        ]
+        resource[:purge] = :true
+        provider.inherit_parent_permissions = :false
+
+        set_perms(permissions).must == permissions
+      end
+
+      it "should handle setting propagation appropriately" do
+        # tried to split this one up into multiple assertions but rspec mocks me
+        path = set_path('set_perms_propagation')
+        resource[:target] = path
+        child_path = File.join(path, 'child_folder')
+        Dir.mkdir(child_path) unless Dir.exists?(child_path)
+        child_file = File.join(path, 'child_file.txt')
+        File.new(child_file, 'w').close
+        grandchild_file = File.join(child_path, 'grandchild_file.txt')
+        File.new(grandchild_file, 'w').close
+        grandchild_path = File.join(child_path, 'grandchild_folder')
+        Dir.mkdir(grandchild_path) unless Dir.exists?(grandchild_path)
+
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full'], 'affects' => 'all'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['write','read'], 'child_types'=>'objects', 'affects' => 'all'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['read'], 'child_types'=>'containers', 'affects' => 'all'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['modify'], 'affects' => 'self_only'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Authenticated Users','rights' => ['full'], 'affects' => 'direct_children_only'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Authenticated Users','rights' => ['modify'], 'child_types' => 'objects', 'affects' => 'direct_children_only'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Authenticated Users','rights' => ['read'], 'child_types' => 'containers', 'affects' => 'direct_children_only'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['read'], 'affects' => 'children_only'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['read','execute'],'child_types' => 'objects', 'affects' => 'children_only'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['modify'],'child_types' => 'containers', 'affects' => 'children_only'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['read'], 'affects' => 'self_and_direct_children_only'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['execute'], 'child_types' =>'objects', 'affects' => 'self_and_direct_children_only'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['write','read'], 'child_types' =>'containers', 'affects' => 'self_and_direct_children_only'}, provider)
+        ]
+        resource[:purge] = :true
+        provider.inherit_parent_permissions = :false
+
+        set_perms(permissions).must == permissions
+
+        #child object
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full'], 'affects' => 'all', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['write','read'], 'child_types'=>'objects', 'affects' => 'all', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Authenticated Users','rights' => ['full'], 'affects' => 'direct_children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Authenticated Users','rights' => ['modify'], 'child_types' => 'objects', 'affects' => 'direct_children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['read'], 'affects' => 'children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['read','execute'],'child_types' => 'objects', 'affects' => 'children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['read'], 'affects' => 'self_and_direct_children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['execute'], 'child_types' =>'objects', 'affects' => 'self_and_direct_children_only', 'is_inherited' => 'true'}, provider)
+        ]
+        get_permissions_for_path(child_file)  == permissions
+
+        #grandchild object
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full'], 'affects' => 'all', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['write','read'], 'child_types'=>'objects', 'affects' => 'all', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['read'], 'affects' => 'children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['read','execute'],'child_types' => 'objects', 'affects' => 'children_only', 'is_inherited' => 'true'}, provider)
+        ]
+        get_permissions_for_path(grandchild_file)  == permissions
+
+        #child container
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full'], 'affects' => 'all', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['read'], 'child_types'=>'containers', 'affects' => 'all', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Authenticated Users','rights' => ['full'], 'affects' => 'direct_children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Authenticated Users','rights' => ['read'], 'child_types' => 'containers', 'affects' => 'direct_children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['read'], 'affects' => 'children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['modify'],'child_types' => 'containers', 'affects' => 'children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['read'], 'affects' => 'self_and_direct_children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['write','read'], 'child_types' =>'containers', 'affects' => 'self_and_direct_children_only', 'is_inherited' => 'true'}, provider)
+        ]
+        get_permissions_for_path(child_path)  == permissions
+
+        #grandchild container
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full'], 'affects' => 'all', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['read'], 'child_types'=>'containers', 'affects' => 'all', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['read'], 'affects' => 'children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['modify'],'child_types' => 'containers', 'affects' => 'children_only', 'is_inherited' => 'true'}, provider)
+        ]
+        get_permissions_for_path(grandchild_path)  == permissions
+      end
     end
   end
 
