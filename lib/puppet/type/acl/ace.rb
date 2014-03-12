@@ -5,8 +5,8 @@ class Puppet::Type::Acl
   class Ace
     require Pathname.new(__FILE__).dirname + '../../../' + 'puppet/type/acl/rights'
 
-    attr_accessor :identity
     attr_accessor :sid
+    attr_reader :identity
     attr_reader :rights
     attr_reader :type
     attr_reader :child_types
@@ -17,7 +17,8 @@ class Puppet::Type::Acl
     def initialize(permission_hash)
       @sid = permission_hash['sid']
       id = permission_hash['identity']
-      @identity = validate_non_empty('identity', id.nil? || id.empty? ? @sid : id)
+      id = permission_hash['sid'] if id.nil? || id.empty?
+      self.identity = id
       self.rights = permission_hash['rights']
       self.type = permission_hash['type']
       self.child_types = permission_hash['child_types']
@@ -130,6 +131,10 @@ class Puppet::Type::Acl
         Puppet.warning("If affects => 'self_only', child_types => value will be ignored. Please remove child_types or set child_types => 'none' to remove this warning. Reference: #{to_s}")
       end
       @child_types = :none if @affects == :self_only
+    end
+
+    def identity=(value)
+      @identity = validate_non_empty('identity', value)
     end
 
     def rights=(value)
