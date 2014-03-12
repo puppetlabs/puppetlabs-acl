@@ -174,6 +174,25 @@ class Puppet::Type::Acl
       ensure_none_or_self_only_sync
     end
 
+    def ==(other)
+      return false unless other.is_a?(Ace)
+
+      account_id = @identity
+      other_id = other.identity
+
+      unless (@sid.nil? || @sid.empty?) && (other.sid.nil? || other.sid.empty?)
+        account_id = @sid
+        other_id = other.sid
+      end
+
+      return account_id == other_id &&
+             @rights == other.rights &&
+             @type == other.type &&
+             @child_types == other.child_types &&
+             @affects == other.affects &&
+             @is_inherited == other.is_inherited
+    end
+
     def to_s
       formatted_ace ="\n"
       formatted_ace << '{ '

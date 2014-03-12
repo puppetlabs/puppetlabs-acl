@@ -97,7 +97,7 @@ Puppet::Type.newtype(:acl) do
     end
 
     munge do |permission|
-      Puppet::Type::Acl::Ace.new(permission)
+      Puppet::Type::Acl::Ace.new(permission, provider)
     end
 
     def insync?(current)

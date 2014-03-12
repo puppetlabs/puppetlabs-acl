@@ -426,8 +426,8 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         end
 
         it "should return true for Administrators and specifying S-1-5-32-544" do
-          admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']})
-          adminSID = Puppet::Type::Acl::Ace.new({'identity'=>'S-1-5-32-544', 'rights'=>['full']})
+          admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']}, provider)
+          adminSID = Puppet::Type::Acl::Ace.new({'identity'=>'S-1-5-32-544', 'rights'=>['full']}, provider)
           provider.are_permissions_insync?([admins], [adminSID]).must be_true
         end
 
@@ -459,8 +459,8 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         end
 
         it "should return true for Administrators and specifying Administrators even if one specifies sid and other non-required information" do
-          admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']})
-          admin2 = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'sid'=>"S-1-5-32-544", 'mask'=>::Windows::File::GENERIC_ALL, 'is_inherited'=>false})
+          admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']}, provider)
+          admin2 = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'sid'=>"S-1-5-32-544", 'mask'=>::Windows::File::GENERIC_ALL, 'is_inherited'=>false}, provider)
           provider.are_permissions_insync?([admins], [admin2], true).must be_true
         end
 

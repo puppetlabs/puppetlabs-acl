@@ -25,7 +25,7 @@ class Puppet::Provider::Acl
           permissions if sd.nil? || sd.dacl.nil?
 
           sd.dacl.each do |ace|
-            permissions << Puppet::Type::Acl::Ace.new(convert_to_permissions_hash(ace))
+            permissions << Puppet::Type::Acl::Ace.new(convert_to_permissions_hash(ace), self)
           end
 
           permissions
@@ -146,13 +146,13 @@ class Puppet::Provider::Acl
 
           current_local_permissions = current_permissions.select { |p| !p.is_inherited? }
 
-          current_sync_check_perms = get_sync_checking_permissions(current_local_permissions)
-          specified_sync_check_perms = get_sync_checking_permissions(specified_permissions)
-
           if should_purge
-            current_sync_check_perms == specified_sync_check_perms
+            current_local_permissions == specified_permissions
           else
-            return true if specified_sync_check_perms.nil?
+            return true if specified_permissions.nil?
+
+            current_sync_check_perms = get_sync_checking_permissions(current_local_permissions)
+            specified_sync_check_perms = get_sync_checking_permissions(specified_permissions)
 
             # intersect permissions equal specified?
             # todo this will not guarantee order, so more work will need to be done here
@@ -282,7 +282,7 @@ class Puppet::Provider::Acl
               # todo v2 should we warn if we have an existing inherited ace that matches?
               next if ace.inherited?
 
-              current_ace = Puppet::Type::Acl::Ace.new(convert_to_permissions_hash(ace))
+              current_ace = Puppet::Type::Acl::Ace.new(convert_to_permissions_hash(ace), self)
               existing_aces = should_aces.select { |a|
                   get_account_sid(a.identity) == current_ace.sid &&
                   get_account_flags(a) == get_account_flags(current_ace) &&

@@ -222,6 +222,16 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         resource[:target] = set_path('set_perms')
       end
 
+      def set_perms(permissions, include_inherited = false)
+        provider.permissions = permissions
+        resource.provider.flush
+
+        if include_inherited
+          provider.permissions
+        else
+          provider.permissions.select { |p| !p.is_inherited? }
+        end
+      end
 
       it "should not allow permissions to be set to a user that does not exist" do
         permissions = [Puppet::Type::Acl::Ace.new({'identity' => 'someuser1231235123112312312','rights' => ['full']})]
@@ -230,6 +240,13 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
           provider.permissions = permissions
         }.to raise_error(Exception, /User or users do not exist/)
       end
+
+
+      it "should handle minimally specified permissions" do
+        permissions = [Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider)]
+        set_perms(permissions).must == permissions
+      end
+
     end
   end
 
