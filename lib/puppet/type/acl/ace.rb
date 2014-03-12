@@ -5,8 +5,8 @@ class Puppet::Type::Acl
   class Ace
     require Pathname.new(__FILE__).dirname + '../../../' + 'puppet/type/acl/rights'
 
-    attr_accessor :sid
     attr_reader :identity
+    attr_reader :sid
     attr_reader :rights
     attr_reader :type
     attr_reader :child_types
@@ -14,11 +14,12 @@ class Puppet::Type::Acl
     attr_accessor :is_inherited
     attr_accessor :mask
 
-    def initialize(permission_hash)
-      @sid = permission_hash['sid']
+    def initialize(permission_hash, provider = nil)
+      @provider = provider
       id = permission_hash['identity']
       id = permission_hash['sid'] if id.nil? || id.empty?
       self.identity = id
+      self.sid = permission_hash['sid']
       self.rights = permission_hash['rights']
       self.type = permission_hash['type']
       self.child_types = permission_hash['child_types']
@@ -135,6 +136,15 @@ class Puppet::Type::Acl
 
     def identity=(value)
       @identity = validate_non_empty('identity', value)
+    end
+
+    def sid=(value)
+      @sid = value
+      if value.nil? || value.empty?
+        if @identity && @provider && @provider.respond_to?(:get_account_sid)
+          @sid = @provider.get_account_sid(@identity)
+        end
+      end
     end
 
     def rights=(value)
