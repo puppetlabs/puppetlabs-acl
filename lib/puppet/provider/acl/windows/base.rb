@@ -151,30 +151,10 @@ class Puppet::Provider::Acl
           else
             return true if specified_permissions.nil?
 
-            current_sync_check_perms = get_sync_checking_permissions(current_local_permissions)
-            specified_sync_check_perms = get_sync_checking_permissions(specified_permissions)
-
-            # intersect permissions equal specified?
-            # todo this will not guarantee order, so more work will need to be done here
-            specified_sync_check_perms == current_sync_check_perms & specified_sync_check_perms
+            # intersect will return order by left item in intersect
+            #  order is guaranteed checked when specified_permissions
+            (current_local_permissions & specified_permissions) == specified_permissions
           end
-        end
-
-        # review - would like to get away from needing this but it seems the array anding doesn't use each element's ==.
-        def get_sync_checking_permissions(permissions)
-          return permissions if permissions.nil?
-
-          sync_checking_permissions = []
-          permissions.each do |perm|
-            sync_checking_permissions << {'sid'=> perm.sid || get_account_sid(perm.identity),
-                                   'rights'=>perm.rights,
-                                   'type'=>perm.type,
-                                   'child_types'=>perm.child_types,
-                                   'affects'=>perm.affects
-            }
-          end
-
-          sync_checking_permissions
         end
 
         def convert_to_dacl(permissions)
@@ -283,11 +263,7 @@ class Puppet::Provider::Acl
               next if ace.inherited?
 
               current_ace = Puppet::Type::Acl::Ace.new(convert_to_permissions_hash(ace), self)
-              existing_aces = should_aces.select { |a|
-                  get_account_sid(a.identity) == current_ace.sid &&
-                  get_account_flags(a) == get_account_flags(current_ace) &&
-                  a.type == current_ace.type # the types may not need to match
-              }
+              existing_aces = should_aces.select { |a| a.same?(current_ace) }
               next unless existing_aces.empty?
 
               # munge in existing unmanaged aces

@@ -175,23 +175,63 @@ class Puppet::Type::Acl
       ensure_none_or_self_only_sync
     end
 
+    def get_comparison_ids(other = nil)
+      ignore_other = true
+      sid_has_value = false
+      other_sid_has_value = false
+      other_id = nil
+
+      unless other.nil?
+        ignore_other = false
+        other_sid_has_value = true unless other.sid.nil? || other.sid.empty?
+      end
+
+      sid_has_value = true unless @sid.nil? || @sid.empty?
+
+      if sid_has_value && (ignore_other || other_sid_has_value)
+        id = @sid
+        other_id = other.sid unless ignore_other
+      else
+        if @provider && @provider.respond_to?(:get_account_name)
+          id = @provider.get_account_name(@identity)
+          other_id = @provider.get_account_name(other.identity) unless ignore_other
+        else
+          id = @identity
+          other_id = other.identity unless ignore_other
+        end
+      end
+
+      [id,other_id]
+    end
+
+    def same?(other)
+      return false unless other.is_a?(Ace)
+
+      account_ids = get_comparison_ids(other)
+
+      return account_ids[0] == account_ids[1] &&
+          @child_types == other.child_types &&
+          @affects == other.affects &&
+          @is_inherited == other.is_inherited &&
+          @type == other.type # the types may not need to match
+    end
+
     def ==(other)
       return false unless other.is_a?(Ace)
 
-      account_id = @identity
-      other_id = other.identity
+      return same?(other) &&
+             @rights == other.rights  &&
+             @type == other.type
+    end
+    alias_method :eql?, :==
 
-      unless (@sid.nil? || @sid.empty?) && (other.sid.nil? || other.sid.empty?)
-        account_id = @sid
-        other_id = other.sid
-      end
-
-      return account_id == other_id &&
-             @rights == other.rights &&
-             @type == other.type &&
-             @child_types == other.child_types &&
-             @affects == other.affects &&
-             @is_inherited == other.is_inherited
+    def hash
+      return get_comparison_ids[0].hash ^
+             @rights.hash ^
+             @type.hash ^
+             @child_types.hash ^
+             @affects.hash ^
+             @is_inherited.hash
     end
 
     def to_s
