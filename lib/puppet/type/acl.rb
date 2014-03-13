@@ -6,13 +6,195 @@ Puppet::Type.newtype(:acl) do
   require Pathname.new(__FILE__).dirname + '../../' + 'puppet/type/acl/constants'
 
   @doc = <<-'EOT'
-    Manages access control lists.  The `acl` type is typically
-    used when you need more complex management of permissions
-    e.g. Windows.
+    Manages access control lists (ACLs).  The `acl` type is
+    typically used when you need more complex management of
+    permissions e.g. Windows. ACLs typically contain access
+    control entries (ACEs) that define a trustee (identity)
+    with a set of rights, whether the type is allow or deny,
+    and how inheritance and propagation of those ACEs are
+    applied to the resource target and child types under it.
+    The order that ACEs are listed in is important on Windows
+    as it determines what is applied first.
 
-    Sample usage:
+    At a minimum, you need to provide the target and at least
+    one permission (access control entry or ACE). It will default
+    the other settings to sensible defaults.
 
-      ADD HERE LATER
+    Minimally expressed sample usage:
+
+      acl { 'c:/tempperms':
+        ensure      => present,
+        permissions => [
+         { identity => 'Administrator', rights => ['full'] }
+       ],
+      }
+
+    If you want to, you can provide a fully expressed ACL. The
+    fully expressed acl in the sample below produces the same
+    settings as the minimal sample above.
+
+    Fully expressed sample usage:
+
+      acl { 'c:/tempperms':
+        ensure      => present,
+        target      => 'c:/tempperms',
+        target_type => 'file',
+        purge       => 'false',
+        permissions => [
+         { identity => 'Administrator', rights => ['full'], type=> 'allow', child_types => 'all', affects => 'all' }
+        ],
+        owner       => 'Administrators',
+        group       => 'Users',
+        inherit_parent_permissions => 'true',
+      }
+
+    Adding in multiple users is done by just adding users to the
+    list of permissions. You can also see that you can specify
+    Domain qualified users and SIDs if you need to.
+
+    Multi-user sample usage:
+
+      acl { 'c:/tempperms':
+        ensure      => present,
+        purge       => 'true',
+        permissions => [
+         { identity => 'NT AUTHORITY\SYSTEM', rights => ['modify'] },
+         { identity => 'BUILTIN\Users', rights => ['read','execute'] },
+         { identity => 'S-1-5-32-544', rights => ['full'] }
+        ],
+        inherit_parent_permissions => 'false',
+      }
+
+    Removing upstream inheritance is known as "protecting" the
+    target. When an item is "protected" without purge => true,
+    the inherited ACEs will be copied into the target as
+    unmanaged ACEs.
+
+    Protected ACL sample usage:
+
+      acl { 'c:/tempperms':
+        ensure      => present,
+        permissions => [
+         { identity => 'Administrators', rights => ['full'] },
+         { identity => 'Users', rights => ['full'] }
+        ],
+        inherit_parent_permissions => 'false',
+      }
+
+    To lock down a folder to managed explicit ACEs, you want to
+    set purge => true. This will only remove other explicit ACEs
+    from the folder that are unmanaged by this resource. All
+    inherited ACEs will remain (see next example).
+
+    Purge sample usage:
+
+      acl { 'c:/tempperms':
+        ensure      => present,
+        purge       => 'true',
+        permissions => [
+         { identity => 'Administrators', rights => ['full'] },
+         { identity => 'Users', rights => ['full'] }
+        ],
+        inherit_parent_permissions => 'false',
+      }
+
+    To lock down a folder to only the permissions specified in
+    the manifest resource, you want to protect the folder and set
+    purge => 'true'. This ensure that the only permissions on the
+    folder are the ones that you have set explicitly in the
+    manifest.
+
+    Protected with purge sample usage:
+
+      acl { 'c:/tempperms':
+        ensure      => present,
+        purge       => 'true',
+        permissions => [
+         { identity => 'Administrators', rights => ['full'] },
+         { identity => 'Users', rights => ['full'] }
+        ],
+        inherit_parent_permissions => 'false',
+      }
+
+    ACEs have inheritance structures as well aka "child_types":
+    'all' (default), 'none', 'containers', and 'objects'. This
+    controls how sub-folders and files will inherit each
+    particular ACE.
+
+    ACE inheritance "child_types" sample usage:
+
+      acl { 'c:/tempperms':
+        ensure      => present,
+        purge       => 'true',
+        permissions => [
+         { identity => 'SYSTEM', rights => ['full'], child_types => 'all' },
+         { identity => 'Administrators', rights => ['full'], child_types => 'containers' },
+         { identity => 'Administrator', rights => ['full'], child_types => 'objects' },
+         { identity => 'Users', rights => ['full'], child_types => 'none' }
+        ],
+        inherit_parent_permissions => 'false',
+      }
+
+    ACEs have propagation rules, a nice way of saying "how" they
+    apply permissions to containers, objects, children and
+    grandchildren. Propagation aka "affects" can take the value
+    of: 'all' (default), 'self_only', 'children_only',
+    'direct_children_only', and 'self_and_direct_children_only'.
+
+    ACE propagation "affects" sample usage:
+
+      acl { 'c:/tempperms':
+        ensure      => present,
+        purge       => 'true',
+        permissions => [
+         { identity => 'Administrators', rights => ['modify'], affects => 'all' },
+         { identity => 'Administrators', rights => ['full'], affects => 'self_only' },
+         { identity => 'Administrator', rights => ['full'], affects => 'direct_children_only' },
+         { identity => 'Users', rights => ['full'], affects => 'children_only' },
+         { identity => 'Authenticated Users', rights => ['read'], affects => 'self_and_direct_children_only' }
+        ],
+        inherit_parent_permissions => 'false',
+      }
+
+    ACEs can be of type 'allow' (default) or 'deny'. Deny ACEs
+    should be listed first before allow ACEs.
+
+    Deny ACE sample usage:
+
+      acl { 'c:/tempperms':
+        ensure      => present,
+        permissions => [
+         { identity => 'SYSTEM', rights => ['full'], type=> 'deny', affects => 'self_only' },
+         { identity => 'Administrators', rights => ['full'] }
+        ],
+      }
+
+    An interesting note with Windows, you can specify the same
+    identity with different inheritance and propagation and each
+    of those items will actually be managed as separate ACEs.
+
+    Same user multiple ACEs sample usage:
+
+      acl { 'c:/tempperms':
+        ensure      => present,
+        purge       => 'true',
+        permissions => [
+         { identity => 'SYSTEM', rights => ['modify'], child_types => 'none' },
+         { identity => 'SYSTEM', rights => ['modify'], child_types => 'containers' },
+         { identity => 'SYSTEM', rights => ['modify'], child_types => 'objects' },
+         { identity => 'SYSTEM', rights => ['full'], affects => 'self_only' },
+         { identity => 'SYSTEM', rights => ['read','execute'], affects => 'direct_children_only' },
+         { identity => 'SYSTEM', rights => ['read','execute'], child_types=>'containers', affects => 'direct_children_only' },
+         { identity => 'SYSTEM', rights => ['read','execute'], child_types=>'objects', affects => 'direct_children_only' },
+         { identity => 'SYSTEM', rights => ['full'], affects => 'children_only' },
+         { identity => 'SYSTEM', rights => ['full'], child_types=>'containers', affects => 'children_only' },
+         { identity => 'SYSTEM', rights => ['full'], child_types=>'objects', affects => 'children_only' },
+         { identity => 'SYSTEM', rights => ['read'], affects => 'self_and_direct_children_only' },
+         { identity => 'SYSTEM', rights => ['read'], child_types=>'containers', affects => 'self_and_direct_children_only' },
+         { identity => 'SYSTEM', rights => ['read'], child_types=>'objects', affects => 'self_and_direct_children_only' }
+        ],
+        inherit_parent_permissions => 'false',
+      }
   EOT
 
   ensurable
