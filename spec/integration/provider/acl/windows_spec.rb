@@ -303,6 +303,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         permissions = [
             Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider)
         ]
+
         set_perms(permissions).must == permissions
       end
 
@@ -352,25 +353,37 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       end
 
       #todo deny - this will be as the bug is fixed.
-
-      it "should handle the same user with differing permissions appropriately" do
+      it "should handle deny when affects => 'self_only'" do
         permissions = [
-            { 'identity' => 'SYSTEM', 'rights' => ['modify'], 'child_types' => 'none' },
-            { 'identity' => 'SYSTEM', 'rights' => ['modify'], 'child_types' => 'containers' },
-            { 'identity' => 'SYSTEM', 'rights' => ['modify'], 'child_types' => 'objects' },
-            { 'identity' => 'SYSTEM', 'rights' => ['full'], 'affects' => 'self_only' },
-            { 'identity' => 'SYSTEM', 'rights' => ['read','execute'], 'affects' => 'direct_children_only' },
-            { 'identity' => 'SYSTEM', 'rights' => ['read','execute'], 'child_types' =>'containers', 'affects' => 'direct_children_only' },
-            { 'identity' => 'SYSTEM', 'rights' => ['read','execute'], 'child_types' =>'objects', 'affects' => 'direct_children_only' },
-            { 'identity' => 'SYSTEM', 'rights' => ['full'], 'affects' => 'children_only' },
-            { 'identity' => 'SYSTEM', 'rights' => ['full'], 'child_types' =>'containers', 'affects' => 'children_only' },
-            { 'identity' => 'SYSTEM', 'rights' => ['full'], 'child_types' =>'objects', 'affects' => 'children_only' },
-            { 'identity' => 'SYSTEM', 'rights' => ['read'], 'affects' => 'self_and_direct_children_only' },
-            { 'identity' => 'SYSTEM', 'rights' => ['read'], 'child_types' =>'containers', 'affects' => 'self_and_direct_children_only' },
-            { 'identity' => 'SYSTEM', 'rights' => ['read'], 'child_types' =>'objects', 'affects' => 'self_and_direct_children_only' }
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['full'], 'type' => 'deny', 'affects'=>'self_only'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full']}, provider)
         ]
         resource[:purge] = :true
         provider.inherit_parent_permissions = :false
+
+        set_perms(permissions).must == permissions
+      end
+
+      it "should handle the same user with differing permissions appropriately" do
+        permissions = [
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['modify'], 'child_types' => 'none' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['modify'], 'child_types' => 'containers' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['modify'], 'child_types' => 'objects' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['full'], 'affects' => 'self_only' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['read','execute'], 'affects' => 'direct_children_only' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['read','execute'], 'child_types' =>'containers', 'affects' => 'direct_children_only' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['read','execute'], 'child_types' =>'objects', 'affects' => 'direct_children_only' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['full'], 'affects' => 'children_only' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['full'], 'child_types' =>'containers', 'affects' => 'children_only' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['full'], 'child_types' =>'objects', 'affects' => 'children_only' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['read'], 'affects' => 'self_and_direct_children_only' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['read'], 'child_types' =>'containers', 'affects' => 'self_and_direct_children_only' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['read'], 'child_types' =>'objects', 'affects' => 'self_and_direct_children_only' }, provider)
+        ]
+        resource[:purge] = :true
+        provider.inherit_parent_permissions = :false
+
+        set_perms(permissions).must == permissions
       end
 
       it "should handle setting propagation appropriately" do
