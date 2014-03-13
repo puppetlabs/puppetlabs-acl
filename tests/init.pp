@@ -26,9 +26,9 @@ file { ['c:/tempperms',
 }
 
 acl { 'c:/tempperms/minimal':
- ensure      => present,
- permissions => [
-  { identity => 'Administrator', rights => ['full'] }
+  ensure      => present,
+  permissions => [
+   { identity => 'Administrator', rights => ['full'] }
  ],
 }
 
@@ -99,11 +99,21 @@ acl { 'c:/tempperms/protected':
   inherit_parent_permissions => 'false',
 }
 
+acl { 'tempperms_protected':
+  ensure      => present,
+  target      => 'c:/tempperms/protected'
+  permissions => [
+   { identity => 'Administrator', rights => ['modify'] }
+  ],
+  inherit_parent_permissions => 'false',
+}
+
 #C:\tempperms>icacls protected
 #protected BUILTIN\Administrators:(OI)(CI)(F)
 #          BUILTIN\Users:(OI)(CI)(F)
 #          BUILTIN\Administrators:(F)
 #          BUILTIN\Administrators:(OI)(CI)(IO)(F)
+#          WIN-QR952GIDHVE\Administrator:(OI)(CI)(IO)(F)
 #          NT AUTHORITY\SYSTEM:(F)
 #          NT AUTHORITY\SYSTEM:(OI)(CI)(IO)(F)
 #          NT AUTHORITY\Authenticated Users:(M)
@@ -129,6 +139,7 @@ acl { 'c:/tempperms/inheritance':
   ensure      => present,
   purge       => 'true',
   permissions => [
+   { identity => 'SYSTEM', rights => ['full'], child_types => 'all' },
    { identity => 'Administrators', rights => ['full'], child_types => 'containers' },
    { identity => 'Administrator', rights => ['full'], child_types => 'objects' },
    { identity => 'Users', rights => ['full'], child_types => 'none' }
@@ -265,7 +276,7 @@ acl { 'c:/tempperms/rights_ordering':
   inherit_parent_permissions => 'false',
 }
 
-#this causes warnings
+#this will issue warnings - expected
 #C:\tempperms>icacls rights_ordering
 #rights_ordering NT AUTHORITY\SYSTEM:(OI)(CI)(RX)
 #                NT AUTHORITY\SYSTEM:(OI)(CI)(NP)(IO)(R)
