@@ -25,6 +25,28 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     path
   end
 
+  def set_perms(permissions, include_inherited = false)
+    provider.permissions = permissions
+    resource.provider.flush
+
+    if include_inherited
+      provider.permissions
+    else
+      provider.permissions.select { |p| !p.is_inherited? }
+    end
+  end
+
+  def get_permissions_for_path(path)
+    sd = Puppet::Util::Windows::Security.get_security_descriptor(path)
+
+    permissions = []
+    sd.dacl.each do |ace|
+      permissions << Puppet::Type::Acl::Ace.new(provider.convert_to_permissions_hash(ace), self)
+    end
+
+    permissions
+  end
+
   before :each do
     resource.provider = provider
   end
@@ -222,28 +244,6 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         resource[:target] = set_path('set_perms')
       end
 
-      def set_perms(permissions, include_inherited = false)
-        provider.permissions = permissions
-        resource.provider.flush
-
-        if include_inherited
-          provider.permissions
-        else
-          provider.permissions.select { |p| !p.is_inherited? }
-        end
-      end
-
-      def get_permissions_for_path(path)
-        sd = Puppet::Util::Windows::Security.get_security_descriptor(path)
-
-        permissions = []
-        sd.dacl.each do |ace|
-          permissions << Puppet::Type::Acl::Ace.new(provider.convert_to_permissions_hash(ace), self)
-        end
-
-        permissions
-      end
-
       it "should not allow permissions to be set to a user that does not exist" do
         permissions = [Puppet::Type::Acl::Ace.new({'identity' => 'someuser1231235123112312312','rights' => ['full']})]
 
@@ -251,7 +251,6 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
           provider.permissions = permissions
         }.to raise_error(Exception, /User or users do not exist/)
       end
-
 
       it "should handle minimally specified permissions" do
         permissions = [Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider)]
@@ -289,7 +288,6 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
         perms_not_empty.must == true
       end
-
 
       it "should handle setting folder purge => true" do
         permissions = [
