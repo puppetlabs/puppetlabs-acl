@@ -57,6 +57,7 @@ class Puppet::Provider::Acl
         end
 
         def get_ace_rights_from_mask(ace)
+          #todo: check that this is a file type and respond appropriately
           rights = []
           return rights if ace.nil?
           mask_specific_remainder = ace.mask
@@ -111,10 +112,6 @@ class Puppet::Provider::Acl
             Puppet.debug("Remainder from #{ace.mask} is #{mask_specific_remainder}")
             rights = [:mask_specific]
           end
-
-          #todo decide on list
-          #FILE_EXECUTE                 = 32
-          #FILE_TRAVERSE                = 32
 
           rights
         end
