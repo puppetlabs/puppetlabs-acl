@@ -287,24 +287,24 @@ class Puppet::Provider::Acl
         module_function :get_account_flags
 
         def sync_aces(current_dacl, should_aces, should_purge = false)
-          unless should_purge
-            current_dacl.each do |ace|
-              # todo v2 should we warn if we have an existing inherited ace that matches?
-              next if ace.inherited?
+          return should_aces if should_purge
 
-              current_ace = Puppet::Type::Acl::Ace.new(convert_to_permissions_hash(ace), self)
-              existing_aces = should_aces.select { |a| a.same?(current_ace) }
-              next unless existing_aces.empty?
+          current_dacl.each do |ace|
+            # todo v2 should we warn if we have an existing inherited ace that matches?
+            next if ace.inherited?
 
-              # munge in existing unmanaged aces
-              case current_ace.type
-                when :deny
-                  last_allow_index = should_aces.index{ |a| a.type == :allow}
-                  should_aces.insert(last_allow_index,current_ace) if last_allow_index
-                  should_aces << current_ace unless last_allow_index
-                when :allow
-                  should_aces << current_ace
-              end
+            current_ace = Puppet::Type::Acl::Ace.new(convert_to_permissions_hash(ace), self)
+            existing_aces = should_aces.select { |a| a.same?(current_ace) }
+            next unless existing_aces.empty?
+
+            # munge in existing unmanaged aces
+            case current_ace.type
+              when :deny
+                last_allow_index = should_aces.index{ |a| a.type == :allow}
+                should_aces.insert(last_allow_index,current_ace) if last_allow_index
+                should_aces << current_ace unless last_allow_index
+              when :allow
+                should_aces << current_ace
             end
           end
 
