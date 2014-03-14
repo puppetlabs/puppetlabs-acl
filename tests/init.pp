@@ -21,7 +21,8 @@ file { ['c:/tempperms',
    'c:/tempperms/deny',
    'c:/tempperms/same_user',
    'c:/tempperms/rights_ordering',
-   'c:/tempperms/identities']:
+   'c:/tempperms/identities',
+   'c:/tempperms/mask_specific']:
   ensure => directory,
 }
 
@@ -307,8 +308,8 @@ acl { 'c:/tempperms/mask_specific':
   permissions => [
    { identity => 'Administrators', rights => ['full'] }, #full is same as - 2032127 aka 0x1f01ff
    { identity => 'SYSTEM', rights => ['modify'] }, #modify is same as 1245631 aka 0x1301bf
-   { identity => 'Users', rights => ['mask_specific'], mask => '1180073' }, #(RX)(RA) #0x1201a9
-   { identity => 'Administrator', rights => ['mask_specific'], mask => '1180032' }  #RA,WA, RP #1180032  #0x120180
+   { identity => 'Users', rights => ['mask_specific'], mask => '1180073' }, #(RX, WA) #0x1201a9
+   { identity => 'Administrator', rights => ['mask_specific'], mask => '1180032' }  #RA,WA,RP #1180032  #0x120180
   ],
   inherit_parent_permissions => 'false',
 }

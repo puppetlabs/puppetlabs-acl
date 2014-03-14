@@ -277,6 +277,13 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:write,:read,:execute]
       end
 
+      it "should contain write, execute if ace.mask contains FILE_GENERIC_WRITE and FILE_GENERIC_EXECUTE" do
+        ace.expects(:mask).returns(::Windows::File::FILE_GENERIC_WRITE |
+                                   ::Windows::File::FILE_GENERIC_EXECUTE ).times(0..10)
+
+        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:write,:execute]
+      end
+
       it "should contain modify if ace.mask contains GENERIC_WRITE, GENERIC_READ, GENERIC_EXECUTE and contains DELETE" do
         ace.expects(:mask).returns(::Windows::Security::GENERIC_WRITE |
                                    ::Windows::Security::GENERIC_READ |
@@ -284,7 +291,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
                                    ::Windows::Security::DELETE ).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:modify]
-        end
+      end
 
       it "should contain modify if ace.mask contains FILE_GENERIC_WRITE, FILE_GENERIC_READ, FILE_GENERIC_EXECUTE and contains DELETE" do
         ace.expects(:mask).returns(::Windows::File::FILE_GENERIC_WRITE |
@@ -315,16 +322,22 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:write]
       end
 
-      it "should contain write if ace.mask contains FILE_WRITE_DATA" do
-        ace.expects(:mask).returns(::Windows::File::FILE_WRITE_DATA).times(0..10)
+      it "should contain write if ace.mask contains FILE_GENERIC_WRITE" do
+        ace.expects(:mask).returns(::Windows::File::FILE_GENERIC_WRITE).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:write]
       end
 
-      it "should contain write if ace.mask contains FILE_APPEND_DATA" do
+      it "should contain mask_specific if ace.mask only contains FILE_WRITE_DATA" do
+        ace.expects(:mask).returns(::Windows::File::FILE_WRITE_DATA).times(0..10)
+
+        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:mask_specific]
+      end
+
+      it "should contain mask_specific if ace.mask only contains FILE_APPEND_DATA" do
         ace.expects(:mask).returns(::Windows::File::FILE_APPEND_DATA).times(0..10)
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:write]
+        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:mask_specific]
       end
 
       it "should contain read if ace.mask contains GENERIC_READ" do
@@ -339,10 +352,17 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:read]
       end
 
-      it "should contain read if ace.mask contains FILE_READ_DATA" do
+      it "should contain mask_specific if ace.mask contains FILE_GENERIC_READ | FILE_WRITE_ATTRIBUTES" do
+        ace.expects(:mask).returns(::Windows::File::FILE_GENERIC_READ |
+                                   ::Windows::File::FILE_WRITE_ATTRIBUTES).times(0..10)
+
+        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:mask_specific]
+      end
+
+      it "should contain mask_specific if ace.mask only contains FILE_READ_DATA" do
         ace.expects(:mask).returns(::Windows::File::FILE_READ_DATA).times(0..10)
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:read]
+        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:mask_specific]
       end
 
       it "should contain execute if ace.mask contains GENERIC_EXECUTE" do
@@ -357,10 +377,10 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:execute]
       end
 
-      it "should contain execute if ace.mask contains FILE_EXECUTE" do
+      it "should contain mask_specific if ace.mask only contains FILE_EXECUTE" do
         ace.expects(:mask).returns(::Windows::File::FILE_EXECUTE).times(0..10)
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:execute]
+        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:mask_specific]
       end
 
       it "should contain mask_specific if ace.mask contains permissions too specific" do

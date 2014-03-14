@@ -13,9 +13,16 @@ class Puppet::Provider::Acl
 
         REFRESH_SD        = true
         DO_NOT_REFRESH_SD = false
-        ACL_FLAGS_WRITE   = ::Windows::File::GENERIC_WRITE | ::Windows::File::FILE_WRITE_DATA | ::Windows::File::FILE_APPEND_DATA
-        ACL_FLAGS_READ    = ::Windows::File::GENERIC_READ | ::Windows::File::FILE_READ_DATA
-        ACL_FLAGS_EXECUTE = ::Windows::File::GENERIC_EXECUTE | ::Windows::File::FILE_EXECUTE
+
+        FILE_ALL_ACCESS = ::Windows::File::FILE_ALL_ACCESS
+        GENERIC_ALL = ::Windows::File::GENERIC_ALL
+        FILE_GENERIC_WRITE = ::Windows::File::FILE_GENERIC_WRITE #& ~::Windows::File::READ_CONTROL
+        GENERIC_WRITE = ::Windows::File::GENERIC_WRITE
+        FILE_GENERIC_READ = ::Windows::File::FILE_GENERIC_READ
+        GENERIC_READ = ::Windows::File::GENERIC_READ
+        FILE_GENERIC_EXECUTE = ::Windows::File::FILE_GENERIC_EXECUTE
+        GENERIC_EXECUTE = ::Windows::File::GENERIC_EXECUTE
+        DELETE = ::Windows::File::DELETE
 
         @security_descriptor = nil
 
@@ -52,34 +59,57 @@ class Puppet::Provider::Acl
         def get_ace_rights_from_mask(ace)
           rights = []
           return rights if ace.nil?
+          mask_specific_remainder = ace.mask
 
           # full
-          if ace.mask & ::Windows::File::GENERIC_ALL != 0 ||
-             (ace.mask & ::Windows::File::FILE_ALL_ACCESS) == ::Windows::File::FILE_ALL_ACCESS
+          if ace.mask & GENERIC_ALL == GENERIC_ALL ||
+             (ace.mask & FILE_ALL_ACCESS) == FILE_ALL_ACCESS
             rights << :full
+            mask_specific_remainder = 0
           end
 
           if rights == []
-            if (ace.mask & ACL_FLAGS_WRITE) != 0
+            if (ace.mask & FILE_GENERIC_WRITE) == FILE_GENERIC_WRITE
               rights << :write
+              mask_specific_remainder &= ~FILE_GENERIC_WRITE
             end
-            if (ace.mask & ACL_FLAGS_READ) != 0
+            if (ace.mask & GENERIC_WRITE) == GENERIC_WRITE
+              rights << :write
+              mask_specific_remainder &= ~GENERIC_WRITE
+            end
+
+            if (ace.mask & FILE_GENERIC_READ) == FILE_GENERIC_READ
               rights << :read
+              mask_specific_remainder &= ~FILE_GENERIC_READ
             end
-            if (ace.mask & ACL_FLAGS_EXECUTE) != 0
+            if (ace.mask & GENERIC_READ) == GENERIC_READ
+              rights << :read
+              mask_specific_remainder &= ~GENERIC_READ
+            end
+
+            if (ace.mask & FILE_GENERIC_EXECUTE) == FILE_GENERIC_EXECUTE
               rights << :execute
+              mask_specific_remainder &= ~FILE_GENERIC_EXECUTE
+            end
+            if (ace.mask & GENERIC_EXECUTE) == GENERIC_EXECUTE
+              rights << :execute
+              mask_specific_remainder &= ~GENERIC_EXECUTE
             end
           end
 
           # modify
           if rights == [:write,:read,:execute] &&
-             ace.mask & ::Windows::File::DELETE != 0
+            ace.mask & DELETE == DELETE
             rights = [:modify]
+            mask_specific_remainder &= ~DELETE
           end
 
           # rights are too specific, use mask
           if rights == []
             rights << :mask_specific
+          elsif mask_specific_remainder != 0
+            Puppet.debug("Remainder from #{ace.mask} is #{mask_specific_remainder}")
+            rights = [:mask_specific]
           end
 
           #todo decide on list
@@ -185,27 +215,27 @@ class Puppet::Provider::Acl
              when :file
                begin
                  if permission.rights.include?(:full)
-                   return ::Windows::File::FILE_ALL_ACCESS
+                   return FILE_ALL_ACCESS
                  end
 
                  if permission.rights.include?(:modify)
-                   return ::Windows::File::DELETE |
-                       ::Windows::File::FILE_GENERIC_WRITE |
-                       ::Windows::File::FILE_GENERIC_READ  |
-                       ::Windows::File::FILE_GENERIC_EXECUTE
+                   return DELETE |
+                       FILE_GENERIC_WRITE |
+                       FILE_GENERIC_READ  |
+                       FILE_GENERIC_EXECUTE
                  end
 
                  filemask = 0x0
                  if permission.rights.include?(:write)
-                   filemask = filemask | ::Windows::File::FILE_GENERIC_WRITE
+                   filemask = filemask | FILE_GENERIC_WRITE
                  end
 
                  if permission.rights.include?(:read)
-                   filemask = filemask | ::Windows::File::FILE_GENERIC_READ
+                   filemask = filemask | FILE_GENERIC_READ
                  end
 
                  if permission.rights.include?(:execute)
-                   filemask = filemask | ::Windows::File::FILE_GENERIC_EXECUTE
+                   filemask = filemask | FILE_GENERIC_EXECUTE
                  end
 
                  filemask
