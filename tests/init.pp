@@ -29,12 +29,14 @@ file { ['c:/tempperms',
 acl { 'c:/tempperms/minimal':
   ensure      => present,
   permissions => [
-   { identity => 'Administrator', rights => ['full'] }
+   { identity => 'Administrator', rights => ['full'] },
+   { identity => 'Users', rights => ['read','execute'] }
  ],
 }
 
 #C:\tempperms>icacls minimal
 #minimal WIN-QR952GIDHVE\Administrator:(OI)(CI)(F)
+#        BUILTIN\Users:(OI)(CI)(RX)
 #        BUILTIN\Administrators:(I)(F)
 #        BUILTIN\Administrators:(I)(OI)(CI)(IO)(F)
 #        NT AUTHORITY\SYSTEM:(I)(F)
@@ -51,15 +53,17 @@ acl { 'c:/tempperms/full':
   target_type => 'file',
   purge       => 'false',
   permissions => [
-   { identity => 'Administrator', rights => ['full'], type=> 'allow', child_types => 'all', affects => 'all' }
+   { identity => 'Administrator', rights => ['full'], type=> 'allow', child_types => 'all', affects => 'all' },
+   { identity => 'Users', rights => ['read','execute'], type=> 'allow', child_types => 'all', affects => 'all' }
   ],
-  owner       => 'Administrators',
-  group       => 'Users',
+  owner       => 'Administrators', #Creator_Owner specific, doesn't manage unless specified
+  group       => 'Users', #Creator_Owner specific, doesn't manage unless specified
   inherit_parent_permissions => 'true',
 }
 
 #C:\tempperms>icacls full
 #full WIN-QR952GIDHVE\Administrator:(OI)(CI)(F)
+#     BUILTIN\Users:(OI)(CI)(RX)
 #     BUILTIN\Administrators:(I)(F)
 #     BUILTIN\Administrators:(I)(OI)(CI)(IO)(F)
 #     NT AUTHORITY\SYSTEM:(I)(F)
@@ -72,15 +76,19 @@ acl { 'c:/tempperms/full':
 acl { 'c:/tempperms/multiuser':
   ensure      => present,
   permissions => [
-   { identity => 'Administrator', rights => ['full'] },
-   { identity => 'Users', rights => ['full'] },
+   { identity => 'Administrators', rights => ['full'] },
+   { identity => 'Administrator', rights => ['write'] },
+   { identity => 'Users', rights => ['write','execute'] },
+   { identity => 'Everyone', rights => ['execute'] },
    { identity => 'Authenticated Users', rights => ['full'] }
   ],
 }
 
 #C:\tempperms>icacls multiuser
-#multiuser WIN-QR952GIDHVE\Administrator:(OI)(CI)(F)
-#          BUILTIN\Users:(OI)(CI)(F)
+#multiuser BUILTIN\Administrators:(OI)(CI)(F)
+#          WIN-QR952GIDHVE\Administrator:(OI)(CI)(W,Rc)
+#          BUILTIN\Users:(OI)(CI)(W,Rc,X,RA)
+#          Everyone:(OI)(CI)(Rc,S,X,RA)
 #          NT AUTHORITY\Authenticated Users:(OI)(CI)(F)
 #          BUILTIN\Administrators:(I)(F)
 #          BUILTIN\Administrators:(I)(OI)(CI)(IO)(F)
@@ -308,8 +316,8 @@ acl { 'c:/tempperms/mask_specific':
   permissions => [
    { identity => 'Administrators', rights => ['full'] }, #full is same as - 2032127 aka 0x1f01ff
    { identity => 'SYSTEM', rights => ['modify'] }, #modify is same as 1245631 aka 0x1301bf
-   { identity => 'Users', rights => ['mask_specific'], mask => '1180073' }, #(RX, WA) #0x1201a9
-   { identity => 'Administrator', rights => ['mask_specific'], mask => '1180032' }  #RA,WA,RP #1180032  #0x120180
+   { identity => 'Users', rights => ['mask_specific'], mask => '1180073' }, #RX WA #0x1201a9
+   { identity => 'Administrator', rights => ['mask_specific'], mask => '1180032' }  #RA,WA,Rc #1180032  #0x120180
   ],
   inherit_parent_permissions => 'false',
 }
