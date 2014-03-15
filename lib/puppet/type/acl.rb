@@ -16,6 +16,19 @@ Puppet::Type.newtype(:acl) do
     The order that ACEs are listed in is important on Windows
     as it determines what is applied first.
 
+    Order of ACE application on Windows is explicit deny,
+    explicit allow, inherited deny, then inherited allow. You
+    cannot specify inherited ACEs in a manifest, only whether
+    to allow upstream inheritance to flow into the managed
+    target location (known as security descriptor). Please
+    ensure your modeled resources follow this order or Windows
+    will complain. NOTE: `acl` type does not enforce or
+    complain about ACE order.
+
+    See examples below to learn about the different features of
+    the `acl` type.
+
+
     At a minimum, you need to provide the target and at least
     one permission (access control entry or ACE). It will default
     the other settings to sensible defaults.
@@ -25,11 +38,13 @@ Puppet::Type.newtype(:acl) do
       acl { 'c:/tempperms':
         ensure      => present,
         permissions => [
-         { identity => 'Administrator', rights => ['full'] }
+         { identity => 'Administrator', rights => ['full'] },
+         { identity => 'Users', rights => ['read','execute'] }
        ],
       }
 
-    If you want to, you can provide a fully expressed ACL. The
+
+    If you want you can provide a fully expressed ACL. The
     fully expressed acl in the sample below produces the same
     settings as the minimal sample above.
 
@@ -41,12 +56,14 @@ Puppet::Type.newtype(:acl) do
         target_type => 'file',
         purge       => 'false',
         permissions => [
-         { identity => 'Administrator', rights => ['full'], type=> 'allow', child_types => 'all', affects => 'all' }
+         { identity => 'Administrator', rights => ['full'], type=> 'allow', child_types => 'all', affects => 'all' },
+         { identity => 'Users', rights => ['read','execute'], type=> 'allow', child_types => 'all', affects => 'all' }
         ],
-        owner       => 'Administrators',
-        group       => 'Users',
+        owner       => 'Administrators', #Creator_Owner specific, doesn't manage unless specified
+        group       => 'Users', #Creator_Owner specific, doesn't manage unless specified
         inherit_parent_permissions => 'true',
       }
+
 
     Adding in multiple users is done by just adding users to the
     list of permissions. You can also see that you can specify
@@ -60,10 +77,38 @@ Puppet::Type.newtype(:acl) do
         permissions => [
          { identity => 'NT AUTHORITY\SYSTEM', rights => ['modify'] },
          { identity => 'BUILTIN\Users', rights => ['read','execute'] },
-         { identity => 'S-1-5-32-544', rights => ['full'] }
+         { identity => 'S-1-5-32-544', rights => ['write','read','execute'] }
         ],
         inherit_parent_permissions => 'false',
       }
+
+
+    You can manage the same target across multiple acl
+    resources with some caveats. The title of the resource
+    needs to be unique. It is suggested that you only do
+    this when you would need to (can get confusing). You should
+    not set purge => 'true' on any of the resources that apply
+    to the same target or you will see thrashing in reports as
+    the permissions will be added and removed every catalog
+    application. Use this feature with care.
+
+    Manage same ACL resource multiple acls sample usage:
+
+      acl { 'c:/tempperms':
+        ensure      => present,
+        permissions => [
+         { identity => 'Administrator', rights => ['full'] }
+       ],
+      }
+
+      acl { 'tempperms_Users':
+        ensure      => present,,
+        target      => 'c:/tempperms',
+        permissions => [
+         { identity => 'Users', rights => ['read','execute'] }
+       ],
+      }
+
 
     Removing upstream inheritance is known as "protecting" the
     target. When an item is "protected" without purge => true,
@@ -81,6 +126,7 @@ Puppet::Type.newtype(:acl) do
         inherit_parent_permissions => 'false',
       }
 
+
     To lock down a folder to managed explicit ACEs, you want to
     set purge => true. This will only remove other explicit ACEs
     from the folder that are unmanaged by this resource. All
@@ -97,6 +143,7 @@ Puppet::Type.newtype(:acl) do
         ],
         inherit_parent_permissions => 'false',
       }
+
 
     To lock down a folder to only the permissions specified in
     the manifest resource, you want to protect the folder and set
@@ -116,6 +163,21 @@ Puppet::Type.newtype(:acl) do
         inherit_parent_permissions => 'false',
       }
 
+
+    ACEs can be of type 'allow' (default) or 'deny'. Deny ACEs
+    should be listed first before allow ACEs.
+
+    Deny ACE sample usage:
+
+      acl { 'c:/tempperms':
+        ensure      => present,
+        permissions => [
+         { identity => 'SYSTEM', rights => ['full'], type=> 'deny', affects => 'self_only' },
+         { identity => 'Administrators', rights => ['full'] }
+        ],
+      }
+
+
     ACEs have inheritance structures as well aka "child_types":
     'all' (default), 'none', 'containers', and 'objects'. This
     controls how sub-folders and files will inherit each
@@ -134,6 +196,7 @@ Puppet::Type.newtype(:acl) do
         ],
         inherit_parent_permissions => 'false',
       }
+
 
     ACEs have propagation rules, a nice way of saying "how" they
     apply permissions to containers, objects, children and
@@ -156,18 +219,6 @@ Puppet::Type.newtype(:acl) do
         inherit_parent_permissions => 'false',
       }
 
-    ACEs can be of type 'allow' (default) or 'deny'. Deny ACEs
-    should be listed first before allow ACEs.
-
-    Deny ACE sample usage:
-
-      acl { 'c:/tempperms':
-        ensure      => present,
-        permissions => [
-         { identity => 'SYSTEM', rights => ['full'], type=> 'deny', affects => 'self_only' },
-         { identity => 'Administrators', rights => ['full'] }
-        ],
-      }
 
     An interesting note with Windows, you can specify the same
     identity with different inheritance and propagation and each
