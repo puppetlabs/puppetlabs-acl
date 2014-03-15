@@ -333,8 +333,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       it "should handle extraneous rights" do
         permissions = [
             Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full','modify']}, provider),
-            Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['modify','read']}, provider),
-            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['read','mask_specific']}, provider)
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['modify','read']}, provider)
         ]
         resource[:purge] = :true
         provider.inherit_parent_permissions = :false
@@ -343,8 +342,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
         permissions = [
             Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full']}, provider),
-            Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['modify']}, provider),
-            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['read']}, provider)
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['modify']}, provider)
         ]
 
         actual_perms.must == permissions

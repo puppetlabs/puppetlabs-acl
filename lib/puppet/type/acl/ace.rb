@@ -20,12 +20,12 @@ class Puppet::Type::Acl
       id = permission_hash['sid'] if id.nil? || id.empty?
       self.identity = id
       self.sid = permission_hash['sid']
+      @mask = permission_hash['mask']
       self.rights = permission_hash['rights']
       self.type = permission_hash['type']
       self.child_types = permission_hash['child_types']
       self.affects = permission_hash['affects']
       @is_inherited = permission_hash['is_inherited'] || false
-      @mask = permission_hash['mask']
     end
 
     def validate(value,*allowed_values)
@@ -95,6 +95,10 @@ class Puppet::Type::Acl
     end
 
     def ensure_rights_values_compatible
+      if @rights.include?(:mask_specific) && rights.count != 1
+        raise ArgumentError, "In each ace, when specifying rights, if you include 'mask_specific', it should be without anything else e.g. rights => ['mask_specific']. Please decide whether 'mask_specific' or predetermined rights and correct the manifest. Reference: #{to_s}"
+      end
+
       if @rights.include?(:full) && rights.count != 1
         Puppet.warning("In each ace, when specifying rights, if you include 'full', it should be without anything else e.g. rights => ['full']. Please remove the extraneous rights from the manifest to remove this warning. Reference: #{to_s}")
         @rights = [:full]
@@ -102,11 +106,12 @@ class Puppet::Type::Acl
       if @rights.include?(:modify) && rights.count != 1
         Puppet.warning("In each ace, when specifying rights, if you include 'modify', it should be without anything else e.g. rights => ['modify']. Please remove the extraneous rights from the manifest to remove this warning. Reference: #{to_s}")
         @rights = [:modify]
-
       end
-      if @rights.include?(:mask_specific) && rights.count != 1
-        Puppet.warning("In each ace, when specifying rights, if you include 'mask_specific', it should be without anything else e.g. rights => ['mask_specific']. 'mask_specific' will be ignored unless it is by itself. Please remove the extraneous rights from the manifest to remove this warning. Reference: #{to_s}")
-        @rights.delete_if { |r| r ==:mask_specific }
+    end
+
+    def ensure_mask_when_mask_specific
+      if @rights.include?(:mask_specific) && (@mask.nil? || @mask.empty?)
+        raise ArgumentError, "If you specify rights => ['mask_specific'], you must also include mask => 'value'. Reference: #{to_s}"
       end
     end
 
@@ -159,6 +164,7 @@ class Puppet::Type::Acl
           :full, :modify, :write, :list, :read, :execute, :mask_specific)))
       ensure_rights_order
       ensure_rights_values_compatible
+      ensure_mask_when_mask_specific if @rights.include?(:mask_specific)
     end
 
     def type=(value)

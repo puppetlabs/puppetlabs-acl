@@ -459,6 +459,10 @@ describe Puppet::Type.type(:acl) do
         resource[:permissions] = {'identity'=>'bob','rights'=>['execute']}
       end
 
+      it "should accept ['mask_specific']" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>['mask_specific'],'mask'=>'123123'}
+      end
+
       it "should accept a combination of valid values" do
         resource[:permissions] = {'identity'=>'bob','rights'=>['read','execute']}
       end
@@ -477,6 +481,42 @@ describe Puppet::Type.type(:acl) do
         expect {
           resource[:permissions] = {'identity' =>'bob','rights'=>['READ']}
         }.to raise_error(Puppet::ResourceError, /Invalid value "READ". Valid values are/)
+      end
+
+      it "should log a warning when rights does not contain 'full' by itself" do
+        Puppet.expects(:warning).with() do |v|
+          /In each ace, when specifying rights, if you include 'full'/.match(v)
+        end
+        resource[:permissions] = {'identity'=>'bob','rights'=>['full','read']}
+      end
+
+      it "should remove all but 'full' when rights does not contain 'full' by itself" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>['full','read']}
+        resource[:permissions][0].rights.should == [:full]
+      end
+
+      it "should log a warning when rights does not contain 'modify' by itself" do
+        Puppet.expects(:warning).with() do |v|
+          /In each ace, when specifying rights, if you include 'modify'/.match(v)
+        end
+        resource[:permissions] = {'identity'=>'bob','rights'=>['modify','read']}
+      end
+
+      it "should remove all but 'modify' when rights does not contain 'modify' by itself" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>['modify','read']}
+        resource[:permissions][0].rights.should == [:modify]
+      end
+
+      it "should not allow 'mask_specific' to exist with other rights" do
+        expect {
+          resource[:permissions] = {'identity' =>'bob','rights'=>['mask_specific','read']}
+        }.to raise_error(Puppet::ResourceError, /In each ace, when specifying rights, if you include 'mask_specific'/)
+      end
+
+      it "should not allow 'mask_specific' without mask" do
+        expect {
+          resource[:permissions] = {'identity' =>'bob','rights'=>['mask_specific']}
+        }.to raise_error(Puppet::ResourceError, /If you specify rights => \['mask_specific'\], you must also include mask/)
       end
 
       it "should set ['read',:read] to [:read]" do
