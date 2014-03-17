@@ -313,7 +313,25 @@ Puppet::Type.newtype(:acl) do
   newproperty(:permissions, :array_matching => :all) do
     desc "Permissions is an array containing Access Control Entries
       (ACEs). Certain Operating Systems require these ACEs to be in
-      explicit order (Windows)."
+      explicit order (Windows). Every element in the array is a hash
+      that will at the very least need `identity` and `rights` e.g
+      { identity => 'Administrators', rights => ['full'] } and at the
+      very most can include `type`, `child_types`, `affects`, and
+      `mask` (mask only should be with `rights => ['mask_specific']`)
+      e.g. `{ identity => 'Administrators', rights => ['full'],
+      type=> 'allow', child_types => 'all', affects => 'all' }`.
+      `Identity` is a group, user or ID (SID on Windows). The identity must
+      exist on the system and will auto-require on user resources.
+      `Rights` is an array that contains 'full', 'modify', 'mask_specific'
+      or some combination of 'write', 'read', and 'execute'. If you specify
+      'mask_specific' you must also specify `mask` with an integer (passed
+      as a string) that represents the permissions mask. `Type` is
+      represented as 'allow' (default) or 'deny'. `Child_types` determines
+      how an ACE is inherited downstream from the target. Valid values are
+      'all' (default), 'objects', 'containers' or 'none'. `Affects` determines
+      how the downstream inheritance is propagated. Valid values are
+      'all' (default), 'self_only', 'children_only',
+      'self_and_direct_children_only' or 'direct_children_only'."
 
     validate do |value|
       if value.nil? or value.empty?
@@ -358,7 +376,9 @@ Puppet::Type.newtype(:acl) do
       2. Group e.g. 'Administrators' or 'BUILTIN\\Administrators', 3.
       SID (Security ID) e.g. 'S-1-5-18'. Defaults to not specified on
       Windows. This allows owner to stay set to whatever it is currently
-      set to (owner can vary depending on the original CREATOR OWNER)."
+      set to (owner can vary depending on the original CREATOR OWNER).
+      The trustee must exist on the system and will auto-require on user
+      resources."
 
     validate do |value|
       if value.nil? or value.empty?
@@ -393,7 +413,9 @@ Puppet::Type.newtype(:acl) do
       2. Group e.g. 'Administrators' or 'BUILTIN\\Administrators', 3.
       SID (Security ID) e.g. 'S-1-5-18'. Defaults to not specified on
       Windows. This allows group to stay set to whatever it is currently
-      set to (group can vary depending on the original CREATOR OWNER)."
+      set to (group can vary depending on the original CREATOR OWNER).
+      The trustee must exist on the system and will auto-require on user
+      resources."
 
     validate do |value|
       if value.nil? or value.empty?
@@ -424,7 +446,7 @@ Puppet::Type.newtype(:acl) do
   newproperty(:inherit_parent_permissions, :boolean => true) do
     desc "Inherit Parent Permissions specifies whether to inherit
       permissions from parent ACLs or not. The default is true."
-    #todo set this based on :can_inherit_parent_permissions
+    #todo v2 set this based on :can_inherit_parent_permissions
     newvalues(:true,:false)
     defaultto(true)
 
@@ -499,6 +521,8 @@ Puppet::Type.newtype(:acl) do
 
     required_users.uniq
   end
+
+  #todo v2? autorequire group
 
   def munge_boolean(value)
     case value
