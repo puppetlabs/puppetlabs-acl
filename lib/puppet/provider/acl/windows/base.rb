@@ -48,7 +48,7 @@ class Puppet::Provider::Acl
           child_types = get_ace_child_types(ace)
           affects = get_ace_propagation(ace)
           is_inherited = ace.inherited?
-          hash = {'identity'=>"#{identity}", 'sid'=>"#{sid}", 'rights'=>rights,
+          hash = {'identity'=>"#{identity}", 'id'=>"#{sid}", 'rights'=>rights,
                   'type'=>ace_type, 'child_types'=> child_types,
                   'affects'=>affects, 'is_inherited'=>is_inherited,
                   'mask'=>"#{ace.mask}" }
@@ -189,7 +189,7 @@ class Puppet::Provider::Acl
           return dacl if permissions.nil? || permissions.empty?
 
           permissions.each do |permission|
-            sid = get_account_sid(permission.identity)
+            sid = get_account_id(permission.identity)
             mask = get_account_mask(permission)
             flags = get_account_flags(permission)
             case permission.type
@@ -326,15 +326,15 @@ class Puppet::Provider::Acl
           should_empty = should.nil? || should.empty?
           return false if current.empty? != should_empty
 
-          get_account_sid(current) == get_account_sid(should)
+          get_account_id(current) == get_account_id(should)
         end
 
-        def get_account_sid(name)
+        def get_account_id(name)
           Puppet::Util::Windows::Security.name_to_sid(name)
         end
 
         def get_account_name(current_value)
-          Puppet::Util::Windows::Security.sid_to_name(get_account_sid(current_value))
+          Puppet::Util::Windows::Security.sid_to_name(get_account_id(current_value))
         end
 
         def is_inheriting_permissions?

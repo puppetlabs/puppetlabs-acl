@@ -83,7 +83,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
          resource.provider.flush
 
-         provider.owner.must == provider.get_account_sid('Administrator')
+         provider.owner.must == provider.get_account_id('Administrator')
        end
 
        it "should not update owner to a user that does not exist" do
@@ -116,16 +116,16 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
        it "should update group to Administrator properly" do
          provider.group.must_not == Puppet::Type::Acl::Constants::GROUP_UNSPECIFIED
-         if provider.group == provider.get_account_sid('Administrator')
+         if provider.group == provider.get_account_id('Administrator')
            provider.group = 'Users'
            resource.provider.flush
          end
-         provider.group.must_not == provider.get_account_sid('Administrator')
+         provider.group.must_not == provider.get_account_id('Administrator')
          provider.group = 'Administrator'
 
          resource.provider.flush
 
-         provider.group.must == provider.get_account_sid('Administrator')
+         provider.group.must == provider.get_account_id('Administrator')
        end
 
        it "should not update group to a group that does not exist" do

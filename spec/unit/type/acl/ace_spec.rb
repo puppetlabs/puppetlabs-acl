@@ -15,8 +15,8 @@ describe "Ace" do
     it "should be equal for two like aces even with extra information" do
       sid = 'S-32-12-0'
       provider = mock()
-      provider.expects(:get_account_sid).returns(sid)
-      left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'sid'=> sid,'mask'=>'2023422'}).hash
+      provider.expects(:get_account_id).returns(sid)
+      left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'id'=> sid,'mask'=>'2023422'}).hash
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']},provider).hash
 
       expect(left).to eq right
@@ -25,16 +25,16 @@ describe "Ace" do
     it "should be equal for two like aces when one has sid" do
       sid = 'S-1-1-0'
       provider = mock()
-      provider.expects(:get_account_sid).returns(sid)
-      left = Puppet::Type::Acl::Ace.new({'identity' => 'Everyone', 'sid'=> sid,'rights' => ['full']}).hash
+      provider.expects(:get_account_id).returns(sid)
+      left = Puppet::Type::Acl::Ace.new({'identity' => 'Everyone', 'id'=> sid,'rights' => ['full']}).hash
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']},provider).hash
 
       expect(left).to eq right
     end
 
     it "should be equal for two like aces when both have same sid but identities are different" do
-      left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'sid'=>'S-1-1-0', 'rights' => ['full']}).hash
-      right = Puppet::Type::Acl::Ace.new({'identity' => 'BUILT IN\Administrators', 'sid'=>'S-1-1-0','rights' => ['full']}).hash
+      left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'id'=>'S-1-1-0', 'rights' => ['full']}).hash
+      right = Puppet::Type::Acl::Ace.new({'identity' => 'BUILT IN\Administrators', 'id'=>'S-1-1-0','rights' => ['full']}).hash
 
       expect(left).to eq right
     end
@@ -61,7 +61,7 @@ describe "Ace" do
 
     it "should be equal for two aces when SIDs evaluate to the same because provider" do
       provider = mock()
-      provider.expects(:get_account_sid).returns('S-1-1-0').twice
+      provider.expects(:get_account_id).returns('S-1-1-0').twice
 
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']}, provider).hash
       right = Puppet::Type::Acl::Ace.new({'identity' => 'NOTAdministrators', 'rights' => ['full']}, provider).hash
@@ -71,7 +71,7 @@ describe "Ace" do
 
     it "should not be equal for two like aces when SIDs evaluate different because provider" do
       provider = mock()
-      provider.stubs(:get_account_sid).returns('S-1-1-0','S-1-1-5')
+      provider.stubs(:get_account_id).returns('S-1-1-0','S-1-1-5')
 
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']}, provider).hash
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']}, provider).hash
@@ -131,22 +131,22 @@ describe "Ace" do
     end
 
     it "should be equal for two like aces even with extra information" do
-      left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'sid'=> 'S-32-12-0','mask'=>'2023422'})
+      left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'id'=> 'S-32-12-0','mask'=>'2023422'})
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']})
 
       expect(left).to eq right
     end
 
     it "should be equal for two like aces when one has sid" do
-      left = Puppet::Type::Acl::Ace.new({'identity' => 'Everyone', 'sid'=>'S-1-1-0','rights' => ['full']})
+      left = Puppet::Type::Acl::Ace.new({'identity' => 'Everyone', 'id'=>'S-1-1-0','rights' => ['full']})
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']})
 
       expect(left).to eq right
     end
 
     it "should be equal for two like aces when both have same sid but identities are different" do
-      left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'sid'=>'S-1-1-0', 'rights' => ['full']})
-      right = Puppet::Type::Acl::Ace.new({'identity' => 'BUILT IN\Administrators', 'sid'=>'S-1-1-0','rights' => ['full']})
+      left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'id'=>'S-1-1-0', 'rights' => ['full']})
+      right = Puppet::Type::Acl::Ace.new({'identity' => 'BUILT IN\Administrators', 'id'=>'S-1-1-0','rights' => ['full']})
 
       expect(left).to eq right
     end
@@ -173,7 +173,7 @@ describe "Ace" do
 
     it "should be equal for two aces when SIDs evaluate to the same because provider" do
       provider = mock()
-      provider.expects(:get_account_sid).returns('S-1-1-0').twice
+      provider.expects(:get_account_id).returns('S-1-1-0').twice
 
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']}, provider)
       right = Puppet::Type::Acl::Ace.new({'identity' => 'NOTAdministrators', 'rights' => ['full']}, provider)
@@ -183,7 +183,7 @@ describe "Ace" do
 
     it "should not be equal for two like aces when SIDs evaluate different because provider" do
       provider = mock()
-      provider.stubs(:get_account_sid).returns('S-1-1-0','S-1-1-5')
+      provider.stubs(:get_account_id).returns('S-1-1-0','S-1-1-5')
 
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']}, provider)
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']}, provider)
@@ -243,22 +243,22 @@ describe "Ace" do
     end
 
     it "should be true for two like aces even with extra information" do
-      left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'sid'=> 'S-32-12-0','mask'=>'2023422'})
+      left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'id'=> 'S-32-12-0','mask'=>'2023422'})
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']})
 
       expect(left.same? right).to be_true
     end
 
     it "should be true for two like aces when one has sid" do
-      left = Puppet::Type::Acl::Ace.new({'identity' => 'Everyone', 'sid'=>'S-1-1-0','rights' => ['full']})
+      left = Puppet::Type::Acl::Ace.new({'identity' => 'Everyone', 'id'=>'S-1-1-0','rights' => ['full']})
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']})
 
       expect(left.same? right).to be_true
     end
 
     it "should be true for two like aces when both have same sid but identities are different" do
-      left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'sid'=>'S-1-1-0', 'rights' => ['full']})
-      right = Puppet::Type::Acl::Ace.new({'identity' => 'BUILT IN\Administrators', 'sid'=>'S-1-1-0','rights' => ['full']})
+      left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'id'=>'S-1-1-0', 'rights' => ['full']})
+      right = Puppet::Type::Acl::Ace.new({'identity' => 'BUILT IN\Administrators', 'id'=>'S-1-1-0','rights' => ['full']})
 
       expect(left.same? right).to be_true
     end
@@ -285,7 +285,7 @@ describe "Ace" do
 
     it "should be true for two aces when SIDs evaluate to the same because provider" do
       provider = mock()
-      provider.expects(:get_account_sid).returns('S-1-1-0').twice
+      provider.expects(:get_account_id).returns('S-1-1-0').twice
 
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']}, provider)
       right = Puppet::Type::Acl::Ace.new({'identity' => 'NOTAdministrators', 'rights' => ['full']}, provider)
@@ -295,7 +295,7 @@ describe "Ace" do
 
     it "should be false for two like aces when SIDs evaluate different because provider" do
       provider = mock()
-      provider.stubs(:get_account_sid).returns('S-1-1-0','S-1-1-5')
+      provider.stubs(:get_account_id).returns('S-1-1-0','S-1-1-5')
 
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']}, provider)
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']}, provider)

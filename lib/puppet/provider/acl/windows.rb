@@ -49,7 +49,7 @@ Puppet::Type.type(:acl).provide :windows do
   def permissions=(value)
     non_existing_users = []
     value.each do |permission|
-      non_existing_users << permission.identity unless get_account_sid(permission.identity)
+      non_existing_users << permission.identity unless get_account_id(permission.identity)
     end
     raise Puppet::Error.new("Failed to set permissions for '#{non_existing_users.join(', ')}': User or users do not exist.") unless non_existing_users.empty?
 
@@ -80,7 +80,7 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def owner=(value)
-    raise Puppet::Error.new("Failed to set owner to '#{value}': User does not exist.") unless get_account_sid(value)
+    raise Puppet::Error.new("Failed to set owner to '#{value}': User does not exist.") unless get_account_id(value)
 
     @property_flush[:owner] = value
   end
@@ -98,7 +98,7 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def group=(value)
-    raise Puppet::Error.new("Failed to set group to '#{value}': Group does not exist.") unless get_account_sid(value)
+    raise Puppet::Error.new("Failed to set group to '#{value}': Group does not exist.") unless get_account_id(value)
 
     @property_flush[:group] = value
   end
@@ -120,10 +120,11 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def flush
+    #require 'pry';binding.pry
     sd = get_security_descriptor
 
-    sd.owner = get_account_sid(@property_flush[:owner]) if @property_flush[:owner]
-    sd.group = get_account_sid(@property_flush[:group]) if @property_flush[:group]
+    sd.owner = get_account_id(@property_flush[:owner]) if @property_flush[:owner]
+    sd.group = get_account_id(@property_flush[:group]) if @property_flush[:group]
     sd.protect = resource.munge_boolean(@property_flush[:inherit_parent_permissions]) == :false if @property_flush.has_key?(:inherit_parent_permissions)
 
     if @property_flush.has_key?(:inherit_parent_permissions) || @property_flush[:owner] || @property_flush[:group]

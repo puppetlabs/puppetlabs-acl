@@ -399,7 +399,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
         it "should return true for Administrators and specifying Administrators even if one specifies sid and other non-required information" do
           admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']}, provider)
-          admin2 = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'sid'=>"S-1-5-32-544", 'mask'=>::Windows::File::GENERIC_ALL, 'is_inherited'=>false})
+          admin2 = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'id'=>"S-1-5-32-544", 'mask'=>::Windows::File::GENERIC_ALL, 'is_inherited'=>false})
           provider.are_permissions_insync?([admins], [admin2]).must be_true
         end
 
@@ -480,7 +480,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
         it "should return true for Administrators and specifying Administrators even if one specifies sid and other non-required information" do
           admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']}, provider)
-          admin2 = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'sid'=>"S-1-5-32-544", 'mask'=>::Windows::File::GENERIC_ALL, 'is_inherited'=>false}, provider)
+          admin2 = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'id'=>"S-1-5-32-544", 'mask'=>::Windows::File::GENERIC_ALL, 'is_inherited'=>false}, provider)
           provider.are_permissions_insync?([admins], [admin2], true).must be_true
         end
 
@@ -797,11 +797,11 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
       before :each do
         # explicit (CI)(OI)
-        current_dacl.allow(provider.get_account_sid('Users'), ::Windows::File::FILE_ALL_ACCESS, Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE)
+        current_dacl.allow(provider.get_account_id('Users'), ::Windows::File::FILE_ALL_ACCESS, Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE)
         # explicit (IO) no propagate
-        current_dacl.allow(provider.get_account_sid('Users'), ::Windows::File::FILE_GENERIC_READ | ::Windows::File::FILE_GENERIC_EXECUTE, Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE )
+        current_dacl.allow(provider.get_account_id('Users'), ::Windows::File::FILE_GENERIC_READ | ::Windows::File::FILE_GENERIC_EXECUTE, Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE )
         # add inherited
-        current_dacl.allow(provider.get_account_sid('Administrators'), ::Windows::File::FILE_ALL_ACCESS, Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::INHERITED_ACE )
+        current_dacl.allow(provider.get_account_id('Administrators'), ::Windows::File::FILE_ALL_ACCESS, Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::INHERITED_ACE )
       end
 
       it "should ignore the current dacl aces and only return the should aces when purge => true" do
@@ -811,13 +811,13 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
       it "should not add inherited to returned aces" do
         current_dacl = Puppet::Util::Windows::AccessControlList.new()
-        current_dacl.allow(provider.get_account_sid('Administrators'), ::Windows::File::FILE_ALL_ACCESS, Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::INHERITED_ACE )
+        current_dacl.allow(provider.get_account_id('Administrators'), ::Windows::File::FILE_ALL_ACCESS, Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::INHERITED_ACE )
         provider.sync_aces(current_dacl,should_aces,should_purge).must == should_aces
       end
 
       it "should add an unmanaged deny ace to the front of the array" do
         should_aces[0].type.must == :allow
-        current_dacl.deny(provider.get_account_sid('Administrator'), ::Windows::File::FILE_ALL_ACCESS, 0x0)
+        current_dacl.deny(provider.get_account_id('Administrator'), ::Windows::File::FILE_ALL_ACCESS, 0x0)
         aces = provider.sync_aces(current_dacl,should_aces,should_purge)
 
         sut_ace = aces[0]
@@ -827,8 +827,8 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
       it "should add unmanaged deny aces to the front of the array in proper order" do
         should_aces[0].type.must == :allow
-        current_dacl.deny(provider.get_account_sid('Administrator'), ::Windows::File::FILE_ALL_ACCESS, 0x0)
-        current_dacl.deny(provider.get_account_sid('Users'), ::Windows::File::FILE_ALL_ACCESS, 0x0)
+        current_dacl.deny(provider.get_account_id('Administrator'), ::Windows::File::FILE_ALL_ACCESS, 0x0)
+        current_dacl.deny(provider.get_account_id('Users'), ::Windows::File::FILE_ALL_ACCESS, 0x0)
         aces = provider.sync_aces(current_dacl,should_aces,should_purge)
 
         sut_ace = aces[0]
@@ -838,8 +838,8 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
       it "should add unmanaged deny aces after existing managed deny aces" do
         should_aces = [Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'type'=>'deny'}),Puppet::Type::Acl::Ace.new({'identity'=>'Administrator', 'rights'=>['modify']})]
-        current_dacl.deny(provider.get_account_sid('Administrator'), ::Windows::File::FILE_ALL_ACCESS, 0x0)
-        current_dacl.deny(provider.get_account_sid('Users'), ::Windows::File::FILE_ALL_ACCESS, 0x0)
+        current_dacl.deny(provider.get_account_id('Administrator'), ::Windows::File::FILE_ALL_ACCESS, 0x0)
+        current_dacl.deny(provider.get_account_id('Users'), ::Windows::File::FILE_ALL_ACCESS, 0x0)
         aces = provider.sync_aces(current_dacl,should_aces,should_purge)
 
         sut_ace = aces[2]
@@ -850,8 +850,8 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       it "should add unmanaged deny aces after existing managed deny aces when there are no allowed aces" do
         should_aces = [Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'type'=>'deny'})]
         current_dacl = Puppet::Util::Windows::AccessControlList.new()
-        current_dacl.deny(provider.get_account_sid('Administrator'), ::Windows::File::FILE_ALL_ACCESS, 0x0)
-        current_dacl.deny(provider.get_account_sid('Users'), ::Windows::File::FILE_ALL_ACCESS, 0x0)
+        current_dacl.deny(provider.get_account_id('Administrator'), ::Windows::File::FILE_ALL_ACCESS, 0x0)
+        current_dacl.deny(provider.get_account_id('Users'), ::Windows::File::FILE_ALL_ACCESS, 0x0)
         aces = provider.sync_aces(current_dacl,should_aces,should_purge)
 
         sut_ace = aces[2]
@@ -873,7 +873,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         resource[:permissions] = {'identity'=>'Administrator','rights'=>['full']}
         dacl = provider.convert_to_dacl(resource[:permissions])
         dacl.each do |ace|
-          ace.sid.must == provider.get_account_sid('Administrator')
+          ace.sid.must == provider.get_account_id('Administrator')
           (ace.mask & ::Windows::File::FILE_ALL_ACCESS).must be ::Windows::File::FILE_ALL_ACCESS
         end
       end

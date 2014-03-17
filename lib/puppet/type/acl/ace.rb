@@ -6,7 +6,7 @@ class Puppet::Type::Acl
     require Pathname.new(__FILE__).dirname + '../../../' + 'puppet/type/acl/rights'
 
     attr_reader :identity
-    attr_reader :sid
+    attr_reader :id
     attr_reader :rights
     attr_reader :type
     attr_reader :child_types
@@ -17,9 +17,9 @@ class Puppet::Type::Acl
     def initialize(permission_hash, provider = nil)
       @provider = provider
       id = permission_hash['identity']
-      id = permission_hash['sid'] if id.nil? || id.empty?
+      id = permission_hash['id'] if id.nil? || id.empty?
       self.identity = id
-      self.sid = permission_hash['sid']
+      self.id = permission_hash['id']
       @mask = permission_hash['mask']
       self.rights = permission_hash['rights']
       self.type = permission_hash['type']
@@ -143,12 +143,12 @@ class Puppet::Type::Acl
       @identity = validate_non_empty('identity', value)
     end
 
-    def sid=(value)
-      @sid = value
+    def id=(value)
+      @id = value
 
       if value.nil? || value.empty?
-        if @identity && @provider && @provider.respond_to?(:get_account_sid)
-          @sid = @provider.get_account_sid(@identity)
+        if @identity && @provider && @provider.respond_to?(:get_account_id)
+          @id = @provider.get_account_id(@identity)
         end
       end
     end
@@ -183,20 +183,20 @@ class Puppet::Type::Acl
 
     def get_comparison_ids(other = nil)
       ignore_other = true
-      sid_has_value = false
-      other_sid_has_value = false
+      id_has_value = false
+      other_id_has_value = false
       other_id = nil
 
       unless other.nil?
         ignore_other = false
-        other_sid_has_value = true unless other.sid.nil? || other.sid.empty?
+        other_id_has_value = true unless other.id.nil? || other.id.empty?
       end
 
-      sid_has_value = true unless @sid.nil? || @sid.empty?
+      id_has_value = true unless @id.nil? || @id.empty?
 
-      if sid_has_value && (ignore_other || other_sid_has_value)
-        id = @sid
-        other_id = other.sid unless ignore_other
+      if id_has_value && (ignore_other || other_id_has_value)
+        id = @id
+        other_id = other.id unless ignore_other
       else
         if @provider && @provider.respond_to?(:get_account_name)
           id = @provider.get_account_name(@identity)
@@ -207,7 +207,7 @@ class Puppet::Type::Acl
         end
       end
 
-      [id,other_id]
+      [id, other_id]
     end
 
     def same?(other)
