@@ -164,6 +164,62 @@ Puppet::Type.newtype(:acl) do
       }
 
 
+    ACE rights can be: 'full', 'modify', 'write', 'read',
+    'execute', and/or 'mask_specific'. 'full', 'modify', and
+    'mask_specific' are mutually exclusive, that is they should
+    be the only thing specified in rights if they are applicable.
+    'full' indicates all rights, so it is cumulative. 'modify'
+    indicates 'write', 'read', 'execute' and DELETE so it is also
+    cumulative. If you specify 'full' or 'modify' as part of a
+    set of rights with other rights (rights => ['full','read'])
+    `acl` will issue a warning and remove the other items.
+    You can specify any combination of 'write', 'read', and
+    'execute'. More on 'mask_specific' in the next section.
+
+
+    Rights sample usage:
+
+      acl { 'c:/tempperms':
+        ensure      => present,
+        permissions => [
+         { identity => 'Administrators', rights => ['full'] },
+         { identity => 'Administrator', rights => ['modify'] },
+         { identity => 'Authenticated Users', rights => ['write','read','execute'] },
+         { identity => 'Users', rights => ['read','execute'] }
+         { identity => 'Everyone', rights => ['read'] }
+        ],
+        inherit_parent_permissions => 'false',
+      }
+
+
+    ACE `rights => ['mask_specific']` indicates that rights are
+    passed as part of a mask, so the mask is all that will be
+    evaluated. When you specify 'mask_specific' you must also
+    specify `mask` with an integer (passed as a string) that
+    represents the permissions mask. Because the mask is all
+    that is evaluated, it is important that you don't try to
+    combine something like read permissions and then the mask
+    e.g. `rights => ['read','mask_specific']` (invalid scenario).
+    In fact, the `ACL` provider will error if you attempt to do
+    this because it could set the system in an unusable state
+    due to a misunderstanding of how this particular feature
+    works.
+
+    Mask specific sample usage:
+
+      acl { 'c:/tempperms':
+        ensure      => present,
+        purge       => 'true',
+        permissions => [
+         { identity => 'Administrators', rights => ['full'] }, #full is same as - 2032127 aka 0x1f01ff
+         { identity => 'SYSTEM', rights => ['modify'] }, #modify is same as 1245631 aka 0x1301bf
+         { identity => 'Users', rights => ['mask_specific'], mask => '1180073' }, #RX WA #0x1201a9
+         { identity => 'Administrator', rights => ['mask_specific'], mask => '1180032' }  #RA,WA,Rc #1180032  #0x120180
+        ],
+        inherit_parent_permissions => 'false',
+      }
+
+
     ACEs can be of type 'allow' (default) or 'deny'. Deny ACEs
     should be listed first before allow ACEs.
 
@@ -333,7 +389,10 @@ Puppet::Type.newtype(:acl) do
       'all' (default), 'objects', 'containers' or 'none'. `Affects` determines
       how the downstream inheritance is propagated. Valid values are
       'all' (default), 'self_only', 'children_only',
-      'self_and_direct_children_only' or 'direct_children_only'."
+      'self_and_direct_children_only' or 'direct_children_only'. While you
+      will see `is_inherited => 'true'` when running puppet resource acl path,
+      puppet will not be able to manage the inherited permissions so those
+      will need to be removed if using that to build a manifest."
 
     validate do |value|
       if value.nil? or value.empty?
