@@ -71,7 +71,7 @@ Puppet::Type.type(:acl).provide :windows do
       end
     end
 
-    # bug This can cause issues when the current displays the unmanaged items (that are not purged) while the should displays something that is being appended to the current set
+    #TODO [BUG][DISPLAY ONLY] This can cause issues when the current displays the unmanaged items (that are not purged) while the should displays something that is being appended to the current set
     perms
   end
 
