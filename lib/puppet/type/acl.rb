@@ -305,7 +305,9 @@ Puppet::Type.newtype(:acl) do
   newparam(:purge, :boolean => true) do
     desc "Purge specifies whether to remove other explicit permissions
       if not specified in the permissions set. This doesn't do anything
-      with permissions inherited from parents. The default is false."
+      with permissions inherited from parents (to remove those you should
+      combine `purge => 'false', inherit_parent_permissions => 'false'`.
+      The default is false."
     newvalues(:true, :false)
     defaultto(false)
   end
