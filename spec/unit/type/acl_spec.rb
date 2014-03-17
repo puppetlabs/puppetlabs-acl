@@ -164,6 +164,84 @@ describe Puppet::Type.type(:acl) do
       end
     end
 
+    context "groups" do
+      def test_should_set_autorequired_group(group_name)
+        group = Puppet::Type.type(:group).new(:name => group_name)
+        catalog.add_resource resource
+        catalog.add_resource group
+
+        reqs = resource.autorequire
+        reqs.count.must == 1
+        reqs[0].source.must == group
+        reqs[0].target.must == resource
+      end
+
+      def test_should_not_set_autorequired_group(group_name)
+        group = Puppet::Type.type(:group).new(:name => group_name)
+        catalog.add_resource resource
+        catalog.add_resource group
+
+        reqs = resource.autorequire
+        reqs.must be_empty
+      end
+
+      it "should not autorequire owner when set to unspecified" do
+        test_should_not_set_autorequired_group('Administrators')
+      end
+
+      it "should autorequire owner when set to Administrators" do
+        resource[:owner] = 'Administrators'
+        test_should_set_autorequired_group(resource[:owner])
+      end
+
+      it "should not autorequire group when set to unspecified" do
+        test_should_not_set_autorequired_group('Administrators')
+      end
+
+      it "should autorequire group when set to Administrators" do
+        resource[:group] = 'Administrators'
+        test_should_set_autorequired_group(resource[:group])
+      end
+
+      it "should not autorequire Administrators if owner is set to the default Administrators SID" do
+        # we have no way at the type level of knowing that Administrators == S-1-5-32-544 - this would require a call to the provider
+        # unfortunately even in the provider we get the full account name 'BUILTIN\Administrators' which doesn't match Administrators
+        test_should_not_set_autorequired_group('Administrators')
+      end
+
+      it "should not autorequire BUILTIN\\Administrators if owner is set to the default Administrators SID" do
+        # we have no way at the type level of knowing that BUILTIN\Administrators == S-1-5-32-544 - this would require a call to the provider
+        # check the provider for a similar test that notes the require works
+        test_should_not_set_autorequired_group('BUILTIN\Administrators')
+      end
+
+      it "should autorequire identities in permissions" do
+        user_name = 'bob'
+        resource[:permissions] = [{'identity'=>'bill','rights'=>['modify']},{'identity'=>user_name,'rights'=>['full']}]
+        test_should_set_autorequired_group(user_name)
+      end
+
+      it "should autorequire identities in permissions once even when included more than once" do
+        user_name = 'bob'
+        resource[:permissions] = [{'identity'=>user_name,'rights'=>['modify'],'affects'=>'children_only'},{'identity'=>user_name,'rights'=>['full']}]
+        test_should_set_autorequired_group(user_name)
+      end
+
+      it "should not autorequire groups that are not part of the owner or permission identities" do
+        resource[:permissions] = [{'identity'=>'bob','rights'=>['modify']}]
+        test_should_not_set_autorequired_group('bill')
+      end
+
+      it "should not autorequire identities/owner if their is not a match to a group in the catalog" do
+        resource[:owner] = 'Administrators'
+        resource[:permissions] = [{'identity'=>'bob','rights'=>['modify']}]
+        catalog.add_resource resource
+
+        reqs = resource.autorequire
+        reqs.must be_empty
+      end
+    end
+
     # :as_platform => :windows - doesn't exist outside of puppet?
     context "when :target_type => :file", :if => Puppet.features.microsoft_windows? do
       def test_should_set_autorequired_file(resource_path,file_path)

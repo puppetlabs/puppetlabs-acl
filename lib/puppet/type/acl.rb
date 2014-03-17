@@ -379,7 +379,7 @@ Puppet::Type.newtype(:acl) do
       e.g. `{ identity => 'Administrators', rights => ['full'],
       type=> 'allow', child_types => 'all', affects => 'all' }`.
       `Identity` is a group, user or ID (SID on Windows). The identity must
-      exist on the system and will auto-require on user resources.
+      exist on the system and will auto-require on user and group resources.
       `Rights` is an array that contains 'full', 'modify', 'mask_specific'
       or some combination of 'write', 'read', and 'execute'. If you specify
       'mask_specific' you must also specify `mask` with an integer (passed
@@ -439,7 +439,7 @@ Puppet::Type.newtype(:acl) do
       Windows. This allows owner to stay set to whatever it is currently
       set to (owner can vary depending on the original CREATOR OWNER).
       The trustee must exist on the system and will auto-require on user
-      resources."
+      and group resources."
 
     validate do |value|
       if value.nil? or value.empty?
@@ -476,7 +476,7 @@ Puppet::Type.newtype(:acl) do
       Windows. This allows group to stay set to whatever it is currently
       set to (group can vary depending on the original CREATOR OWNER).
       The trustee must exist on the system and will auto-require on user
-      resources."
+      and group resources."
 
     validate do |value|
       if value.nil? or value.empty?
@@ -583,7 +583,41 @@ Puppet::Type.newtype(:acl) do
     required_users.uniq
   end
 
-  #todo v2? autorequire group
+  autorequire(:group) do
+    required_groups = []
+
+    unless provider.respond_to?(:get_group_name)
+      return_same_value = lambda { |current_value| return current_value}
+      provider.class.send(:define_method,'get_group_name', &return_same_value)
+    end
+
+    unless self[:owner] == Puppet::Type::Acl::Constants::OWNER_UNSPECIFIED
+      owner_name = provider.get_group_name(self[:owner])
+
+      # add both qualified and unqualified items
+      required_groups << "Group[#{self[:owner]}]"
+      required_groups << "Group[#{owner_name}]"
+    end
+
+    unless self[:group] == Puppet::Type::Acl::Constants::GROUP_UNSPECIFIED
+      group_name = provider.get_group_name(self[:group])
+
+      # add both qualified and unqualified items
+      required_groups << "Group[#{self[:group]}]"
+      required_groups << "Group[#{group_name}]"
+    end
+
+    permissions = self[:permissions]
+    unless permissions.nil?
+      permissions.each do |permission|
+        account_name = provider.get_group_name(permission.identity)
+        required_groups << "Group[#{permission.identity}]"
+        required_groups << "Group[#{account_name}]"
+      end
+    end
+
+    required_groups.uniq
+  end
 
   def munge_boolean(value)
     case value

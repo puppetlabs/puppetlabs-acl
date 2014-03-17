@@ -336,6 +336,7 @@ class Puppet::Provider::Acl
         def get_account_name(current_value)
           Puppet::Util::Windows::Security.sid_to_name(get_account_id(current_value))
         end
+        alias_method :get_group_name, :get_account_name
 
         def is_inheriting_permissions?
           sd = get_security_descriptor
