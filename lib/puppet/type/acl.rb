@@ -309,7 +309,7 @@ Puppet::Type.newtype(:acl) do
     alias :should_to_s :is_to_s
   end
 
-  newproperty(:inherit_parent_permissions, :boolean => true) do
+  newproperty(:inherit_parent_permissions, :boolean => true, :required_features=> :can_inherit_parent_permissions) do
     desc "Inherit Parent Permissions specifies whether to inherit
       permissions from parent ACLs or not. The default is true."
     #todo v2 set this based on :can_inherit_parent_permissions
