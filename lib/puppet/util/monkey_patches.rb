@@ -48,7 +48,7 @@ if Puppet::Util::Platform.windows?
         end
 
         bool   = false
-        sid    = 0.chr * 28
+        sid    = 0.chr * 80
         sid_cb = [sid.size].pack('L')
 
         domain_buf = 0.chr * 80
