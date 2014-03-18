@@ -323,7 +323,6 @@ Puppet::Type.newtype(:acl) do
   newproperty(:inherit_parent_permissions, :boolean => true, :required_features=> :can_inherit_parent_permissions) do
     desc "Inherit Parent Permissions specifies whether to inherit
       permissions from parent ACLs or not. The default is true."
-    #todo v2 set this based on :can_inherit_parent_permissions
     newvalues(:true,:false)
     defaultto(true)
 
