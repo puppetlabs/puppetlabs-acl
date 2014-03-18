@@ -401,18 +401,24 @@ describe Puppet::Type.type(:acl) do
       resource[:inherit_parent_permissions].must == :true
     end
 
-    it "should accept true" do
-      resource[:inherit_parent_permissions] = true
-    end
+    context "when the provider has implemented :can_inherit_parent_permissions" do
+      before :each do
+        resource.provider.class.expects(:satisfies?).with(:can_inherit_parent_permissions).returns(true)
+      end
 
-    it "should accept false" do
-      resource[:inherit_parent_permissions] = false
-    end
+      it "should accept true" do
+        resource[:inherit_parent_permissions] = true
+      end
 
-    it "should reject non-boolean values" do
-      expect {
-        resource[:inherit_parent_permissions] = :whenever
-      }.to raise_error(Puppet::ResourceError, /Invalid value :whenever. Valid values are true/)
+      it "should accept false" do
+        resource[:inherit_parent_permissions] = false
+      end
+
+      it "should reject non-boolean values" do
+        expect {
+          resource[:inherit_parent_permissions] = :whenever
+        }.to raise_error(Puppet::ResourceError, /Invalid value :whenever. Valid values are true/)
+      end
     end
   end
 
