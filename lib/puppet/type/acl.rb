@@ -109,8 +109,6 @@ Puppet::Type.newtype(:acl) do
 
   EOT
 
-  ensurable
-
   feature :ace_order_required, "The provider determines if the order of access control entries (ACE) is required."
   feature :can_inherit_parent_permissions, "The provider can inherit permissions from the parent."
 
@@ -130,6 +128,8 @@ Puppet::Type.newtype(:acl) do
       self[:group] = Puppet::Type::Acl::Constants::GROUP_UNSPECIFIED
     end
   end
+
+  ensurable
 
   newparam(:name) do
     desc "The name of the acl resource. Used for uniqueness. Will set
