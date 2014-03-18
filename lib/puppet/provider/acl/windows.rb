@@ -148,7 +148,8 @@ Puppet::Type.type(:acl).provide :windows do
     # message in the report as Puppet figures things out. It will apply the sync based on what the actual
     # permissions are after setting owner, group, and protect.
     if @property_flush[:permissions]
-      dacl = convert_to_dacl(sync_aces(sd.dacl,@property_flush[:permissions],@resource[:purge] == :true))
+      should_purge = resource.munge_boolean(@resource[:purge]) if @resource[:purge]
+      dacl = convert_to_dacl(sync_aces(sd.dacl,@property_flush[:permissions], should_purge == :true))
       set_security_descriptor(Puppet::Util::Windows::SecurityDescriptor.new(sd.owner,sd.group,dacl,sd.protect))
     end
 
