@@ -232,7 +232,18 @@ Puppet::Type.newtype(:acl) do
 
       super(currentvalue)
     end
-    alias :should_to_s :is_to_s
+
+    def should_to_s(shouldvalue)
+      if provider.respond_to?(:permissions_should_to_s)
+        return provider.permissions_should_to_s(shouldvalue)
+      end
+
+      if provider.respond_to?(:permissions_to_s)
+        return provider.permissions_to_s(shouldvalue)
+      end
+
+      super(shouldvalue)
+    end
   end
 
   newproperty(:owner) do

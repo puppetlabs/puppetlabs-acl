@@ -70,6 +70,16 @@ Puppet::Type.type(:acl).provide :windows do
     are_permissions_insync?(current, should, @resource[:purge] == :true)
   end
 
+  def permissions_should_to_s(should)
+    return '' if should.nil? or !should.kind_of?(Array)
+
+    sd = get_security_descriptor
+    should_purge = resource.munge_boolean(@resource[:purge]) if @resource[:purge]
+    should_aces = sync_aces(sd.dacl,should, should_purge == :true)
+
+    permissions_to_s(should_aces)
+  end
+
   def permissions_to_s(permissions)
     return '' if permissions.nil? or !permissions.kind_of?(Array)
 
@@ -81,7 +91,6 @@ Puppet::Type.type(:acl).provide :windows do
       end
     end
 
-    #TODO [BUG][DISPLAY ONLY] This can cause issues when the current displays the unmanaged items (that are not purged) while the should displays something that is being appended to the current set
     perms
   end
 
