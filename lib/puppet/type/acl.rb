@@ -236,9 +236,7 @@ Puppet::Type.newtype(:acl) do
     def should_to_s(shouldvalue)
       if provider.respond_to?(:permissions_should_to_s)
         return provider.permissions_should_to_s(shouldvalue)
-      end
-
-      if provider.respond_to?(:permissions_to_s)
+      elsif provider.respond_to?(:permissions_to_s)
         return provider.permissions_to_s(shouldvalue)
       end
 
