@@ -347,6 +347,9 @@ class Puppet::Provider::Acl
           true
         end
 
+        def remove_file_permissions
+        end
+
         def get_security_descriptor(refresh_sd = DO_NOT_REFRESH_SD)
           refresh_sd ||= false
           if @security_descriptor.nil? || refresh_sd
