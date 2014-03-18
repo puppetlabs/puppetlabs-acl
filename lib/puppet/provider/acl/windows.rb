@@ -25,21 +25,30 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def exists?
-      case @resource[:target_type]
-        when :file
-          # todo find the acl and determine if it exists with the identified aces
-          return :true
-        else
-          raise Puppet::ResourceError, "At present only :target_type => :file is supported on Windows."
-      end
+    case @resource[:target_type]
+      when :file
+        return ::File.exist?(@resource[:target])
+      else
+        raise Puppet::ResourceError, "At present only :target_type => :file is supported on Windows."
+    end
   end
 
   def create
-    #todo anything to go here? The DACL and security descriptor will always exist
+    case @resource[:target_type]
+      when :file
+        raise Puppet::Error.new("ACL cannot create target resources. Target resource will already have a security descriptor on it when created. Ensure target '#{@resource[:target]}' exists.") unless ::File.exist?(@resource[:target])
+      else
+        raise Puppet::ResourceError, "At present only :target_type => :file is supported on Windows."
+    end
   end
 
   def destroy
-    #todo what are we removing? The aces listed in the dacl that would no longer be managed
+    case @resource[:target_type]
+      when :file
+        raise Puppet::Error.new("ACL cannot remove target resources, only permissions from those target resources. Ensure you pass non-inherited permissions to remove.") unless @resource[:permissions]
+      else
+        raise Puppet::ResourceError, "At present only :target_type => :file is supported on Windows."
+    end
   end
 
   def permissions
