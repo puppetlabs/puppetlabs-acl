@@ -139,7 +139,6 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def flush
-    #require 'pry';binding.pry
     sd = get_security_descriptor
 
     sd.owner = get_account_id(@property_flush[:owner]) if @property_flush[:owner]
