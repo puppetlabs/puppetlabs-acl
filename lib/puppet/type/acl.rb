@@ -200,7 +200,7 @@ Puppet::Type.newtype(:acl) do
       will need to be removed if using that to build a manifest."
 
     validate do |value|
-      if value.nil? or value.empty?
+      if value.nil? || value.empty?
         raise ArgumentError, "A non-empty permissions must be specified."
       end
       if value['inherited']
