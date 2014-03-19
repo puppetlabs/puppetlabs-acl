@@ -36,6 +36,19 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     end
   end
 
+  def set_perms_absent(permissions, include_inherited = false)
+    resource[:permissions] = permissions
+    #provider.permissions = permissions
+    resource.provider.destroy
+    resource.provider.flush
+
+    if include_inherited
+      provider.permissions
+    else
+      provider.permissions.select { |p| !p.is_inherited? }
+    end
+  end
+
   def get_permissions_for_path(path)
     sd = Puppet::Util::Windows::Security.get_security_descriptor(path)
 
@@ -461,6 +474,38 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       end
     end
   end
+
+  context "ensure => absent" do
+    let (:permissions) { [
+        Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}),
+        Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['modify']}),
+        Puppet::Type::Acl::Ace.new({'identity' => 'Authenticated Users','rights' => ['write','read','execute']})
+    ] }
+
+    before :each do
+      resource[:target] = set_path('perms_absent')
+      permissions.each do |perm|
+        perm.id = provider.get_account_id(perm.identity)
+      end
+
+      set_perms(permissions).must == permissions
+
+      resource[:ensure] = :absent
+    end
+
+    it "should remove specified permissions" do
+      removing_perms_hash = [
+          {'identity' => 'Everyone','rights' => ['full']}
+      ]
+
+      removing_perms = [
+          Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider)
+      ]
+
+      set_perms_absent(removing_perms_hash).must == (permissions - removing_perms)
+    end
+  end
+
 
   context ".set_security_descriptor" do
     it "should handle nil security descriptor appropriately" do

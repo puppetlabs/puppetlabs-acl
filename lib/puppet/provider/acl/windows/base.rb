@@ -283,26 +283,42 @@ class Puppet::Provider::Acl
         end
         module_function :get_account_flags
 
-        def sync_aces(current_dacl, should_aces, should_purge = false)
-          return should_aces if should_purge
+        def sync_aces(current_dacl, should_aces, should_purge = false, remove_permissions = false)
+          unless remove_permissions
+          #if @resource[:ensure] != :absent
+            return should_aces if should_purge
 
-          current_dacl.each do |ace|
-            # todo v2 should we warn if we have an existing inherited ace that matches?
-            next if ace.inherited?
+            current_dacl.each do |ace|
+              # todo v2 should we warn if we have an existing inherited ace that matches?
+              next if ace.inherited?
 
-            current_ace = Puppet::Type::Acl::Ace.new(convert_to_permissions_hash(ace), self)
-            existing_aces = should_aces.select { |a| a.same?(current_ace) }
-            next unless existing_aces.empty?
+              current_ace = Puppet::Type::Acl::Ace.new(convert_to_permissions_hash(ace), self)
+              existing_aces = should_aces.select { |a| a.same?(current_ace) }
+              next unless existing_aces.empty?
 
-            # munge in existing unmanaged aces
-            case current_ace.type
-              when :deny
-                last_allow_index = should_aces.index{ |a| a.type == :allow}
-                should_aces.insert(last_allow_index,current_ace) if last_allow_index
-                should_aces << current_ace unless last_allow_index
-              when :allow
-                should_aces << current_ace
+              # munge in existing unmanaged aces
+              case current_ace.type
+                when :deny
+                  last_allow_index = should_aces.index{ |a| a.type == :allow}
+                  should_aces.insert(last_allow_index,current_ace) if last_allow_index
+                  should_aces << current_ace unless last_allow_index
+                when :allow
+                  should_aces << current_ace
+              end
             end
+          else
+            kept_aces = []
+            current_dacl.each do |ace|
+              next if ace.inherited?
+
+              current_ace = Puppet::Type::Acl::Ace.new(convert_to_permissions_hash(ace), self)
+              existing_aces = should_aces.select { |a| a.same?(current_ace) }
+              next unless existing_aces.empty?
+
+              kept_aces << current_ace
+            end
+
+            should_aces = kept_aces
           end
 
           should_aces
@@ -345,9 +361,6 @@ class Puppet::Provider::Acl
 
           # default true
           true
-        end
-
-        def remove_file_permissions
         end
 
         def get_security_descriptor(refresh_sd = DO_NOT_REFRESH_SD)

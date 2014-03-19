@@ -22,7 +22,8 @@ file { ['c:/tempperms',
    'c:/tempperms/same_user',
    'c:/tempperms/rights_ordering',
    'c:/tempperms/identities',
-   'c:/tempperms/mask_specific']:
+   'c:/tempperms/mask_specific',
+   'c:/tempperms/absent']:
   ensure => directory,
 }
 
@@ -327,3 +328,34 @@ acl { 'c:/tempperms/mask_specific':
 #              NT AUTHORITY\SYSTEM:(OI)(CI)(M)
 #              BUILTIN\Users:(OI)(CI)(RX,WA)
 #              WIN-QR952GIDHVE\Administrator:(OI)(CI)(Rc,S,RA,WA)
+
+
+acl { 'c:/tempperms/absent':
+  ensure      => present,
+  purge       => 'true',
+  permissions => [
+   { identity => 'Administrators', rights => ['full'] },
+   { identity => 'Administrator', rights => ['write'] },
+   { identity => 'Users', rights => ['write','execute'] },
+   { identity => 'Everyone', rights => ['execute'] },
+   { identity => 'Authenticated Users', rights => ['full'] }
+  ],
+  inherit_parent_permissions => 'false',
+}
+
+acl { 'remove_tempperms/absent':
+  ensure      => absent,
+  target      => 'c:/tempperms/absent',
+  purge       => 'true',
+  permissions => [
+   { identity => 'Administrator', rights => ['write'] },
+   { identity => 'Authenticated Users', rights => ['full'] }
+  ],
+  inherit_parent_permissions => 'false',
+  require     => Acl['c:/tempperms/absent'],
+}
+
+#C:\tempperms>icacls absent
+#absent BUILTIN\Administrators:(OI)(CI)(F)
+#       BUILTIN\Users:(OI)(CI)(W,Rc,X,RA)
+#       Everyone:(OI)(CI)(Rc,S,X,RA)

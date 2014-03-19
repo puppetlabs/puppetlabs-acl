@@ -219,6 +219,38 @@ ACE propagation "affects" sample usage:
       inherit_parent_permissions => 'false',
     }
 
+Removing permissions is done by using `ensure => absent`. This will remove permissions from the ACL. Note that you are not able to destroy the security descriptor or Access List with `absent`, only remove explicit permissions. When the example below is done, it will ensure that `Administrator` and `Authenticated Users` are not on the ACL. This comparison is done based on `identity`, `type`, `child_types` and `affects`.
+
+Removing permissions sample usage:
+
+    #set permissions
+    acl { 'c:/tempperms/absent':
+      ensure      => present,
+      purge       => 'true',
+      permissions => [
+       { identity => 'Administrators', rights => ['full'] },
+       { identity => 'Administrator', rights => ['write'] },
+       { identity => 'Users', rights => ['write','execute'] },
+       { identity => 'Everyone', rights => ['execute'] },
+       { identity => 'Authenticated Users', rights => ['full'] }
+      ],
+      inherit_parent_permissions => 'false',
+    }
+
+    #now remove some permissions
+    acl { 'remove_tempperms/absent':
+      ensure      => absent,
+      target      => 'c:/tempperms/absent',
+      purge       => 'true',
+      permissions => [
+       { identity => 'Administrator', rights => ['write'] },
+       { identity => 'Authenticated Users', rights => ['full'] }
+      ],
+      inherit_parent_permissions => 'false',
+      require     => Acl['c:/tempperms/absent'],
+    }
+
+**Note:** possibly in a second release we could add the ability to target by identity only to ensure is absent.
 
 An interesting note with Windows, you can specify the same identity with different inheritance and propagation and each of those items will actually be managed as separate ACEs.
 
@@ -249,6 +281,8 @@ Same user multiple ACEs sample usage:
 
  * The Windows Provider in the first release (at least) will not handle permissions with Symlinks. Please explicitly manage the permissions of the target.
  * When using SIDs for identities, autorequire will attempt to match to users with fully qualified names (`User[BUILTIN\Administrators]`) in addition to SIDs (`User[S-1-5-32-544]`). The limitation is that it won't match against `User[Administrators]` as that could cause issues if attempting to match domain accounts versus local accounts with the same name e.g. `Domain\Bob` vs `LOCAL\Bob`.
+ * Deny ACEs do not inherit due to bug in framework (outside of acl module).
+ * `ensure => absent` does not properly report what the ACEs where changed to.
 
 ##License
 
