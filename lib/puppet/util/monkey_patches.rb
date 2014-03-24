@@ -14,6 +14,9 @@ if Puppet::Util::Platform.windows?
   if Gem.loaded_specs["win32-security"].version < Gem::Version.new('0.2.0')
     # monkey patch that bad boy
     Win32::Security::SID.class_eval do
+      # Error class typically raised if any of the SID methods fail
+      class Error < StandardError; end
+
       def initialize(account=nil, host=Socket.gethostname)
         if account.nil?
           htoken = [0].pack('L')
