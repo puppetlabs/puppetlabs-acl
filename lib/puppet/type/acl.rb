@@ -288,7 +288,7 @@ Puppet::Type.newtype(:acl) do
       2. Group e.g. 'Administrators' or 'BUILTIN\\Administrators', 3.
       SID (Security ID) e.g. 'S-1-5-18'. Defaults to not specified on
       Windows. This allows group to stay set to whatever it is currently
-      set to (group can vary depending on the original CREATOR OWNER).
+      set to (group can vary depending on the original CREATOR GROUP).
       The trustee must exist on the system and will auto-require on user
       and group resources."
 
