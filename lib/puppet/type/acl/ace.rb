@@ -6,7 +6,6 @@ class Puppet::Type::Acl
     require Pathname.new(__FILE__).dirname + '../../../' + 'puppet/type/acl/rights'
 
     attr_reader :identity
-    attr_reader :id
     attr_reader :rights
     attr_reader :type
     attr_reader :child_types
@@ -143,14 +142,18 @@ class Puppet::Type::Acl
       @identity = validate_non_empty('identity', value)
     end
 
-    def id=(value)
-      @id = value
-
-      if value.nil? || value.empty?
+    def id
+      if @id.nil? || @id.empty?
         if @identity && @provider && @provider.respond_to?(:get_account_id)
           @id = @provider.get_account_id(@identity)
         end
       end
+
+      @id
+    end
+
+    def id=(value)
+      @id = value
     end
 
     def rights=(value)
@@ -192,10 +195,10 @@ class Puppet::Type::Acl
         other_id_has_value = true unless other.id.nil? || other.id.empty?
       end
 
-      id_has_value = true unless @id.nil? || @id.empty?
+      id_has_value = true unless self.id.nil? || self.id.empty?
 
       if id_has_value && (ignore_other || other_id_has_value)
-        id = @id
+        id = self.id
         other_id = other.id unless ignore_other
       else
         if @provider && @provider.respond_to?(:get_account_name)
