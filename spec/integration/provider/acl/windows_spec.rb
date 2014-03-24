@@ -504,6 +504,37 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
       set_perms_absent(removing_perms_hash).must == (permissions - removing_perms)
     end
+
+    context "when removing non-existing users" do
+      require 'puppet/util/adsi'
+
+      it "should allow it to work with SIDs" do
+        user_name = "jimmy123456_randomyo"
+
+        user = Puppet::Util::ADSI::User.create(user_name) unless Puppet::Util::ADSI::User.exists?(user_name)
+        user = Puppet::Util::ADSI::User.new(user_name) if Puppet::Util::ADSI::User.exists?(user_name)
+        user.commit
+        sid = user.sid.to_s
+
+        permissions = [
+          Puppet::Type::Acl::Ace.new({'identity' => user_name,'rights' => ['modify']}, provider)
+        ]
+        set_perms(permissions).must == permissions
+
+        Puppet::Util::ADSI::User.delete(user_name)
+
+        removing_perms_hash = [
+            {'identity' => sid,'rights' => ['modify']}
+        ]
+        removing_perms = [
+            Puppet::Type::Acl::Ace.new({'identity' => sid,'rights' => ['modify']}, provider)
+        ]
+
+        permissions = get_permissions_for_path(resource[:target]).select { |p| !p.is_inherited? }
+        set_perms_absent(removing_perms_hash).must == (permissions - removing_perms)
+      end
+
+    end
   end
 
 
