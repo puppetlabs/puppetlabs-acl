@@ -58,7 +58,7 @@ acl { 'c:/tempperms/full':
    { identity => 'Users', rights => ['read','execute'], type=> 'allow', child_types => 'all', affects => 'all' }
   ],
   owner       => 'Administrators', #Creator_Owner specific, doesn't manage unless specified
-  group       => 'Users', #Creator_Owner specific, doesn't manage unless specified
+  group       => 'Users', #Creator_Group specific, doesn't manage unless specified
   inherit_parent_permissions => 'true',
 }
 
