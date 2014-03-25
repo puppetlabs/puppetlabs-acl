@@ -74,7 +74,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
   context ":owner" do
     it "should be set to the default unspecified value by default" do
-      resource[:owner].must == Puppet::Type::Acl::Constants::OWNER_UNSPECIFIED
+      resource[:owner].must be_nil
     end
 
     context ".insync?" do
@@ -98,7 +98,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
   context ":group" do
     it "should be set to the default unspecified value by default" do
-      resource[:group].must == Puppet::Type::Acl::Constants::GROUP_UNSPECIFIED
+      resource[:group].must be_nil
     end
 
     context ".insync?" do

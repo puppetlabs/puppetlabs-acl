@@ -326,7 +326,7 @@ describe Puppet::Type.type(:acl) do
 
   context "property :owner" do
     it "should default to use the default unspecified group" do
-      resource[:owner].must ==  Puppet::Type::Acl::Constants::OWNER_UNSPECIFIED
+      resource[:owner].must be_nil
     end
 
     it "should accept bob" do
@@ -362,7 +362,7 @@ describe Puppet::Type.type(:acl) do
 
   context "property :group" do
     it "should default to use the default unspecified group" do
-      resource[:group].must == Puppet::Type::Acl::Constants::GROUP_UNSPECIFIED
+      resource[:group].must be_nil
     end
 
     it "should accept bob" do

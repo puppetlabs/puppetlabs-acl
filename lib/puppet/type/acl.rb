@@ -3,7 +3,6 @@ require 'pathname'
 
 Puppet::Type.newtype(:acl) do
   require Pathname.new(__FILE__).dirname + '../../' + 'puppet/type/acl/ace'
-  require Pathname.new(__FILE__).dirname + '../../' + 'puppet/type/acl/constants'
 
   @doc = <<-'EOT'
     Manages access control lists (ACLs).  The `acl` type is
@@ -118,14 +117,6 @@ Puppet::Type.newtype(:acl) do
     # if target is unset, use the title
     if self[:target].nil? then
       self[:target] = self[:name]
-    end
-
-    if self[:owner].nil? then
-      self[:owner] = Puppet::Type::Acl::Constants::OWNER_UNSPECIFIED
-    end
-
-    if self[:group].nil? then
-      self[:group] = Puppet::Type::Acl::Constants::GROUP_UNSPECIFIED
     end
   end
 
@@ -256,13 +247,13 @@ Puppet::Type.newtype(:acl) do
       and group resources."
 
     validate do |value|
-      if value.nil? or value.empty?
+      if value.nil? || value.empty?
         raise ArgumentError, "A non-empty owner must be specified."
       end
     end
 
     def insync?(current)
-      return true if should == Puppet::Type::Acl::Constants::OWNER_UNSPECIFIED
+      return true if should.nil?
 
       if provider.respond_to?(:owner_insync?)
         return provider.owner_insync?(current, should)
@@ -293,13 +284,13 @@ Puppet::Type.newtype(:acl) do
       and group resources."
 
     validate do |value|
-      if value.nil? or value.empty?
+      if value.nil? || value.empty?
         raise ArgumentError, "A non-empty group must be specified."
       end
     end
 
     def insync?(current)
-      return true if should == Puppet::Type::Acl::Constants::GROUP_UNSPECIFIED
+      return true if should.nil?
 
       if provider.respond_to?(:group_insync?)
         return provider.group_insync?(current, should)
@@ -368,7 +359,7 @@ Puppet::Type.newtype(:acl) do
       provider.class.send(:define_method,'get_account_name', &return_same_value)
     end
 
-    unless self[:owner] == Puppet::Type::Acl::Constants::OWNER_UNSPECIFIED
+    if self[:owner]
       owner_name = provider.get_account_name(self[:owner])
 
       # add both qualified and unqualified items
@@ -376,7 +367,7 @@ Puppet::Type.newtype(:acl) do
       required_users << "User[#{owner_name}]"
     end
 
-    unless self[:group] == Puppet::Type::Acl::Constants::GROUP_UNSPECIFIED
+    if self[:group]
       group_name = provider.get_account_name(self[:group])
 
       # add both qualified and unqualified items
@@ -404,7 +395,7 @@ Puppet::Type.newtype(:acl) do
       provider.class.send(:define_method,'get_group_name', &return_same_value)
     end
 
-    unless self[:owner] == Puppet::Type::Acl::Constants::OWNER_UNSPECIFIED
+    if self[:owner]
       owner_name = provider.get_group_name(self[:owner])
 
       # add both qualified and unqualified items
@@ -412,7 +403,7 @@ Puppet::Type.newtype(:acl) do
       required_groups << "Group[#{owner_name}]"
     end
 
-    unless self[:group] == Puppet::Type::Acl::Constants::GROUP_UNSPECIFIED
+    if self[:group]
       group_name = provider.get_group_name(self[:group])
 
       # add both qualified and unqualified items
