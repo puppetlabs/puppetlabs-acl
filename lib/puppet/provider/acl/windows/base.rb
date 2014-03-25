@@ -25,7 +25,6 @@ class Puppet::Provider::Acl
         DELETE = ::Windows::File::DELETE
 
         @security_descriptor = nil
-        @@sid_regex = /S\-\d+\-\d+/
 
         def get_current_permissions
           sd = get_security_descriptor(DO_NOT_REFRESH_SD)
@@ -348,9 +347,9 @@ class Puppet::Provider::Acl
 
         def get_account_id(name)
           # sometimes the name will come in with a SID
-          #  and the user no longer exists
-          #  which will return nil if we call name_to_sid
-          if (@@sid_regex =~ name) != nil
+          # which will return nil when we call name_to_sid
+          # if the user no longer exists
+          if Puppet::Util::Windows::Security.valid_sid?(name)
             name
           else
             Puppet::Util::Windows::Security.name_to_sid(name)
