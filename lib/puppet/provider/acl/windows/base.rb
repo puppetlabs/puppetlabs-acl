@@ -123,8 +123,8 @@ class Puppet::Provider::Acl
           return :allow if ace.nil?
 
           ace_type = case ace.type
-            when 0 then :allow
-            when 1 then :deny
+            when Puppet::Util::Windows::AccessControlEntry::ACCESS_ALLOWED_ACE_TYPE then :allow
+            when Puppet::Util::Windows::AccessControlEntry::ACCESS_DENIED_ACE_TYPE then :deny
           end
 
           ace_type
