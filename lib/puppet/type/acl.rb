@@ -354,33 +354,37 @@ Puppet::Type.newtype(:acl) do
   autorequire(:user) do
     required_users = []
 
-    unless provider.respond_to?(:get_account_name)
-      return_same_value = lambda { |current_value| return current_value}
-      provider.class.send(:define_method,'get_account_name', &return_same_value)
+    if provider.respond_to?(:get_account_name)
+      has_account_name_method = true
+    else
+      has_account_name_method = false
     end
 
     if self[:owner]
-      owner_name = provider.get_account_name(self[:owner])
+      if has_account_name_method
+        required_users << "User[#{provider.get_account_name(self[:owner])}]"
+      end
 
-      # add both qualified and unqualified items
+      # add the unqualified item whether qualified is found or not
       required_users << "User[#{self[:owner]}]"
-      required_users << "User[#{owner_name}]"
     end
 
     if self[:group]
-      group_name = provider.get_account_name(self[:group])
+      if has_account_name_method
+        required_users << "User[#{provider.get_account_name(self[:group])}]"
+      end
 
-      # add both qualified and unqualified items
+      # add the unqualified item whether qualified is found or not
       required_users << "User[#{self[:group]}]"
-      required_users << "User[#{group_name}]"
     end
 
     permissions = self[:permissions]
     unless permissions.nil?
       permissions.each do |permission|
-        account_name = provider.get_account_name(permission.identity)
+        if has_account_name_method
+          required_users << "User[#{provider.get_account_name(permission.identity)}]"
+        end
         required_users << "User[#{permission.identity}]"
-        required_users << "User[#{account_name}]"
       end
     end
 
@@ -390,33 +394,37 @@ Puppet::Type.newtype(:acl) do
   autorequire(:group) do
     required_groups = []
 
-    unless provider.respond_to?(:get_group_name)
-      return_same_value = lambda { |current_value| return current_value}
-      provider.class.send(:define_method,'get_group_name', &return_same_value)
+    if provider.respond_to?(:get_group_name)
+      has_account_group_method = true
+    else
+      has_account_group_method = false
     end
 
     if self[:owner]
-      owner_name = provider.get_group_name(self[:owner])
+      if has_account_group_method
+        required_groups << "Group[#{provider.get_group_name(self[:owner])}]"
+      end
 
-      # add both qualified and unqualified items
+      # add the unqualified item whether qualified is found or not
       required_groups << "Group[#{self[:owner]}]"
-      required_groups << "Group[#{owner_name}]"
     end
 
     if self[:group]
-      group_name = provider.get_group_name(self[:group])
+      if has_account_group_method
+        required_groups << "Group[#{provider.get_group_name(self[:group])}]"
+      end
 
-      # add both qualified and unqualified items
+      # add the unqualified item whether qualified is found or not
       required_groups << "Group[#{self[:group]}]"
-      required_groups << "Group[#{group_name}]"
     end
 
     permissions = self[:permissions]
     unless permissions.nil?
       permissions.each do |permission|
-        account_name = provider.get_group_name(permission.identity)
+        if has_account_group_method
+          required_groups << "Group[#{provider.get_group_name(permission.identity)}]"
+        end
         required_groups << "Group[#{permission.identity}]"
-        required_groups << "Group[#{account_name}]"
       end
     end
 
