@@ -2,6 +2,9 @@ require 'pathname'
 
 class Puppet::Provider::Acl
   module Windows
+    # This provides the detailed implementation details for the
+    # provider and should shield the provider from legacy
+    # support implementations that would happen here.
     module Base
       if Puppet::Util::Platform.windows?
         require Pathname.new(__FILE__).dirname + '../../../../' + 'puppet/type/acl/ace'

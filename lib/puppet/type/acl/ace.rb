@@ -2,6 +2,10 @@ require 'puppet/parameter/value_collection'
 require 'pathname'
 
 class Puppet::Type::Acl
+  # Ace is an Access Control Entry for use with the Access
+  # Control List (ACL) type. ACEs contain information about
+  # the trustee, the rights, and on some systems how they are
+  # inherited and propagated to subtypes.
   class Ace
     require Pathname.new(__FILE__).dirname + '../../../' + 'puppet/type/acl/rights'
 
@@ -213,6 +217,13 @@ class Puppet::Type::Acl
       [id, other_id]
     end
 
+    # This ensures we are looking at the same ace even if the
+    # rights are different. Contextually we have two ace objects
+    # and we are trying to determine if they are the same ace or
+    # different given all of the different compare points.
+    #
+    # @param other [Ace] The ace that we are comparing to.
+    # @return [Boolean] true if all points are equal
     def same?(other)
       return false unless other.is_a?(Ace)
 
@@ -225,6 +236,12 @@ class Puppet::Type::Acl
           @type == other.type
     end
 
+    # This ensures we are looking at the same ace with the same
+    # rights. We want to know if the two aces are equal on all
+    # important data points.
+    #
+    # @param other [Ace] The ace that we are comparing to.
+    # @return [Boolean] true if all points are equal
     def ==(other)
       return false unless other.is_a?(Ace)
 
