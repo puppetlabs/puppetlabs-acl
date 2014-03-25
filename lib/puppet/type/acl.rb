@@ -327,25 +327,19 @@ Puppet::Type.newtype(:acl) do
   end
 
   autorequire(:file) do
-    # review - autorequire is a soft dependency, is it a waste of cycles to attempt to find one versus just soft require?
     required_file = []
     if self[:target] && self[:target_type] == :file
       target_path = File.expand_path(self[:target]).to_s
 
-      if file_resource = catalog.resource(:file, target_path)
-        required_file << file_resource.to_s
+      # There is a bug with the casing on the volume (c:/ versus C:/)
+      #  causing resources to not be found by the catalog checking
+      #  against lowercase and uppercase corrects that.
+      target_path[0] = target_path[0].downcase
+      unless file_resource = catalog.resource(:file, target_path)
+        target_path[0] = target_path[0].upcase
+        file_resource = catalog.resource(:file, target_path)
       end
-
-      if required_file.empty?
-        # There is a bug with the casing on the volume (c:/ versus C:/) causing resources to not be found by the catalog
-        #  checking against lowercase and uppercase corrects that.
-        target_path[0] = target_path[0].downcase
-        unless file_resource = catalog.resource(:file, target_path)
-          target_path[0] = target_path[0].upcase
-          file_resource = catalog.resource(:file, target_path)
-        end
-        required_file << file_resource.to_s if file_resource
-      end
+      required_file << file_resource.to_s if file_resource
     end
 
     required_file
