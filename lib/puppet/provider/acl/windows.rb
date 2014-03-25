@@ -24,31 +24,33 @@ Puppet::Type.type(:acl).provide :windows do
     []
   end
 
-
-  #todo def self.prefetch
-  #  # not entirely sure yet if this will be needed
-  #end
-
   def exists?
-    #begin
-      case @resource[:target_type]
-        when :file
-          # todo find the acl and determine if it exists with the identified aces
-          return :true
-        else
-          raise Puppet::ResourceError, "At present only :target_type => :file is supported on Windows."
-      end
-    #rescue
-    #  raise Puppet
-    #end
+    case @resource[:target_type]
+      when :file
+        return ::File.exist?(@resource[:target])
+      else
+        raise Puppet::ResourceError, "At present only :target_type => :file is supported on Windows."
+    end
   end
 
   def create
-    #todo anything to go here? The DACL and security descriptor will always exist
+    case @resource[:target_type]
+      when :file
+        raise Puppet::Error.new("ACL cannot create target resources. Target resource will already have a security descriptor on it when created. Ensure target '#{@resource[:target]}' exists.") unless ::File.exist?(@resource[:target])
+      else
+        raise Puppet::ResourceError, "At present only :target_type => :file is supported on Windows."
+    end
   end
 
   def destroy
-    #todo what are we removing? The aces listed in the dacl that would no longer be managed
+    case @resource[:target_type]
+      when :file
+        raise Puppet::Error.new("ACL cannot remove target resources, only permissions from those target resources. Ensure you pass non-inherited permissions to remove.") unless @resource[:permissions]
+        self.permissions = @resource[:permissions]
+        @property_flush[:removing_permissions] = :true
+      else
+        raise Puppet::ResourceError, "At present only :target_type => :file is supported on Windows."
+    end
   end
 
   def permissions
@@ -56,17 +58,30 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def permissions=(value)
-    non_existing_users = []
-    value.each do |permission|
-      non_existing_users << permission.identity unless get_account_sid(permission.identity)
+    unless @resource[:ensure] == :absent
+      non_existing_users = []
+      value.each do |permission|
+        non_existing_users << permission.identity unless get_account_id(permission.identity)
+      end
+      raise Puppet::Error.new("Failed to set permissions for '#{non_existing_users.join(', ')}': User or users do not exist.") unless non_existing_users.empty?
     end
-    raise Puppet::Error.new("Failed to set permissions for '#{non_existing_users.join(', ')}': User or users do not exist.") unless non_existing_users.empty?
 
     @property_flush[:permissions] = value
   end
 
   def permissions_insync?(current, should)
     are_permissions_insync?(current, should, @resource[:purge] == :true)
+  end
+
+  def permissions_should_to_s(should)
+    return '' if should.nil? or !should.kind_of?(Array)
+
+    sd = get_security_descriptor
+    should_purge = resource.munge_boolean(@resource[:purge]) if @resource[:purge]
+    remove_perms = resource.munge_boolean(@property_flush[:removing_permissions]) if @property_flush.has_key?(:removing_permissions)
+    should_aces = sync_aces(sd.dacl,should, should_purge == :true, remove_perms == :true)
+
+    permissions_to_s(should_aces)
   end
 
   def permissions_to_s(permissions)
@@ -76,7 +91,7 @@ Puppet::Type.type(:acl).provide :windows do
 
     unless perms.nil?
       perms.each do |perm|
-        perm.identity = get_account_name(perm.identity) || perm.identity
+        perm.identity = get_account_name(perm.identity)
       end
     end
 
@@ -88,7 +103,7 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def owner=(value)
-    raise Puppet::Error.new("Failed to set owner to '#{value}': User does not exist.") unless get_account_sid(value)
+    raise Puppet::Error.new("Failed to set owner to '#{value}': User does not exist.") unless get_account_id(value)
 
     @property_flush[:owner] = value
   end
@@ -98,7 +113,7 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def owner_to_s(current_value)
-    get_account_name(current_value) || current_value
+    get_account_name(current_value)
   end
 
   def group
@@ -106,7 +121,7 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def group=(value)
-    raise Puppet::Error.new("Failed to set group to '#{value}': Group does not exist.") unless get_account_sid(value)
+    raise Puppet::Error.new("Failed to set group to '#{value}': Group does not exist.") unless get_account_id(value)
 
     @property_flush[:group] = value
   end
@@ -116,7 +131,7 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def group_to_s(current_value)
-    get_account_name(current_value) || current_value
+    get_account_name(current_value)
   end
 
   def inherit_parent_permissions
@@ -130,11 +145,27 @@ Puppet::Type.type(:acl).provide :windows do
   def flush
     sd = get_security_descriptor
 
-    sd.owner = get_account_sid(@property_flush[:owner]) if @property_flush[:owner]
-    sd.group = get_account_sid(@property_flush[:group]) if @property_flush[:group]
-    sd.protect = resource.munge_boolean(@property_flush[:inherit_parent_permissions]) == :false if @property_flush[:inherit_parent_permissions]
+    sd.owner = get_account_id(@property_flush[:owner]) if @property_flush[:owner]
+    sd.group = get_account_id(@property_flush[:group]) if @property_flush[:group]
+    sd.protect = resource.munge_boolean(@property_flush[:inherit_parent_permissions]) == :false if @property_flush.has_key?(:inherit_parent_permissions)
 
-    set_security_descriptor(sd) unless @property_flush.empty?
+    if @property_flush.has_key?(:inherit_parent_permissions) || @property_flush[:owner] || @property_flush[:group]
+      # If owner/group/protect change, we should save the SD and reevaluate for sync of permissions
+      set_security_descriptor(sd)
+      sd = get_security_descriptor
+    end
+
+    # There is a possibility someone will get a message of permissions changing the first time they make
+    # changes to owner/group/protect even if the outcome of making those changes would have resulted in
+    # the DACL being in sync. Since there is a change on the resource, I think we are fine with the extra
+    # message in the report as Puppet figures things out. It will apply the sync based on what the actual
+    # permissions are after setting owner, group, and protect.
+    if @property_flush[:permissions]
+      should_purge = resource.munge_boolean(@resource[:purge]) if @resource[:purge]
+      remove_perms = resource.munge_boolean(@property_flush[:removing_permissions]) if @property_flush.has_key?(:removing_permissions)
+      dacl = convert_to_dacl(sync_aces(sd.dacl,@property_flush[:permissions], should_purge == :true, remove_perms == :true))
+      set_security_descriptor(Puppet::Util::Windows::SecurityDescriptor.new(sd.owner,sd.group,dacl,sd.protect))
+    end
 
     @property_flush.clear
   end

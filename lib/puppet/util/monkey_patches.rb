@@ -5,7 +5,6 @@ end
 if Puppet::Util::Platform.windows?
 
   require 'win32/security'
-
   # http://stackoverflow.com/a/2954632/18475
   # only monkey patch older versions that have the flaw with certain accounts
   # and stripping what appears to be whitespace
@@ -15,6 +14,9 @@ if Puppet::Util::Platform.windows?
   if Gem.loaded_specs["win32-security"].version < Gem::Version.new('0.2.0')
     # monkey patch that bad boy
     Win32::Security::SID.class_eval do
+      # Error class typically raised if any of the SID methods fail
+      class Error < StandardError; end
+
       def initialize(account=nil, host=Socket.gethostname)
         if account.nil?
           htoken = [0].pack('L')
@@ -49,7 +51,7 @@ if Puppet::Util::Platform.windows?
         end
 
         bool   = false
-        sid    = 0.chr * 28
+        sid    = 0.chr * 80
         sid_cb = [sid.size].pack('L')
 
         domain_buf = 0.chr * 80
