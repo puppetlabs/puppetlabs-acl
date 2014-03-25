@@ -63,7 +63,7 @@ class Puppet::Provider::Acl
           mask_specific_remainder = ace.mask
 
           # full
-          if ace.mask & GENERIC_ALL == GENERIC_ALL ||
+          if (ace.mask & GENERIC_ALL) == GENERIC_ALL ||
              (ace.mask & FILE_ALL_ACCESS) == FILE_ALL_ACCESS
             rights << :full
             mask_specific_remainder = 0
@@ -99,8 +99,10 @@ class Puppet::Provider::Acl
           end
 
           # modify
+          # if the rights appending changes above, we'll
+          # need to ensure this check is still good
           if rights == [:write,:read,:execute] &&
-            ace.mask & DELETE == DELETE
+            (ace.mask & DELETE) == DELETE
             rights = [:modify]
             mask_specific_remainder &= ~DELETE
           end
