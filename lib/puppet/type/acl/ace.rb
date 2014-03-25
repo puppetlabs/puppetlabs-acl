@@ -247,6 +247,7 @@ class Puppet::Type::Acl
       formatted_ace << '{ '
       formatted_ace << "identity => '#{identity}'"
       formatted_ace << ", rights => #{convert_from_symbols(rights)}"
+      formatted_ace << ", mask => '#{mask}'" if rights == [:mask_specific]
       formatted_ace << ", type => '#{type}'" unless type == :allow
       formatted_ace << ", child_types => '#{child_types}'" unless (child_types == :all || child_types == :none)
       formatted_ace << ", affects => '#{affects}'" unless affects == :all
