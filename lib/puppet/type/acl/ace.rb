@@ -222,15 +222,14 @@ class Puppet::Type::Acl
           @child_types == other.child_types &&
           @affects == other.affects &&
           @is_inherited == other.is_inherited &&
-          @type == other.type # the types may not need to match
+          @type == other.type
     end
 
     def ==(other)
       return false unless other.is_a?(Ace)
 
       return same?(other) &&
-             @rights == other.rights  &&
-             @type == other.type
+             @rights == other.rights
     end
     alias_method :eql?, :==
 
