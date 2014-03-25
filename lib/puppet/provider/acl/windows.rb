@@ -92,7 +92,7 @@ Puppet::Type.type(:acl).provide :windows do
 
     unless perms.nil?
       perms.each do |perm|
-        perm.identity = get_account_name(perm.identity) || perm.identity
+        perm.identity = get_account_name(perm.identity)
       end
     end
 
@@ -114,7 +114,7 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def owner_to_s(current_value)
-    get_account_name(current_value) || current_value
+    get_account_name(current_value)
   end
 
   def group
@@ -132,7 +132,7 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def group_to_s(current_value)
-    get_account_name(current_value) || current_value
+    get_account_name(current_value)
   end
 
   def inherit_parent_permissions
