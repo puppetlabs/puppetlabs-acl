@@ -25,6 +25,41 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     path
   end
 
+  def set_perms(permissions, include_inherited = false)
+    provider.permissions = permissions
+    resource.provider.flush
+
+    if include_inherited
+      provider.permissions
+    else
+      provider.permissions.select { |p| !p.is_inherited? }
+    end
+  end
+
+  def set_perms_absent(permissions, include_inherited = false)
+    resource[:permissions] = permissions
+    #provider.permissions = permissions
+    resource.provider.destroy
+    resource.provider.flush
+
+    if include_inherited
+      provider.permissions
+    else
+      provider.permissions.select { |p| !p.is_inherited? }
+    end
+  end
+
+  def get_permissions_for_path(path)
+    sd = Puppet::Util::Windows::Security.get_security_descriptor(path)
+
+    permissions = []
+    sd.dacl.each do |ace|
+      permissions << Puppet::Type::Acl::Ace.new(provider.convert_to_permissions_hash(ace), self)
+    end
+
+    permissions
+  end
+
   before :each do
     resource.provider = provider
   end
@@ -39,8 +74,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
   context ":owner" do
     before :each do
-      path = set_path('owner_stuff')
-      resource[:target] = path
+      resource[:target] = set_path('owner_stuff')
     end
 
     it "should not be nil" do
@@ -53,8 +87,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
     context ".flush" do
       before :each do
-        path = set_path('set_owner')
-        resource[:target] = path
+        resource[:target] = set_path('set_owner')
       end
 
        it "should update owner to Administrator properly" do
@@ -63,7 +96,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
          resource.provider.flush
 
-         provider.owner.must == provider.get_account_sid('Administrator')
+         provider.owner.must == provider.get_account_id('Administrator')
        end
 
        it "should not update owner to a user that does not exist" do
@@ -76,8 +109,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
   context ":group" do
     before :each do
-      path = set_path('group_stuff')
-      resource[:target] = path
+      resource[:target] = set_path('group_stuff')
     end
 
     it "should not be nil" do
@@ -85,29 +117,28 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     end
 
     it "should grab current group" do
-      # there really isn't a default group, it depends on the primary group of the original CREATOR OWNER of a resource.
+      # there really isn't a default group, it depends on the primary group of the original CREATOR GROUP of a resource.
       # http://msdn.microsoft.com/en-us/library/windows/desktop/ms676927(v=vs.85).aspx
-      provider.group.must_not == Puppet::Type::Acl::Constants::GROUP_UNSPECIFIED
+      provider.group.must_not be_nil
     end
 
     context ".flush" do
       before :each do
-        path = set_path('set_group')
-        resource[:target] = path
+        resource[:target] = set_path('set_group')
       end
 
        it "should update group to Administrator properly" do
-         provider.group.must_not == Puppet::Type::Acl::Constants::GROUP_UNSPECIFIED
-         if provider.group == provider.get_account_sid('Administrator')
+         provider.group.must_not be_nil
+         if provider.group == provider.get_account_id('Administrator')
            provider.group = 'Users'
            resource.provider.flush
          end
-         provider.group.must_not == provider.get_account_sid('Administrator')
+         provider.group.must_not == provider.get_account_id('Administrator')
          provider.group = 'Administrator'
 
          resource.provider.flush
 
-         provider.group.must == provider.get_account_sid('Administrator')
+         provider.group.must == provider.get_account_id('Administrator')
        end
 
        it "should not update group to a group that does not exist" do
@@ -120,8 +151,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
   context ":inherit_parent_permissions" do
     before :each do
-      path = set_path('inheritance_stuff')
-      resource[:target] = path
+      resource[:target] = set_path('inheritance_stuff')
     end
 
     it "should not be nil" do
@@ -134,14 +164,13 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
     context ".flush" do
       before :each do
-        path = set_path('set_inheritance')
-        resource[:target] = path
+        resource[:target] = set_path('set_inheritance')
       end
 
       it "should do nothing if inheritance is set to true (default)" do
         provider.inherit_parent_permissions.must be_true
 
-        # puppet won't make this call if values are in sync
+        # puppet will not make this call if values are in sync
         #provider.inherit_parent_permissions = :true
 
         resource.provider.expects(:set_security_descriptor).never
@@ -162,8 +191,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
   context ":permissions" do
     before :each do
-      path = set_path('permissions_stuff')
-      resource[:target] = path
+      resource[:target] = set_path('permissions_stuff')
     end
 
     it "should not be nil" do
@@ -177,7 +205,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     it "should contain aces that are access allowed" do
        at_least_one = false
        provider.permissions.each do |ace|
-         if ace.type == 'allow'
+         if ace.type == :allow
            at_least_one = true
            break
          end
@@ -190,7 +218,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       at_least_one = false
       provider.permissions.each do |ace|
         case ace.child_types
-          when 'all','objects','containers'
+          when :all, :objects, :containers
             at_least_one = true
             break
         end
@@ -215,7 +243,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       at_least_one = false
       provider.permissions.each do |ace|
         case ace.affects
-          when 'all','children_only','self_and_direct_children_only','direct_children_only'
+          when :all, :children_only, :self_and_direct_children_only, :direct_children_only
             at_least_one = true
             break
         end
@@ -224,12 +252,10 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       at_least_one.must be_true
     end
 
-    context ".flush" do
+    context "when setting permissions" do
       before :each do
-        path = set_path('set_perms')
-        resource[:target] = path
+        resource[:target] = set_path('set_perms')
       end
-
 
       it "should not allow permissions to be set to a user that does not exist" do
         permissions = [Puppet::Type::Acl::Ace.new({'identity' => 'someuser1231235123112312312','rights' => ['full']})]
@@ -238,8 +264,279 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
           provider.permissions = permissions
         }.to raise_error(Exception, /User or users do not exist/)
       end
+
+      it "should handle minimally specified permissions" do
+        permissions = [Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider)]
+        set_perms(permissions).must == permissions
+      end
+
+      it "should handle fully specified permissions" do
+        permissions = [Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full'], 'type'=>'allow','child_types'=>'all','affects'=>'all'}, provider)]
+        set_perms(permissions).must == permissions
+      end
+
+      it "should handle multiple users" do
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['modify']}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Authenticated Users','rights' => ['write','read','execute']}, provider)
+        ]
+        set_perms(permissions).must == permissions
+      end
+
+      it "should handle setting folder protected" do
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider)
+        ]
+        provider.inherit_parent_permissions = :false
+
+        set_perms(permissions).must == permissions
+
+        perms_not_empty = false
+        all_perms = get_permissions_for_path(resource[:target])
+        all_perms.each do |perm|
+          perms_not_empty = true
+          perm.is_inherited?.must == false
+        end
+
+        perms_not_empty.must == true
+      end
+
+      it "should handle setting folder purge => true" do
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['full']}, provider)
+        ]
+        resource[:purge] = :true
+
+        set_perms(permissions).must == permissions
+
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider)
+        ]
+
+        set_perms(permissions).must == permissions
+      end
+
+      it "should handle setting folder protected and purge => true" do
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['full']}, provider)
+        ]
+        resource[:purge] = :true
+        provider.inherit_parent_permissions = :false
+
+        set_perms(permissions).must == permissions
+        # all permissions including inherited should also be the same
+        get_permissions_for_path(resource[:target]).must == permissions
+      end
+
+      it "should handle setting ace inheritance" do
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full'], 'child_types' => 'containers'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['full'], 'child_types' => 'objects'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['full'], 'child_types' => 'none'}, provider)
+        ]
+        resource[:purge] = :true
+        provider.inherit_parent_permissions = :false
+
+        set_perms(permissions).must == permissions
+      end
+
+      it "should handle extraneous rights" do
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full','modify']}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['modify','read']}, provider)
+        ]
+        resource[:purge] = :true
+        provider.inherit_parent_permissions = :false
+
+        actual_perms = set_perms(permissions)
+
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full']}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['modify']}, provider)
+        ]
+
+        actual_perms.must == permissions
+      end
+
+      #todo deny - this will be as the bug is fixed.
+      it "should handle deny when affects => 'self_only'" do
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['full'], 'type' => 'deny', 'affects'=>'self_only'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full']}, provider)
+        ]
+        resource[:purge] = :true
+        provider.inherit_parent_permissions = :false
+
+        set_perms(permissions).must == permissions
+      end
+
+      it "should handle the same user with differing permissions appropriately" do
+        permissions = [
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['modify'], 'child_types' => 'none' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['modify'], 'child_types' => 'containers' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['modify'], 'child_types' => 'objects' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['full'], 'affects' => 'self_only' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['read','execute'], 'affects' => 'direct_children_only' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['read','execute'], 'child_types' =>'containers', 'affects' => 'direct_children_only' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['read','execute'], 'child_types' =>'objects', 'affects' => 'direct_children_only' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['full'], 'affects' => 'children_only' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['full'], 'child_types' =>'containers', 'affects' => 'children_only' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['full'], 'child_types' =>'objects', 'affects' => 'children_only' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['read'], 'affects' => 'self_and_direct_children_only' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['read'], 'child_types' =>'containers', 'affects' => 'self_and_direct_children_only' }, provider),
+            Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['read'], 'child_types' =>'objects', 'affects' => 'self_and_direct_children_only' }, provider)
+        ]
+        resource[:purge] = :true
+        provider.inherit_parent_permissions = :false
+
+        set_perms(permissions).must == permissions
+      end
+
+      it "should handle setting propagation appropriately" do
+        # tried to split this one up into multiple assertions but rspec mocks me
+        path = set_path('set_perms_propagation')
+        resource[:target] = path
+        child_path = File.join(path, 'child_folder')
+        Dir.mkdir(child_path) unless Dir.exists?(child_path)
+        child_file = File.join(path, 'child_file.txt')
+        File.new(child_file, 'w').close
+        grandchild_file = File.join(child_path, 'grandchild_file.txt')
+        File.new(grandchild_file, 'w').close
+        grandchild_path = File.join(child_path, 'grandchild_folder')
+        Dir.mkdir(grandchild_path) unless Dir.exists?(grandchild_path)
+
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full'], 'affects' => 'all'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['write','read'], 'child_types'=>'objects', 'affects' => 'all'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['read'], 'child_types'=>'containers', 'affects' => 'all'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['modify'], 'affects' => 'self_only'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Authenticated Users','rights' => ['full'], 'affects' => 'direct_children_only'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Authenticated Users','rights' => ['modify'], 'child_types' => 'objects', 'affects' => 'direct_children_only'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Authenticated Users','rights' => ['read'], 'child_types' => 'containers', 'affects' => 'direct_children_only'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['read'], 'affects' => 'children_only'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['read','execute'],'child_types' => 'objects', 'affects' => 'children_only'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['modify'],'child_types' => 'containers', 'affects' => 'children_only'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['read'], 'affects' => 'self_and_direct_children_only'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['execute'], 'child_types' =>'objects', 'affects' => 'self_and_direct_children_only'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['write','read'], 'child_types' =>'containers', 'affects' => 'self_and_direct_children_only'}, provider)
+        ]
+        resource[:purge] = :true
+        provider.inherit_parent_permissions = :false
+
+        set_perms(permissions).must == permissions
+
+        #child object
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full'], 'affects' => 'all', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['write','read'], 'child_types'=>'objects', 'affects' => 'all', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Authenticated Users','rights' => ['full'], 'affects' => 'direct_children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Authenticated Users','rights' => ['modify'], 'child_types' => 'objects', 'affects' => 'direct_children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['read'], 'affects' => 'children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['read','execute'],'child_types' => 'objects', 'affects' => 'children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['read'], 'affects' => 'self_and_direct_children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['execute'], 'child_types' =>'objects', 'affects' => 'self_and_direct_children_only', 'is_inherited' => 'true'}, provider)
+        ]
+        get_permissions_for_path(child_file)  == permissions
+
+        #grandchild object
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full'], 'affects' => 'all', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['write','read'], 'child_types'=>'objects', 'affects' => 'all', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['read'], 'affects' => 'children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['read','execute'],'child_types' => 'objects', 'affects' => 'children_only', 'is_inherited' => 'true'}, provider)
+        ]
+        get_permissions_for_path(grandchild_file)  == permissions
+
+        #child container
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full'], 'affects' => 'all', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['read'], 'child_types'=>'containers', 'affects' => 'all', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Authenticated Users','rights' => ['full'], 'affects' => 'direct_children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Authenticated Users','rights' => ['read'], 'child_types' => 'containers', 'affects' => 'direct_children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['read'], 'affects' => 'children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['modify'],'child_types' => 'containers', 'affects' => 'children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['read'], 'affects' => 'self_and_direct_children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['write','read'], 'child_types' =>'containers', 'affects' => 'self_and_direct_children_only', 'is_inherited' => 'true'}, provider)
+        ]
+        get_permissions_for_path(child_path)  == permissions
+
+        #grandchild container
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full'], 'affects' => 'all', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['read'], 'child_types'=>'containers', 'affects' => 'all', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['read'], 'affects' => 'children_only', 'is_inherited' => 'true'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['modify'],'child_types' => 'containers', 'affects' => 'children_only', 'is_inherited' => 'true'}, provider)
+        ]
+        get_permissions_for_path(grandchild_path)  == permissions
+      end
     end
   end
+
+  context "ensure => absent" do
+    let (:permissions) { [
+        Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}),
+        Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['modify']}),
+        Puppet::Type::Acl::Ace.new({'identity' => 'Authenticated Users','rights' => ['write','read','execute']})
+    ] }
+
+    before :each do
+      resource[:target] = set_path('perms_absent')
+      permissions.each do |perm|
+        perm.id = provider.get_account_id(perm.identity)
+      end
+
+      set_perms(permissions).must == permissions
+
+      resource[:ensure] = :absent
+    end
+
+    it "should remove specified permissions" do
+      removing_perms_hash = [
+          {'identity' => 'Everyone','rights' => ['full']}
+      ]
+
+      removing_perms = [
+          Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider)
+      ]
+
+      set_perms_absent(removing_perms_hash).must == (permissions - removing_perms)
+    end
+
+    context "when removing non-existing users" do
+      require 'puppet/util/adsi'
+
+      it "should allow it to work with SIDs" do
+        user_name = "jimmy123456_randomyo"
+
+        user = Puppet::Util::ADSI::User.create(user_name) unless Puppet::Util::ADSI::User.exists?(user_name)
+        user = Puppet::Util::ADSI::User.new(user_name) if Puppet::Util::ADSI::User.exists?(user_name)
+        user.commit
+        sid = user.sid.to_s
+
+        permissions = [
+          Puppet::Type::Acl::Ace.new({'identity' => user_name,'rights' => ['modify']}, provider)
+        ]
+        set_perms(permissions).must == permissions
+
+        Puppet::Util::ADSI::User.delete(user_name)
+
+        removing_perms_hash = [
+            {'identity' => sid,'rights' => ['modify']}
+        ]
+        removing_perms = [
+            Puppet::Type::Acl::Ace.new({'identity' => sid,'rights' => ['modify']}, provider)
+        ]
+
+        permissions = get_permissions_for_path(resource[:target]).select { |p| !p.is_inherited? }
+        set_perms_absent(removing_perms_hash).must == (permissions - removing_perms)
+      end
+
+    end
+  end
+
 
   context ".set_security_descriptor" do
     it "should handle nil security descriptor appropriately" do

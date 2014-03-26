@@ -164,6 +164,84 @@ describe Puppet::Type.type(:acl) do
       end
     end
 
+    context "groups" do
+      def test_should_set_autorequired_group(group_name)
+        group = Puppet::Type.type(:group).new(:name => group_name)
+        catalog.add_resource resource
+        catalog.add_resource group
+
+        reqs = resource.autorequire
+        reqs.count.must == 1
+        reqs[0].source.must == group
+        reqs[0].target.must == resource
+      end
+
+      def test_should_not_set_autorequired_group(group_name)
+        group = Puppet::Type.type(:group).new(:name => group_name)
+        catalog.add_resource resource
+        catalog.add_resource group
+
+        reqs = resource.autorequire
+        reqs.must be_empty
+      end
+
+      it "should not autorequire owner when set to unspecified" do
+        test_should_not_set_autorequired_group('Administrators')
+      end
+
+      it "should autorequire owner when set to Administrators" do
+        resource[:owner] = 'Administrators'
+        test_should_set_autorequired_group(resource[:owner])
+      end
+
+      it "should not autorequire group when set to unspecified" do
+        test_should_not_set_autorequired_group('Administrators')
+      end
+
+      it "should autorequire group when set to Administrators" do
+        resource[:group] = 'Administrators'
+        test_should_set_autorequired_group(resource[:group])
+      end
+
+      it "should not autorequire Administrators if owner is set to the default Administrators SID" do
+        # we have no way at the type level of knowing that Administrators == S-1-5-32-544 - this would require a call to the provider
+        # unfortunately even in the provider we get the full account name 'BUILTIN\Administrators' which doesn't match Administrators
+        test_should_not_set_autorequired_group('Administrators')
+      end
+
+      it "should not autorequire BUILTIN\\Administrators if owner is set to the default Administrators SID" do
+        # we have no way at the type level of knowing that BUILTIN\Administrators == S-1-5-32-544 - this would require a call to the provider
+        # check the provider for a similar test that notes the require works
+        test_should_not_set_autorequired_group('BUILTIN\Administrators')
+      end
+
+      it "should autorequire identities in permissions" do
+        user_name = 'bob'
+        resource[:permissions] = [{'identity'=>'bill','rights'=>['modify']},{'identity'=>user_name,'rights'=>['full']}]
+        test_should_set_autorequired_group(user_name)
+      end
+
+      it "should autorequire identities in permissions once even when included more than once" do
+        user_name = 'bob'
+        resource[:permissions] = [{'identity'=>user_name,'rights'=>['modify'],'affects'=>'children_only'},{'identity'=>user_name,'rights'=>['full']}]
+        test_should_set_autorequired_group(user_name)
+      end
+
+      it "should not autorequire groups that are not part of the owner or permission identities" do
+        resource[:permissions] = [{'identity'=>'bob','rights'=>['modify']}]
+        test_should_not_set_autorequired_group('bill')
+      end
+
+      it "should not autorequire identities/owner if their is not a match to a group in the catalog" do
+        resource[:owner] = 'Administrators'
+        resource[:permissions] = [{'identity'=>'bob','rights'=>['modify']}]
+        catalog.add_resource resource
+
+        reqs = resource.autorequire
+        reqs.must be_empty
+      end
+    end
+
     # :as_platform => :windows - doesn't exist outside of puppet?
     context "when :target_type => :file", :if => Puppet.features.microsoft_windows? do
       def test_should_set_autorequired_file(resource_path,file_path)
@@ -248,7 +326,7 @@ describe Puppet::Type.type(:acl) do
 
   context "property :owner" do
     it "should default to use the default unspecified group" do
-      resource[:owner].must ==  Puppet::Type::Acl::Constants::OWNER_UNSPECIFIED
+      resource[:owner].must be_nil
     end
 
     it "should accept bob" do
@@ -284,7 +362,7 @@ describe Puppet::Type.type(:acl) do
 
   context "property :group" do
     it "should default to use the default unspecified group" do
-      resource[:group].must == Puppet::Type::Acl::Constants::GROUP_UNSPECIFIED
+      resource[:group].must be_nil
     end
 
     it "should accept bob" do
@@ -323,18 +401,24 @@ describe Puppet::Type.type(:acl) do
       resource[:inherit_parent_permissions].must == :true
     end
 
-    it "should accept true" do
-      resource[:inherit_parent_permissions] = true
-    end
+    context "when the provider has implemented :can_inherit_parent_permissions" do
+      before :each do
+        resource.provider.class.expects(:satisfies?).with(:can_inherit_parent_permissions).returns(true)
+      end
 
-    it "should accept false" do
-      resource[:inherit_parent_permissions] = false
-    end
+      it "should accept true" do
+        resource[:inherit_parent_permissions] = true
+      end
 
-    it "should reject non-boolean values" do
-      expect {
-        resource[:inherit_parent_permissions] = :whenever
-      }.to raise_error(Puppet::ResourceError, /Invalid value :whenever. Valid values are true/)
+      it "should accept false" do
+        resource[:inherit_parent_permissions] = false
+      end
+
+      it "should reject non-boolean values" do
+        expect {
+          resource[:inherit_parent_permissions] = :whenever
+        }.to raise_error(Puppet::ResourceError, /Invalid value :whenever. Valid values are true/)
+      end
     end
   end
 
@@ -369,6 +453,41 @@ describe Puppet::Type.type(:acl) do
       end
     end
 
+    it "should not allow inherited aces in manifests" do
+      expect {
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'inherited'=>'true'}
+      }.to raise_error(Puppet::ResourceError, /Puppet can not manage inherited ACEs/)
+    end
+
+    it "should not log a warning when an ace contains child_types => 'none' and affects => 'self_only'" do
+      Puppet.expects(:warning).never
+      resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'child_types'=>'none','affects'=>'self_only'}
+    end
+
+    it "should not log a warning when an ace contains child_types => 'none' and affects is set to 'all' (default)" do
+      Puppet.expects(:warning).never
+      resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'child_types'=>'none'}
+    end
+
+    it "should not log a warning when an ace contains affects => 'self_only' and child_types is set to 'all' (default)" do
+      Puppet.expects(:warning).never
+      resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'affects'=>'self_only'}
+    end
+
+    it "should log a warning when an ace contains child_types => 'none' and affects is not 'all' (default) or 'self_only'" do
+      Puppet.expects(:warning).with() do |v|
+        /If child_types => 'none', affects => value/.match(v)
+      end
+      resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'child_types'=>'none','affects'=>'children_only'}
+    end
+
+    it "should log a warning when an ace contains affects => 'self_only' and child_types is not 'all' (default) or 'none'" do
+      Puppet.expects(:warning).with() do |v|
+        /If affects => 'self_only', child_types => value/.match(v)
+      end
+      resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'child_types'=>'containers','affects'=>'self_only'}
+    end
+
     context ":identity" do
       it "should accept bob" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full']}
@@ -383,7 +502,7 @@ describe Puppet::Type.type(:acl) do
       end
 
       it "should use the SID when the system returns a non-existing user" do
-        resource[:permissions] = {'identity'=>'', 'sid' =>'S-1-5-32-544','rights'=>['full']}
+        resource[:permissions] = {'identity'=>'', 'id' =>'S-1-5-32-544','rights'=>['full']}
       end
 
       it "should reject empty" do
@@ -424,8 +543,69 @@ describe Puppet::Type.type(:acl) do
         resource[:permissions] = {'identity'=>'bob','rights'=>['execute']}
       end
 
+      it "should accept ['mask_specific']" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>['mask_specific'],'mask'=>'123123'}
+      end
+
       it "should accept a combination of valid values" do
         resource[:permissions] = {'identity'=>'bob','rights'=>['read','execute']}
+      end
+
+      it "should reorder [:execute,:read] to [:read,:execute]" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>[:execute,:read]}
+        resource[:permissions][0].rights.should == [:read,:execute]
+      end
+
+      it "should set ['read','read'] to [:read]" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>['read','read']}
+        resource[:permissions][0].rights.should == [:read]
+      end
+
+      it "should not allow improperly cased rights like ['READ']" do
+        expect {
+          resource[:permissions] = {'identity' =>'bob','rights'=>['READ']}
+        }.to raise_error(Puppet::ResourceError, /Invalid value "READ". Valid values are/)
+      end
+
+      it "should log a warning when rights does not contain 'full' by itself" do
+        Puppet.expects(:warning).with() do |v|
+          /In each ace, when specifying rights, if you include 'full'/.match(v)
+        end
+        resource[:permissions] = {'identity'=>'bob','rights'=>['full','read']}
+      end
+
+      it "should remove all but 'full' when rights does not contain 'full' by itself" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>['full','read']}
+        resource[:permissions][0].rights.should == [:full]
+      end
+
+      it "should log a warning when rights does not contain 'modify' by itself" do
+        Puppet.expects(:warning).with() do |v|
+          /In each ace, when specifying rights, if you include 'modify'/.match(v)
+        end
+        resource[:permissions] = {'identity'=>'bob','rights'=>['modify','read']}
+      end
+
+      it "should remove all but 'modify' when rights does not contain 'modify' by itself" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>['modify','read']}
+        resource[:permissions][0].rights.should == [:modify]
+      end
+
+      it "should not allow 'mask_specific' to exist with other rights" do
+        expect {
+          resource[:permissions] = {'identity' =>'bob','rights'=>['mask_specific','read']}
+        }.to raise_error(Puppet::ResourceError, /In each ace, when specifying rights, if you include 'mask_specific'/)
+      end
+
+      it "should not allow 'mask_specific' without mask" do
+        expect {
+          resource[:permissions] = {'identity' =>'bob','rights'=>['mask_specific']}
+        }.to raise_error(Puppet::ResourceError, /If you specify rights => \['mask_specific'\], you must also include mask/)
+      end
+
+      it "should set ['read',:read] to [:read]" do
+        resource[:permissions] = {'identity'=>'bob','rights'=>['read',:read]}
+        resource[:permissions][0].rights.should == [:read]
       end
 
       it "should reject any other value" do
@@ -468,7 +648,7 @@ describe Puppet::Type.type(:acl) do
     context ":type" do
       it "should default to allow" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full']}
-        resource[:permissions][0].type.should == 'allow'
+        resource[:permissions][0].type.should == :allow
       end
 
       it "should accept allow" do
@@ -493,25 +673,34 @@ describe Puppet::Type.type(:acl) do
 
       it "should set default value on nil" do
         resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'type'=>nil}
-        resource[:permissions][0].type.should == 'allow'
+        resource[:permissions][0].type.should == :allow
       end
     end
 
     context ":child_types" do
-      it "should default to all" do
+      it "should default to 'all'" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full']}
-        resource[:permissions][0].child_types.should == 'all'
+        resource[:permissions][0].child_types.should == :all
       end
 
-      it "should accept all" do
+      it "should accept 'all'" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'child_types'=>'all'}
       end
 
-      it "should accept objects" do
+      it "should accept 'none'" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'child_types'=>'none'}
+      end
+
+      it "when set to 'none' should update affects to 'self_only'" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'child_types'=>'none'}
+        resource[:permissions][0].affects.should == :self_only
+      end
+
+      it "should accept 'objects'" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'child_types'=>'objects'}
       end
 
-      it "should accept containers" do
+      it "should accept 'containers'" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'child_types'=>'containers'}
       end
 
@@ -529,33 +718,38 @@ describe Puppet::Type.type(:acl) do
 
       it "should set default value on nil" do
         resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'child_types'=>nil}
-        resource[:permissions][0].child_types.should == 'all'
+        resource[:permissions][0].child_types.should == :all
       end
     end
 
     context ":affects" do
-      it "should default to all" do
+      it "should default to 'all'" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full']}
-        resource[:permissions][0].affects.should == 'all'
+        resource[:permissions][0].affects.should == :all
       end
 
-      it "should accept all" do
+      it "should accept 'all'" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'all'}
       end
 
-      it "should accept self_only" do
+      it "should accept 'self_only'" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'self_only'}
       end
 
-      it "should accept children_only" do
+     it "when set to 'self_only' should update child_types to 'none'" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'self_only'}
+        resource[:permissions][0].child_types.should == :none
+      end
+
+      it "should accept 'children_only'" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'children_only'}
       end
 
-      it "should accept self_and_direct_children" do
-        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'self_and_direct_children'}
+      it "should accept 'self_and_direct_children_only'" do
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'self_and_direct_children_only'}
       end
 
-      it "should accept direct_children_only" do
+      it "should accept 'direct_children_only'" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'direct_children_only'}
       end
 
@@ -573,7 +767,7 @@ describe Puppet::Type.type(:acl) do
 
       it "should set default value on nil" do
         resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'affects'=>nil}
-        resource[:permissions][0].affects.should == 'all'
+        resource[:permissions][0].affects.should == :all
       end
     end
 
@@ -587,13 +781,13 @@ describe Puppet::Type.type(:acl) do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full']}
 
         resource[:permissions][0].identity.should == 'bob'
-        resource[:permissions][0].rights.should == ['full']
+        resource[:permissions][0].rights.should == [:full]
       end
 
       it "should set defaults" do
-        resource[:permissions][0].type.should == 'allow'
-        resource[:permissions][0].child_types.should == 'all'
-        resource[:permissions][0].affects.should == 'all'
+        resource[:permissions][0].type.should == :allow
+        resource[:permissions][0].child_types.should == :all
+        resource[:permissions][0].affects.should == :all
       end
     end
 
