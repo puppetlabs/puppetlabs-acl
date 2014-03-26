@@ -1,20 +1,83 @@
 {
-  "name": "puppetlabs-acl",
-  "version": "0.1.0",
-  "summary": "This module provides the ability to manace ACLs on nodes",
   "author": "puppetlabs",
-  "description": "This module provides the ability to manace ACLs on nodes. Currently the only operating system supported is Windows",
+  "checksums": {
+    "lib/puppet/util/monkey_patches.rb": "d2adbe14bf5be6f9d15ea8bfd9c4398b",
+    ".idea/.rakeTasks": "c39cc21fd4a5b0a1c5ed4db7c485fe01",
+    ".metadata/.plugins/org.eclipse.core.resources/.root/1.tree": "89888c0141c259238a6deba7b128be49",
+    "DEVELOPERS.md": "03a59096f18f6a46153f3b0f0caf7da1",
+    "lib/puppet/type/acl/rights.rb": "de1e531fa4bd70a234e2080ea804ca80",
+    "LICENSE": "d2794c0df5b907fdace235a619d80314",
+    "tests/hiera.yaml": "97f18ff1d7f3de6d5c915abd0dc2f1da",
+    "spec/unit/type/acl/ace_spec.rb": "a964cf309d4547a0e81b8d1e17ddf1db",
+    "manifests/init.pp": "ca18db1082980536995d44293ecbb26c",
+    ".idea/encodings.xml": "f1c5edfa5b1a67aabcb9e41674afa252",
+    ".idea/codeStyleSettings.xml": "008ada5e659b6acb51d65e3033644307",
+    "lib/puppet/provider/acl/windows.rb": "e747df1486a2a4c62018c49251917974",
+    ".idea/puppetlabs-acl.iml": "957973685445fb1f6582aa906ac79672",
+    ".metadata/.plugins/org.eclipse.core.resources/.root/.indexes/history.version": "9e688c58a5487b8eaf69c9e1005ad0bf",
+    ".idea/misc.xml": "cb9cc92cdc025150705f3aa18a6dde7b",
+    "README.md": "15da3c51ab7c35b50af6ee6f4e598a20",
+    ".idea/vcs.xml": "befac2d4c4845c7aba4e3652ddb60f2a",
+    "lib/puppet/type/acl/ace.rb": "7e7ab393328ad72f9695b39bf5a1e294",
+    "Rakefile": "5f442b52d07e2ad72d97063cf31fbea9",
+    ".metadata/.plugins/org.eclipse.dltk.core/Containers.dat": "f52aead55c71d643510d5f624f787e11",
+    ".metadata/.plugins/org.eclipse.core.resources/.projects/.com_puppetlabs_geppetto_pptp_target/org.eclipse.egit.core/GitProjectData.properties": "528237aee5270bdf0f238dec489c102a",
+    ".metadata/.plugins/org.eclipse.ui.ide/dialog_settings.xml": "103428a47061f7c884df973bbb0e1ee1",
+    ".metadata/.plugins/org.eclipse.ui.workbench/workingsets.xml": "6fa17311cf4f0c298ee5600b6ba85213",
+    "tests/hieradata/common.yaml": "25cab2953c77fe630d5748033b40fad3",
+    ".metadata/.plugins/org.eclipse.core.resources/.projects/.com_puppetlabs_geppetto_pptp_target/.indexes/properties.index": "3d125787de34ea041ce43e78deaacbef",
+    ".metadata/.plugins/com.puppetlabs.geppetto.pp.dsl.ui/dialog_settings.xml": "a24e3ff3878b87db0d62d4266d8e93b4",
+    ".idea/inspectionProfiles/profiles_settings.xml": "d185730e401baf34a994650a55965410",
+    "lib/puppet/provider/acl/windows/base.rb": "0cd2e97c347dcf989d7615687d9f98b2",
+    ".idea/scopes/scope_settings.xml": "3d0b1957d39aa5636904788c54e654cf",
+    ".idea/.name": "90e5c5b7af08f83e91b1bf69e9e6e035",
+    ".metadata/version.ini": "e77ad89cbe32c2d793ebbf2c743574f4",
+    ".idea/workspace.xml": "594a891e388581b74e2e7067cb273f5b",
+    ".idea/inspectionProfiles/Project_Default.xml": "7fe75f1ba44ec1700f53af0bb83b1ebb",
+    ".idea/modules.xml": "5e6115c71fccb231b7aa19702b3279ef",
+    "spec/spec_helper.rb": "2904afda3f374bac339b6e9eb7f9e009",
+    "tests/hiera.pp": "53f217e82eece2ffa50eb1cbd2729489",
+    ".metadata/.plugins/org.eclipse.ui.workbench/dialog_settings.xml": "5f62cb8409c2c94fc2f78c3987da5496",
+    ".metadata/.plugins/org.eclipse.e4.workbench/workbench.xmi": "8f5cc60d4c07d217a3491d03d811de43",
+    ".metadata/.plugins/org.eclipse.core.resources/.root/.indexes/properties.version": "55a54008ad1ba589aa210d2629c1df41",
+    "CHANGELOG": "3b2c074920f939b26c33301e5480b636",
+    "spec/unit/type/acl_spec.rb": "8817d45b1b9be6174f925ebbabb14812",
+    ".metadata/.plugins/org.eclipse.core.resources/.root/.indexes/properties.index": "bf781ee615627f834471ff0c561b9156",
+    "spec/unit/provider/acl/windows_spec.rb": "ad36ee87136044bccac8818ea302988c",
+    ".metadata/.plugins/org.eclipse.core.resources/.safetable/org.eclipse.core.resources": "c165c52435f7d3b10bbf045019418442",
+    "Gemfile": "3ca86e6d5bc5db458e01b9836805b07e",
+    "spec/integration/provider/acl/windows_spec.rb": "9b5fdd9d0f3f0d89517c6cdafdce1ca9",
+    "Gemfile.local": "f0d21a1a7a9244567b59d4422f44fd7d",
+    "Modulefile": "c02788b54b04708036ce5497f918df49",
+    ".metadata/.plugins/org.eclipse.core.resources/.projects/.com_puppetlabs_geppetto_pptp_target/.location": "d502b20cee20a41f499201384673f4a0",
+    ".metadata/.log": "79344c91bfd1912f0d59abe1519c1248",
+    ".metadata/.lock": "d41d8cd98f00b204e9800998ecf8427e",
+    "tests/init.pp": "94a75146e5a5f20c688230ab91ef3574",
+    ".metadata/.plugins/org.eclipse.xtext.builder/builder.state": "de9218cb4ac38231a6b1549d3ecbc476",
+    "lib/puppet/type/acl.rb": "87534387fffbc4c06a87d0da52140bc9",
+    "Gemfile.lock": "79ada724d1d763d6dd48235520f74f31"
+  },
   "dependencies": [],
+  "description": "This module provides the ability to manace ACLs on nodes. Currently the only operating system supported is Windows",
+  "license": "Apache License, Version 2.0",
+  "name": "puppetlabs-acl",
+  "project_page": "https://github.com/puppetlabs/puppetlabs-acl",
+  "source": "git://github.com/puppetlabs/puppetlabs-acl.git",
+  "summary": "This module provides the ability to manace ACLs on nodes",
   "types": [
     {
       "properties": [
         {
           "name": "permissions",
-          "doc": "Permissions is an array containing Access Control Entries\n      (ACEs). Certain Operating Systems require these ACEs to be in\n      explicit order (Windows)."
+          "doc": "Permissions is an array containing Access Control Entries\n      (ACEs). Certain Operating Systems require these ACEs to be in\n      explicit order (Windows). Every element in the array is a hash\n      that will at the very least need `identity` and `rights` e.g\n      { identity \u003d\u003e \u0027Administrators\u0027, rights \u003d\u003e [\u0027full\u0027] } and at the\n      very most can include `type`, `child_types`, `affects`, and\n      `mask` (mask only should be with `rights \u003d\u003e [\u0027mask_specific\u0027]`)\n      e.g. `{ identity \u003d\u003e \u0027Administrators\u0027, rights \u003d\u003e [\u0027full\u0027],\n      type\u003d\u003e \u0027allow\u0027, child_types \u003d\u003e \u0027all\u0027, affects \u003d\u003e \u0027all\u0027 }`.\n      `Identity` is a group, user or ID (SID on Windows). The identity must\n      exist on the system and will auto-require on user and group resources.\n      `Rights` is an array that contains \u0027full\u0027, \u0027modify\u0027, \u0027mask_specific\u0027\n      or some combination of \u0027write\u0027, \u0027read\u0027, and \u0027execute\u0027. If you specify\n      \u0027mask_specific\u0027 you must also specify `mask` with an integer (passed\n      as a string) that represents the permissions mask. `Type` is\n      represented as \u0027allow\u0027 (default) or \u0027deny\u0027. `Child_types` determines\n      how an ACE is inherited downstream from the target. Valid values are\n      \u0027all\u0027 (default), \u0027objects\u0027, \u0027containers\u0027 or \u0027none\u0027. `Affects` determines\n      how the downstream inheritance is propagated. Valid values are\n      \u0027all\u0027 (default), \u0027self_only\u0027, \u0027children_only\u0027,\n      \u0027self_and_direct_children_only\u0027 or \u0027direct_children_only\u0027. While you\n      will see `is_inherited \u003d\u003e \u0027true\u0027` when running puppet resource acl path,\n      puppet will not be able to manage the inherited permissions so those\n      will need to be removed if using that to build a manifest."
         },
         {
           "name": "owner",
-          "doc": "The owner identity is also known as a trustee or principal\n      that is said to own the particular acl/security descriptor. This\n      can be in the form of: 1. User - e.g. \u0027Bob\u0027 or \u0027TheNet\\Bob\u0027,\n      2. Group e.g. \u0027Administrators\u0027 or \u0027BUILTIN\\Administrators\u0027, 3.\n      SID (Security ID) e.g. \u0027S-1-5-18\u0027. Defaults to \u0027S-1-5-32-544\u0027\n      (Administrators) on Windows."
+          "doc": "The owner identity is also known as a trustee or principal\n      that is said to own the particular acl/security descriptor. This\n      can be in the form of: 1. User - e.g. \u0027Bob\u0027 or \u0027TheNet\\Bob\u0027,\n      2. Group e.g. \u0027Administrators\u0027 or \u0027BUILTIN\\Administrators\u0027, 3.\n      SID (Security ID) e.g. \u0027S-1-5-18\u0027. Defaults to not specified on\n      Windows. This allows owner to stay set to whatever it is currently\n      set to (owner can vary depending on the original CREATOR OWNER).\n      The trustee must exist on the system and will auto-require on user\n      and group resources."
+        },
+        {
+          "name": "group",
+          "doc": "The group identity is also known as a trustee or principal\n      that is said to have access to the particular acl/security descriptor.\n      This can be in the form of: 1. User - e.g. \u0027Bob\u0027 or \u0027TheNet\\Bob\u0027,\n      2. Group e.g. \u0027Administrators\u0027 or \u0027BUILTIN\\Administrators\u0027, 3.\n      SID (Security ID) e.g. \u0027S-1-5-18\u0027. Defaults to not specified on\n      Windows. This allows group to stay set to whatever it is currently\n      set to (group can vary depending on the original CREATOR GROUP).\n      The trustee must exist on the system and will auto-require on user\n      and group resources."
         },
         {
           "name": "inherit_parent_permissions",
@@ -36,7 +99,7 @@
         },
         {
           "name": "purge",
-          "doc": "Purge specifies whether to remove other explicit permissions\n      if not specified in the permissions set. This doesn\u0027t do anything\n      with permissions inherited from parents. The default is false."
+          "doc": "Purge specifies whether to remove other explicit permissions\n      if not specified in the permissions set. This doesn\u0027t do anything\n      with permissions inherited from parents (to remove those you should\n      combine `purge \u003d\u003e \u0027false\u0027, inherit_parent_permissions \u003d\u003e \u0027false\u0027`.\n      The default is false."
         }
       ],
       "providers": [
@@ -45,11 +108,8 @@
         }
       ],
       "name": "acl",
-      "doc": "    Manages access control lists.  The `acl` type is typically\n    used when you need more complex management of permissions\n    e.g. Windows.\n\n    Sample usage:\n\n      ADD HERE LATER\n"
+      "doc": "    Manages access control lists (ACLs).  The `acl` type is\n    typically used when you need more complex management of\n    permissions e.g. Windows. ACLs typically contain access\n    control entries (ACEs) that define a trustee (identity)\n    with a set of rights, whether the type is allow or deny,\n    and how inheritance and propagation of those ACEs are\n    applied to the resource target and child types under it.\n    The order that ACEs are listed in is important on Windows\n    as it determines what is applied first.\n\n    Order of ACE application on Windows is explicit deny,\n    explicit allow, inherited deny, then inherited allow. You\n    cannot specify inherited ACEs in a manifest, only whether\n    to allow upstream inheritance to flow into the managed\n    target location (known as security descriptor). Please\n    ensure your modeled resources follow this order or Windows\n    will complain. NOTE: `acl` type does not enforce or\n    complain about ACE order.\n\n    For very specific examples, see the readme[1] and learn\n    about the different features of the `acl` type.\n\n    [1] https://github.com/puppetlabs/puppetlabs-acl/blob/master/README.md\n\n    **Autorequires:** If Puppet is managing the user, group or\n    target of an acl resource, the acl type will autorequire\n    them.\n\n    At a minimum, you need to provide the target and at least\n    one permission (access control entry or ACE). It will default\n    the other settings to sensible defaults.\n\n    Minimally expressed sample usage:\n\n      acl { \u0027c:/tempperms\u0027:\n        ensure      \u003d\u003e present,\n        permissions \u003d\u003e [\n         { identity \u003d\u003e \u0027Administrator\u0027, rights \u003d\u003e [\u0027full\u0027] },\n         { identity \u003d\u003e \u0027Users\u0027, rights \u003d\u003e [\u0027read\u0027,\u0027execute\u0027] }\n       ],\n      }\n\n    If you want you can provide a fully expressed ACL. The\n    fully expressed acl in the sample below produces the same\n    settings as the minimal sample above.\n\n    Fully expressed sample usage:\n\n      acl { \u0027c:/tempperms\u0027:\n        ensure      \u003d\u003e present,\n        target      \u003d\u003e \u0027c:/tempperms\u0027,\n        target_type \u003d\u003e \u0027file\u0027,\n        purge       \u003d\u003e \u0027false\u0027,\n        permissions \u003d\u003e [\n         { identity \u003d\u003e \u0027Administrator\u0027, rights \u003d\u003e [\u0027full\u0027], type\u003d\u003e \u0027allow\u0027, child_types \u003d\u003e \u0027all\u0027, affects \u003d\u003e \u0027all\u0027 },\n         { identity \u003d\u003e \u0027Users\u0027, rights \u003d\u003e [\u0027read\u0027,\u0027execute\u0027], type\u003d\u003e \u0027allow\u0027, child_types \u003d\u003e \u0027all\u0027, affects \u003d\u003e \u0027all\u0027 }\n        ],\n        owner       \u003d\u003e \u0027Administrators\u0027, #Creator_Owner specific, doesn\u0027t manage unless specified\n        group       \u003d\u003e \u0027Users\u0027, #Creator_Group specific, doesn\u0027t manage unless specified\n        inherit_parent_permissions \u003d\u003e \u0027true\u0027,\n      }\n\n    You can manage the same target across multiple acl\n    resources with some caveats. The title of the resource\n    needs to be unique. It is suggested that you only do\n    this when you would need to (can get confusing). You should\n    not set purge \u003d\u003e \u0027true\u0027 on any of the resources that apply\n    to the same target or you will see thrashing in reports as\n    the permissions will be added and removed every catalog\n    application. Use this feature with care.\n\n    Manage same ACL resource multiple acls sample usage:\n\n      acl { \u0027c:/tempperms\u0027:\n        ensure      \u003d\u003e present,\n        permissions \u003d\u003e [\n         { identity \u003d\u003e \u0027Administrator\u0027, rights \u003d\u003e [\u0027full\u0027] }\n       ],\n      }\n\n      acl { \u0027tempperms_Users\u0027:\n        ensure      \u003d\u003e present,,\n        target      \u003d\u003e \u0027c:/tempperms\u0027,\n        permissions \u003d\u003e [\n         { identity \u003d\u003e \u0027Users\u0027, rights \u003d\u003e [\u0027read\u0027,\u0027execute\u0027] }\n       ],\n      }\n\n    Removing upstream inheritance with purge sample usage:\n\n      acl { \u0027c:/tempperms\u0027:\n        ensure      \u003d\u003e present,\n        purge       \u003d\u003e \u0027true\u0027,\n        permissions \u003d\u003e [\n         { identity \u003d\u003e \u0027Administrators\u0027, rights \u003d\u003e [\u0027full\u0027] },\n         { identity \u003d\u003e \u0027Users\u0027, rights \u003d\u003e [\u0027full\u0027] }\n        ],\n        inherit_parent_permissions \u003d\u003e \u0027false\u0027,\n      }\n\n\n"
     }
   ],
-  "checksums": {},
-  "source": "git://github.com/puppetlabs/puppetlabs-acl.git",
-  "project_page": "https://github.com/puppetlabs/puppetlabs-acl",
-  "license": "Apache License, Version 2.0"
+  "version": "0.1.0"
 }
