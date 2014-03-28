@@ -118,7 +118,6 @@ Purge sample usage:
        { identity => 'Administrators', rights => ['full'] },
        { identity => 'Users', rights => ['full'] }
       ],
-      inherit_parent_permissions => 'false',
     }
 
 
