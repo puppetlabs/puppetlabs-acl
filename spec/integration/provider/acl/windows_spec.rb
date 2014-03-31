@@ -26,6 +26,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
   end
 
   def set_perms(permissions, include_inherited = false)
+    #resource[:permissions] = permissions
     provider.permissions = permissions
     resource.provider.flush
 
@@ -180,7 +181,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
       it "should update inheritance to false when set to :false" do
         provider.inherit_parent_permissions.must be_true
-        provider.inherit_parent_permissions = :false
+        provider.inherit_parent_permissions = false
 
         resource.provider.flush
 
@@ -537,6 +538,38 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     end
   end
 
+  context "when purge => true with a pre-existing manifest and inherit parent permissions is then set false (PUP-2036)" do
+    let (:permissions_hash) { [
+        {'identity' => 'Administrators','rights' => ['full']},
+        {'identity' => 'SYSTEM','rights' => ['full']},
+        {'identity' => 'Administrator','rights' => ['modify']}
+    ] }
+
+    let (:permissions) { [
+        Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full']}),
+        Puppet::Type::Acl::Ace.new({'identity' => 'SYSTEM','rights' => ['full']}),
+        Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['modify']})
+    ] }
+
+    before :each do
+      resource[:target] = set_path('perms_purge_true_inherit_false_second_sync')
+      resource[:purge] = true
+      permissions.each do |perm|
+        perm.id = provider.get_account_id(perm.identity)
+        perm.identity = provider.get_account_name(perm.identity)
+      end
+      resource[:permissions] = permissions_hash
+
+      set_perms(permissions).must == permissions
+    end
+
+    it "should remove the permissions successfully" do
+      provider.inherit_parent_permissions = false
+      resource.provider.flush
+
+      provider.permissions.must == permissions
+    end
+  end
 
   context ".set_security_descriptor" do
     it "should handle nil security descriptor appropriately" do

@@ -153,13 +153,20 @@ Puppet::Type.type(:acl).provide :windows do
       # If owner/group/protect change, we should save the SD and reevaluate for sync of permissions
       set_security_descriptor(sd)
       sd = get_security_descriptor
+      # Permissions may go out of whack due to a change here. Ensuring
+      # we flush them below will help ensure we are in sync on first
+      # convergence.
+      @property_flush[:permissions] = @resource[:permissions] unless @property_flush[:permissions]
     end
 
-    # There is a possibility someone will get a message of permissions changing the first time they make
-    # changes to owner/group/protect even if the outcome of making those changes would have resulted in
-    # the DACL being in sync. Since there is a change on the resource, I think we are fine with the extra
-    # message in the report as Puppet figures things out. It will apply the sync based on what the actual
-    # permissions are after setting owner, group, and protect.
+    # There is a possibility someone will get a message of permissions
+    # changing the first time they make changes to owner/group/protect
+    # even if the outcome of making those changes would have resulted
+    # in the DACL being in sync. Since there is a change on the
+    # resource, I think we are fine with the extra message in the
+    # report as Puppet figures things out. It will apply the sync based
+    # on what the actual permissions are after setting owner, group,
+    # and protect.
     if @property_flush[:permissions]
       should_purge = resource.munge_boolean(@resource[:purge]) if @resource[:purge]
       remove_perms = resource.munge_boolean(@property_flush[:removing_permissions]) if @property_flush.has_key?(:removing_permissions)
