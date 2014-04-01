@@ -8,11 +8,12 @@ class Puppet::Provider::Acl
     module Base
       if Puppet::Util::Platform.windows?
         require Pathname.new(__FILE__).dirname + '../../../../' + 'puppet/type/acl/ace'
-        require Pathname.new(__FILE__).dirname + '../../../../' + 'puppet/util/monkey_patches'
         require 'puppet/util/windows/security'
         require 'win32/security'
         require 'windows/security'
         require 'windows/file'
+        # fixes come after everything else is loaded
+        require Pathname.new(__FILE__).dirname + '../../../../' + 'puppet/util/monkey_patches'
 
         REFRESH_SD        = true
         DO_NOT_REFRESH_SD = false

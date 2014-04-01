@@ -128,4 +128,79 @@ if Puppet::Util::Platform.windows?
   end
 
 
+  require 'puppet/util/windows/security'
+  # PUP-2100 - https://tickets.puppetlabs.com/browse/PUP-2100
+  # backporting that fix to earlier versions of Puppet.
+  # PUP-1987 - https://tickets.puppetlabs.com/browse/PUP-1987
+  if Puppet.version < '3.6.0'
+
+    module Puppet::Util::Windows::Security
+
+      def add_access_denied_ace(acl, mask, sid, inherit = nil)
+        inherit ||= NO_INHERITANCE
+
+        string_to_sid_ptr(sid) do |sid_ptr|
+          raise Puppet::Util::Windows::Error.new("Invalid SID") unless IsValidSid(sid_ptr)
+
+          unless AddAccessDeniedAceEx(acl, ACL_REVISION, inherit, mask, sid_ptr)
+            raise Puppet::Util::Windows::Error.new("Failed to add access control entry")
+          end
+        end
+      end
+
+      #need to bring this in as well so it can all add_access_denied_ace properly
+      # setting DACL requires both READ_CONTROL and WRITE_DACL access rights,
+      # and their respective privileges, SE_BACKUP_NAME and SE_RESTORE_NAME.
+      def set_security_descriptor(path, sd)
+        # REMIND: FFI
+        acl = 0.chr * 1024 # This can be increased later as neede
+        unless InitializeAcl(acl, acl.size, ACL_REVISION)
+          raise Puppet::Util::Windows::Error.new("Failed to initialize ACL")
+        end
+
+        raise Puppet::Util::Windows::Error.new("Invalid DACL") unless IsValidAcl(acl)
+
+        with_privilege(SE_BACKUP_NAME) do
+          with_privilege(SE_RESTORE_NAME) do
+            open_file(path, READ_CONTROL | WRITE_DAC | WRITE_OWNER) do |handle|
+              string_to_sid_ptr(sd.owner) do |ownersid|
+                string_to_sid_ptr(sd.group) do |groupsid|
+                  sd.dacl.each do |ace|
+                    case ace.type
+                      when ACCESS_ALLOWED_ACE_TYPE
+                        #puts "ace: allow, sid #{sid_to_name(ace.sid)}, mask 0x#{ace.mask.to_s(16)}"
+                        add_access_allowed_ace(acl, ace.mask, ace.sid, ace.flags)
+                      when ACCESS_DENIED_ACE_TYPE
+                        #puts "ace: deny, sid #{sid_to_name(ace.sid)}, mask 0x#{ace.mask.to_s(16)}"
+                        add_access_denied_ace(acl, ace.mask, ace.sid, ace.flags)
+                      else
+                        raise "We should never get here"
+                      # TODO: this should have been a warning in an earlier commit
+                    end
+                  end
+
+                  # protected means the object does not inherit aces from its parent
+                  flags = OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION
+                  flags |= sd.protect ? PROTECTED_DACL_SECURITY_INFORMATION : UNPROTECTED_DACL_SECURITY_INFORMATION
+
+                  rv = SetSecurityInfo(handle,
+                                       SE_FILE_OBJECT,
+                                       flags,
+                                       ownersid,
+                                       groupsid,
+                                       acl,
+                                       nil)
+                  raise Puppet::Util::Windows::Error.new("Failed to set security information") unless rv == ERROR_SUCCESS
+                end
+              end
+            end
+          end
+        end
+      end
+
+
+
+    end
+  end
+
 end

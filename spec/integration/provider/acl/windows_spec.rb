@@ -362,7 +362,19 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         actual_perms.must == permissions
       end
 
-      #todo deny - this will be as the bug is fixed.
+      it "should handle deny" do
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['full'], 'type' => 'deny'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full']}, provider)
+        ]
+        resource[:purge] = :true
+        provider.inherit_parent_permissions = :false
+
+        actual = set_perms(permissions)
+
+        actual.must == permissions
+      end
+
       it "should handle deny when affects => 'self_only'" do
         permissions = [
             Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['full'], 'type' => 'deny', 'affects'=>'self_only'}, provider),
