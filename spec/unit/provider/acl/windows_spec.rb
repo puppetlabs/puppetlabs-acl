@@ -475,45 +475,90 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       context "when purge=>true" do
         it "should return true for Administrators and specifying Administrators with same permissions" do
           admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']})
-          provider.are_permissions_insync?([admins], [admins], true).must be_true
+          provider.are_permissions_insync?([admins], [admins], :true).must be_true
         end
 
         it "should return true for Administrators and specifying Administrators even if one specifies sid and other non-required information" do
           admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']}, provider)
           admin2 = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'id'=>"S-1-5-32-544", 'mask'=>::Windows::File::GENERIC_ALL, 'is_inherited'=>false}, provider)
-          provider.are_permissions_insync?([admins], [admin2], true).must be_true
+          provider.are_permissions_insync?([admins], [admin2], :true).must be_true
         end
 
         it "should return false for Administrators and specifying Administrators when more current permissions exist than are specified" do
           admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']})
           admin = Puppet::Type::Acl::Ace.new({'identity'=>'Administrator', 'rights'=>['full']})
-          provider.are_permissions_insync?([admin,admins], [admin], true).must be_false
+          provider.are_permissions_insync?([admin,admins], [admin], :true).must be_false
         end
 
         it "should return false for Administrators and specifying Administrators when more permissions are specified than exist" do
           admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']})
           admin = Puppet::Type::Acl::Ace.new({'identity'=>'Administrator', 'rights'=>['full']})
-          provider.are_permissions_insync?([admin], [admin,admins], true).must be_false
+          provider.are_permissions_insync?([admin], [admin,admins], :true).must be_false
         end
 
         it "should return false for nil and specifying Administrators" do
           admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']})
-          provider.are_permissions_insync?(nil, [admins], true).must be_false
+          provider.are_permissions_insync?(nil, [admins], :true).must be_false
         end
 
         it "should return false for Administrators and specifying nil" do
           admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']})
-          provider.are_permissions_insync?([admins], nil, true).must be_false
+          provider.are_permissions_insync?([admins], nil, :true).must be_false
         end
 
         it "should return false for Administrators and specifying []" do
           admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']})
-          provider.are_permissions_insync?([admins], [], true).must be_false
+          provider.are_permissions_insync?([admins], [], :true).must be_false
         end
 
         it "should return false for [] and specifying Administrators" do
           admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']})
-          provider.are_permissions_insync?([], [admins], true).must be_false
+          provider.are_permissions_insync?([], [admins], :true).must be_false
+        end
+      end
+
+      context "when purge=>listed_permissions" do
+        it "should return false for Administrators and specifying Administrators with same permissions" do
+          admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']})
+          provider.are_permissions_insync?([admins], [admins], :listed_permissions).must be_false
+        end
+
+        it "should return false for Administrators and specifying Administrators even if one specifies sid and other non-required information" do
+          admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']}, provider)
+          admin2 = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'id'=>"S-1-5-32-544", 'mask'=>::Windows::File::GENERIC_ALL, 'is_inherited'=>false}, provider)
+          provider.are_permissions_insync?([admins], [admin2], :listed_permissions).must be_false
+        end
+
+        it "should return false for Administrators and specifying Administrators when more current permissions exist than are specified" do
+          admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']})
+          admin = Puppet::Type::Acl::Ace.new({'identity'=>'Administrator', 'rights'=>['full']})
+          provider.are_permissions_insync?([admin,admins], [admin], :listed_permissions).must be_false
+        end
+
+        it "should return false for Administrators and specifying Administrators when more permissions are specified than exist" do
+          admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']})
+          admin = Puppet::Type::Acl::Ace.new({'identity'=>'Administrator', 'rights'=>['full']})
+          provider.are_permissions_insync?([admin], [admin,admins], :listed_permissions).must be_false
+        end
+
+        it "should return true for nil and specifying Administrators" do
+          admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']})
+          provider.are_permissions_insync?(nil, [admins], :listed_permissions).must be_true
+        end
+
+        it "should return true for Administrators and specifying nil" do
+          admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']})
+          provider.are_permissions_insync?([admins], nil, :listed_permissions).must be_true
+        end
+
+        it "should return true for Administrators and specifying []" do
+          admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']})
+          provider.are_permissions_insync?([admins], [], :listed_permissions).must be_true
+        end
+
+        it "should return true for [] and specifying Administrators" do
+          admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']})
+          provider.are_permissions_insync?([], [admins], :listed_permissions).must be_true
         end
       end
     end

@@ -46,8 +46,6 @@ Puppet::Type.type(:acl).provide :windows do
     case @resource[:target_type]
       when :file
         raise Puppet::Error.new("ACL cannot remove target resources, only permissions from those target resources. Ensure you pass non-inherited permissions to remove.") unless @resource[:permissions]
-        @property_flush[:removing_permissions] = :true
-        evaluate_destroy(@resource)
       else
         raise Puppet::ResourceError, "At present only :target_type => :file is supported on Windows."
     end
@@ -58,7 +56,7 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def permissions=(value)
-    unless @resource[:ensure] == :absent
+    unless @resource[:purge] == :listed_permissions
       non_existing_users = []
       value.each do |permission|
         non_existing_users << permission.identity unless get_account_id(permission.identity)
@@ -70,16 +68,14 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def permissions_insync?(current, should)
-    are_permissions_insync?(current, should, @resource[:purge] == :true)
+    are_permissions_insync?(current, should, @resource[:purge])
   end
 
   def permissions_should_to_s(should)
     return '' if should.nil? or !should.kind_of?(Array)
 
     sd = get_security_descriptor
-    should_purge = resource.munge_boolean(@resource[:purge]) if @resource[:purge]
-    remove_perms = resource.munge_boolean(@property_flush[:removing_permissions]) if @property_flush.has_key?(:removing_permissions)
-    should_aces = sync_aces(sd.dacl,should, should_purge == :true, remove_perms == :true)
+    should_aces = sync_aces(sd.dacl,should, @resource[:purge] == :true, @resource[:purge] == :listed_permissions)
 
     permissions_to_s(should_aces)
   end
@@ -168,9 +164,7 @@ Puppet::Type.type(:acl).provide :windows do
     # on what the actual permissions are after setting owner, group,
     # and protect.
     if @property_flush[:permissions]
-      should_purge = resource.munge_boolean(@resource[:purge]) if @resource[:purge]
-      remove_perms = resource.munge_boolean(@property_flush[:removing_permissions]) if @property_flush.has_key?(:removing_permissions)
-      dacl = convert_to_dacl(sync_aces(sd.dacl,@property_flush[:permissions], should_purge == :true, remove_perms == :true))
+      dacl = convert_to_dacl(sync_aces(sd.dacl,@property_flush[:permissions], @resource[:purge] == :true, @resource[:purge] == :listed_permissions))
       set_security_descriptor(Puppet::Util::Windows::SecurityDescriptor.new(sd.owner,sd.group,dacl,sd.protect))
     end
 

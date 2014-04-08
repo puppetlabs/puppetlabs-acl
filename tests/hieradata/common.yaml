@@ -2,7 +2,6 @@
 acls:
   tempdir:
     target: 'C:\temp'
-    ensure: present
     permissions:
       - identity: 'tim'
         rights:
@@ -16,7 +15,6 @@ acls:
           - execute
   dir2:
     target: 'C:\temp'
-    ensure: present
     permissions:
       - identity: 'tim'
         rights:
