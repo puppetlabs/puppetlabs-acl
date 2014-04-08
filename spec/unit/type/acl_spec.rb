@@ -587,6 +587,16 @@ describe Puppet::Type.type(:acl) do
         }.to raise_error(Puppet::ResourceError, /Invalid value "READ". Valid values are/)
       end
 
+      it "should not allow ['remove_match_any'] without purge=>listed_permissions" do
+        expect {
+          Puppet::Type.type(:acl).new(:name => "acl",:permissions =>[ {'identity' =>'bob','rights'=>['remove_match_any']}])
+        }.to raise_error(Puppet::ResourceError, /'remove_match_any' can only be used with `purge => listed_permissions`/)
+      end
+
+      it "should accept ['remove_match_any'] with purge=>listed_permissions" do
+        Puppet::Type.type(:acl).new(:name => "acl",:permissions =>[ {'identity' =>'bob','rights'=>['remove_match_any']}],:purge =>'listed_permissions')
+      end
+
       it "should log a warning when rights does not contain 'full' by itself" do
         Puppet.expects(:warning).with() do |v|
           /In each ace, when specifying rights, if you include 'full'/.match(v)
@@ -679,6 +689,16 @@ describe Puppet::Type.type(:acl) do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'type'=>'deny'}
       end
 
+      it "should not allow remove_match_any without purge=>listed_permissions" do
+        expect {
+          Puppet::Type.type(:acl).new(:name => "acl",:permissions =>[ {'identity' =>'bob','rights'=>['full'],'type'=>'remove_match_any'}])
+        }.to raise_error(Puppet::ResourceError, /'remove_match_any' can only be used with `purge => listed_permissions`/)
+      end
+
+      it "should accept remove_match_any with purge=>listed_permissions" do
+        Puppet::Type.type(:acl).new(:name => "acl",:permissions =>[ {'identity' =>'bob','rights'=>['full'],'type'=>'remove_match_any'}],:purge=>'listed_permissions')
+      end
+
       it "should reject any other value" do
         expect {
           resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'type'=>'what'}
@@ -722,6 +742,16 @@ describe Puppet::Type.type(:acl) do
 
       it "should accept 'containers'" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'child_types'=>'containers'}
+      end
+
+      it "should not allow remove_match_any without purge=>listed_permissions" do
+        expect {
+          Puppet::Type.type(:acl).new(:name => "acl",:permissions =>[ {'identity' =>'bob','rights'=>['full'],'child_types'=>'remove_match_any'}])
+        }.to raise_error(Puppet::ResourceError, /'remove_match_any' can only be used with `purge => listed_permissions`/)
+      end
+
+      it "should accept remove_match_any with purge=>listed_permissions" do
+        Puppet::Type.type(:acl).new(:name => "acl",:permissions =>[ {'identity' =>'bob','rights'=>['full'],'child_types'=>'remove_match_any'}],:purge=>'listed_permissions')
       end
 
       it "should reject any other value" do
@@ -771,6 +801,16 @@ describe Puppet::Type.type(:acl) do
 
       it "should accept 'direct_children_only'" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'affects'=>'direct_children_only'}
+      end
+
+      it "should not allow remove_match_any without purge=>listed_permissions" do
+        expect {
+          Puppet::Type.type(:acl).new(:name => "acl",:permissions =>[ {'identity' =>'bob','rights'=>['full'],'affects'=>'remove_match_any'}])
+        }.to raise_error(Puppet::ResourceError, /'remove_match_any' can only be used with `purge => listed_permissions`/)
+      end
+
+      it "should accept remove_match_any with purge=>listed_permissions" do
+        Puppet::Type.type(:acl).new(:name => "acl",:permissions =>[ {'identity' =>'bob','rights'=>['full'],'affects'=>'remove_match_any'}],:purge=>'listed_permissions')
       end
 
       it "should reject any other value" do

@@ -190,7 +190,14 @@ class Puppet::Provider::Acl
             current_local_permissions == specified_permissions
           elsif remove_permissions
             return true if specified_permissions.nil?
-            (specified_permissions & current_local_permissions) == []
+            return false unless (specified_permissions & current_local_permissions) == []
+            # a more detailed check is required - hashing is limited with match any
+            specified_permissions.each do |specified_ace|
+              existing_aces = current_local_permissions.select { |a| a == specified_ace }
+              return false unless existing_aces.empty?
+            end
+
+            return true
           else
             return true if specified_permissions.nil?
 
@@ -327,7 +334,7 @@ class Puppet::Provider::Acl
               next if ace.inherited?
 
               current_ace = Puppet::Type::Acl::Ace.new(convert_to_permissions_hash(ace), self)
-              existing_aces = should_aces.select { |a| a.same?(current_ace) }
+              existing_aces = should_aces.select { |a| a == current_ace }
               next unless existing_aces.empty?
 
               kept_aces << current_ace

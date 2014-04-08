@@ -21,6 +21,8 @@ class Puppet::Type::Acl
            4
          when :mask_specific
            5
+         when :remove_match_any
+           6
        end
     end
   end

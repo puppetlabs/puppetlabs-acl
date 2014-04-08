@@ -319,6 +319,17 @@ Puppet::Type.newtype(:acl) do
     if self[:permissions] == []
       raise ArgumentError, "Value for permissions should be an array with at least one element specified."
     end
+
+    if self[:permissions]
+      self[:permissions].each do |ace|
+        ace.rights.each do |right|
+          validate_remove_match_any('rights', right)
+        end
+        validate_remove_match_any('type', ace.type)
+        validate_remove_match_any('child_types', ace.child_types)
+        validate_remove_match_any('affects', ace.affects)
+      end
+    end
   end
 
   autorequire(:file) do
@@ -429,5 +440,13 @@ Puppet::Type.newtype(:acl) do
       else
         fail("munge_boolean only takes booleans")
     end
+  end
+
+  def validate_remove_match_any(name,value)
+    if value == :remove_match_any && self[:purge] != :listed_permissions
+      raise ArgumentError, "Value for '#{name}' of 'remove_match_any' can only be used with `purge => listed_permissions`."
+    end
+
+    value
   end
 end
