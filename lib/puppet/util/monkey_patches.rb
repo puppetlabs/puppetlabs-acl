@@ -127,7 +127,6 @@ if Puppet::Util::Platform.windows?
     end
   end
 
-
   require 'puppet/util/windows/security'
   # PUP-2100 - https://tickets.puppetlabs.com/browse/PUP-2100
   # backporting that fix to earlier versions of Puppet.
@@ -175,7 +174,7 @@ if Puppet::Util::Platform.windows?
                         add_access_denied_ace(acl, ace.mask, ace.sid, ace.flags)
                       else
                         raise "We should never get here"
-                      # TODO: this should have been a warning in an earlier commit
+                        # this should have been a warning in an earlier commit
                     end
                   end
 
@@ -199,27 +198,4 @@ if Puppet::Util::Platform.windows?
       end
     end
   end
-
-  if Puppet.version < '3.6.0'
-    class Puppet::Transaction
-      class ResourceHarness
-        # overriding the current initializer method so we can
-        # add the instance to instances
-        def initialize(transaction)
-          @transaction = transaction
-          @@instances = []
-          @@instances << self
-        end
-
-        def self.instances
-          @@instances
-        end
-
-        def sync_if_needed_public(param, context)
-          sync_if_needed(param, context)
-        end
-      end
-    end
-  end
-
 end

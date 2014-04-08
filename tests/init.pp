@@ -13,7 +13,7 @@ include acl
 file { ['c:/tempperms',
    'c:/tempperms/minimal',
    'c:/tempperms/full',
-   'c:/tempperms/multiuser',
+   'c:/tempperms/fqdn_sid',
    'c:/tempperms/protected',
    'c:/tempperms/protected_purge',
    'c:/tempperms/inheritance',
@@ -21,14 +21,12 @@ file { ['c:/tempperms',
    'c:/tempperms/deny',
    'c:/tempperms/same_user',
    'c:/tempperms/rights_ordering',
-   'c:/tempperms/identities',
    'c:/tempperms/mask_specific',
-   'c:/tempperms/absent']:
+   'c:/tempperms/remove']:
   ensure => directory,
 }
 
 acl { 'c:/tempperms/minimal':
-  ensure      => present,
   permissions => [
    { identity => 'Administrator', rights => ['full'] },
    { identity => 'Users', rights => ['read','execute'] }
@@ -49,7 +47,6 @@ acl { 'c:/tempperms/minimal':
 
 # same as minimal but fully expressed
 acl { 'c:/tempperms/full':
-  ensure      => present,
   target      => 'c:/tempperms/full',
   target_type => 'file',
   purge       => 'false',
@@ -74,34 +71,29 @@ acl { 'c:/tempperms/full':
 #     NT AUTHORITY\Authenticated Users:(I)(OI)(CI)(IO)(M)
 
 
-acl { 'c:/tempperms/multiuser':
-  ensure      => present,
+acl { 'c:/tempperms/fqdn_sid':
   permissions => [
-   { identity => 'Administrators', rights => ['full'] },
-   { identity => 'Administrator', rights => ['write'] },
-   { identity => 'Users', rights => ['write','execute'] },
-   { identity => 'Everyone', rights => ['execute'] },
-   { identity => 'Authenticated Users', rights => ['full'] }
+   { identity => 'S-1-5-32-544', rights => ['full'] },
+   { identity => 'NT AUTHORITY\SYSTEM', rights => ['write'] },
+   { identity => 'BUILTIN\Users', rights => ['write','execute'] },
+   { identity => 'Everyone', rights => ['execute'] }
   ],
 }
 
-#C:\tempperms>icacls multiuser
-#multiuser BUILTIN\Administrators:(OI)(CI)(F)
-#          WIN-QR952GIDHVE\Administrator:(OI)(CI)(W,Rc)
-#          BUILTIN\Users:(OI)(CI)(W,Rc,X,RA)
-#          Everyone:(OI)(CI)(Rc,S,X,RA)
-#          NT AUTHORITY\Authenticated Users:(OI)(CI)(F)
-#          BUILTIN\Administrators:(I)(F)
-#          BUILTIN\Administrators:(I)(OI)(CI)(IO)(F)
-#          NT AUTHORITY\SYSTEM:(I)(F)
-#          NT AUTHORITY\SYSTEM:(I)(OI)(CI)(IO)(F)
-#          BUILTIN\Users:(I)(OI)(CI)(RX)
-#          NT AUTHORITY\Authenticated Users:(I)(M)
-#          NT AUTHORITY\Authenticated Users:(I)(OI)(CI)(IO)(M)
-
+#C:\tempperms>icacls fqdn_sid
+#fqdn_sid BUILTIN\Administrators:(OI)(CI)(F)
+#         NT AUTHORITY\SYSTEM:(OI)(CI)(W,Rc)
+#         BUILTIN\Users:(OI)(CI)(W,Rc,X,RA)
+#         Everyone:(OI)(CI)(Rc,S,X,RA)
+#         BUILTIN\Administrators:(I)(F)
+#         BUILTIN\Administrators:(I)(OI)(CI)(IO)(F)
+#         NT AUTHORITY\SYSTEM:(I)(F)
+#         NT AUTHORITY\SYSTEM:(I)(OI)(CI)(IO)(F)
+#         BUILTIN\Users:(I)(OI)(CI)(RX)
+#         NT AUTHORITY\Authenticated Users:(I)(M)
+#         NT AUTHORITY\Authenticated Users:(I)(OI)(CI)(IO)(M)
 
 acl { 'c:/tempperms/protected':
-  ensure      => present,
   permissions => [
    { identity => 'Administrators', rights => ['full'] },
    { identity => 'Users', rights => ['full'] }
@@ -110,7 +102,6 @@ acl { 'c:/tempperms/protected':
 }
 
 acl { 'tempperms_protected':
-  ensure      => present,
   target      => 'c:/tempperms/protected',
   permissions => [
    { identity => 'Administrator', rights => ['modify'] }
@@ -131,7 +122,6 @@ acl { 'tempperms_protected':
 
 
 acl { 'c:/tempperms/protected_purge':
-  ensure      => present,
   purge       => 'true',
   permissions => [
    { identity => 'Administrators', rights => ['full'] },
@@ -146,7 +136,6 @@ acl { 'c:/tempperms/protected_purge':
 
 
 acl { 'c:/tempperms/inheritance':
-  ensure      => present,
   purge       => 'true',
   permissions => [
    { identity => 'SYSTEM', rights => ['full'], child_types => 'all' },
@@ -164,7 +153,6 @@ acl { 'c:/tempperms/inheritance':
 
 
 acl { 'c:/tempperms/propagation':
-  ensure      => present,
   purge       => 'true',
   permissions => [
    { identity => 'Administrators', rights => ['modify'], affects => 'all' },
@@ -216,16 +204,13 @@ file { ['c:/tempperms/propagation/child_object.txt',
 
 
 acl { 'c:/tempperms/deny':
-  ensure      => present,
   permissions => [
-   { identity => 'SYSTEM', rights => ['full'], type=> 'deny', affects => 'self_only' }
+   { identity => 'SYSTEM', rights => ['full'], type=> 'deny' }
   ],
 }
 
-# BUG: Deny does not inherit by default?
-
 #C:\tempperms>icacls deny
-#deny  NT AUTHORITY\SYSTEM:(N)
+#deny  NT AUTHORITY\SYSTEM:(I)(N)
 #      BUILTIN\Administrators:(I)(F)
 #      BUILTIN\Administrators:(I)(OI)(CI)(IO)(F)
 #      NT AUTHORITY\SYSTEM:(I)(F)
@@ -236,7 +221,6 @@ acl { 'c:/tempperms/deny':
 
 
 acl { 'c:/tempperms/same_user':
-  ensure      => present,
   purge       => 'true',
   permissions => [
    #{ identity => 'SYSTEM', rights => ['modify'], type=> 'deny', child_types => 'none' },
@@ -275,7 +259,6 @@ acl { 'c:/tempperms/same_user':
 
 
 acl { 'c:/tempperms/rights_ordering':
-  ensure      => present,
   purge       => 'true',
   permissions => [
    { identity => 'SYSTEM', rights => ['execute','read'] },
@@ -294,25 +277,7 @@ acl { 'c:/tempperms/rights_ordering':
 #                WIN-QR952GIDHVE\Administrator:(OI)(CI)(M)
 
 
-acl { 'c:/tempperms/identities':
-  ensure      => present,
-  purge       => 'true',
-  permissions => [
-   { identity => 'NT AUTHORITY\SYSTEM', rights => ['modify'] },
-   { identity => 'BUILTIN\Users', rights => ['read','execute'] },
-   { identity => 'S-1-5-32-544', rights => ['full'] }
-  ],
-  inherit_parent_permissions => 'false',
-}
-
-#C:\tempperms>icacls identities
-#identities NT AUTHORITY\SYSTEM:(OI)(CI)(M)
-#           BUILTIN\Users:(OI)(CI)(RX)
-#           BUILTIN\Administrators:(OI)(CI)(F)
-
-
 acl { 'c:/tempperms/mask_specific':
-  ensure      => present,
   purge       => 'true',
   permissions => [
    { identity => 'Administrators', rights => ['full'] }, #full is same as - 2032127 aka 0x1f01ff
@@ -330,8 +295,7 @@ acl { 'c:/tempperms/mask_specific':
 #              WIN-QR952GIDHVE\Administrator:(OI)(CI)(Rc,S,RA,WA)
 
 
-acl { 'c:/tempperms/absent':
-  ensure      => present,
+acl { 'c:/tempperms/remove':
   purge       => 'true',
   permissions => [
    { identity => 'Administrators', rights => ['full'] },
@@ -343,19 +307,18 @@ acl { 'c:/tempperms/absent':
   inherit_parent_permissions => 'false',
 }
 
-acl { 'remove_tempperms/absent':
-  ensure      => absent,
-  target      => 'c:/tempperms/absent',
-  purge       => 'true',
+acl { 'remove_tempperms/remove':
+  target      => 'c:/tempperms/remove',
+  purge       => 'listed_permissions',
   permissions => [
    { identity => 'Administrator', rights => ['write'] },
    { identity => 'Authenticated Users', rights => ['full'] }
   ],
   inherit_parent_permissions => 'false',
-  require     => Acl['c:/tempperms/absent'],
+  require     => Acl['c:/tempperms/remove'],
 }
 
-#C:\tempperms>icacls absent
-#absent BUILTIN\Administrators:(OI)(CI)(F)
+#C:\tempperms>icacls remove
+#remove BUILTIN\Administrators:(OI)(CI)(F)
 #       BUILTIN\Users:(OI)(CI)(W,Rc,X,RA)
 #       Everyone:(OI)(CI)(Rc,S,X,RA)

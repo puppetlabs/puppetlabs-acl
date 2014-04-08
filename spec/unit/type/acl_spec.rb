@@ -306,7 +306,7 @@ describe Puppet::Type.type(:acl) do
 
   context "parameter :purge" do
     it "should default to nil" do
-      resource[:purge].must be_nil
+      resource[:purge].must == :false
     end
 
     it "should accept true" do
@@ -315,6 +315,26 @@ describe Puppet::Type.type(:acl) do
 
     it "should accept false" do
       resource[:purge] = false
+    end
+
+    it "should accept 'true'" do
+      resource[:purge] = 'true'
+    end
+
+    it "should accept 'false'" do
+      resource[:purge] = 'false'
+    end
+
+    it "should accept :true" do
+      resource[:purge] = :true
+    end
+
+    it "should accept :false" do
+      resource[:purge] = :false
+    end
+
+    it "should accept :listed_permissions" do
+      resource[:purge] = :listed_permissions
     end
 
     it "should reject non-boolean values" do
