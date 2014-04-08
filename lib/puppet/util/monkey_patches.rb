@@ -197,9 +197,28 @@ if Puppet::Util::Platform.windows?
           end
         end
       end
+    end
+  end
 
+  if Puppet.version < '3.6.0'
+    class Puppet::Transaction
+      class ResourceHarness
+        # overriding the current initializer method so we can
+        # add the instance to instances
+        def initialize(transaction)
+          @transaction = transaction
+          @@instances = []
+          @@instances << self
+        end
 
+        def self.instances
+          @@instances
+        end
 
+        def sync_if_needed_public(param, context)
+          sync_if_needed(param, context)
+        end
+      end
     end
   end
 

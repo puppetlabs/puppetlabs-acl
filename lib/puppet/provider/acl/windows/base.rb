@@ -410,6 +410,37 @@ class Puppet::Provider::Acl
           # flush out the cached sd
           get_security_descriptor(REFRESH_SD)
         end
+
+        def evaluate_destroy(resource)
+          status = Puppet::Resource::Status.new(resource)
+          if Puppet::Transaction::ResourceHarness.instances == nil || Puppet::Transaction::ResourceHarness.instances.count == 0
+            Puppet.warning("ACL is unable to report change to permissions due to not able to access the resource harness. Please check to see that permissions changes were successful where applied if there are no reported errors.")
+            self.permissions = @resource[:permissions]
+            return
+          end
+
+          harness = Puppet::Transaction::ResourceHarness.instances.first
+
+          begin
+            context = Puppet::Transaction::ResourceHarness::ResourceApplicationContext.from_resource(resource, status)
+            ensure_param = resource.parameter(:ensure)
+            resource.properties.each do |param|
+              next if param == ensure_param
+              harness.sync_if_needed_public(param, context)
+            end
+
+            if status.changed? && ! resource.noop?
+              harness.cache(resource, :synced, Time.now)
+              resource.flush if resource.respond_to?(:flush)
+            end
+          rescue => detail
+            status.failed_because(detail)
+          ensure
+            status.evaluation_time = Time.now - status.time
+          end
+
+          harness.transaction.report.add_resource_status(status)
+        end
       end
     end
   end

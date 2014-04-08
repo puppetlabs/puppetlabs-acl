@@ -46,8 +46,8 @@ Puppet::Type.type(:acl).provide :windows do
     case @resource[:target_type]
       when :file
         raise Puppet::Error.new("ACL cannot remove target resources, only permissions from those target resources. Ensure you pass non-inherited permissions to remove.") unless @resource[:permissions]
-        self.permissions = @resource[:permissions]
         @property_flush[:removing_permissions] = :true
+        evaluate_destroy(@resource)
       else
         raise Puppet::ResourceError, "At present only :target_type => :file is supported on Windows."
     end
