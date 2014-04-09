@@ -157,7 +157,7 @@ Rights sample usage:
 ###ACE Mask Specific Rights
 ACE `rights => ['mask_specific']` indicates that rights are passed as part of a mask, so the mask is all that will be evaluated. When you specify 'mask_specific' you must also specify `mask` with an integer (passed as a string) that represents the permissions mask. Because the mask is all that is evaluated, it is important that you don't try to combine something like read permissions and then the mask e.g. `rights => ['read','mask_specific']` (invalid scenario). In fact, the `ACL` provider will error if you attempt to do this because it could set the system in an unusable state due to a misunderstanding of how this particular feature works.
 
-NOTE: Mask specific should ONLY be used when other rights are not specific enough. If you specify mask specific with the equivalent of 'full' rights (2032127), and it finds the property to be 'full', it will report making changes to the resource even though nothing is different.
+**NOTE:** Mask specific should ONLY be used when other rights are not specific enough. If you specify mask specific with the equivalent of 'full' rights (2032127), and it finds the property to be 'full', it will report making changes to the resource even though nothing is different.
 
 Mask specific sample usage:
 
