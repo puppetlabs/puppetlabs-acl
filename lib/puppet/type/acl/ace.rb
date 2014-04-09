@@ -18,6 +18,8 @@ class Puppet::Type::Acl
     attr_accessor :mask
 
     def initialize(permission_hash, provider = nil)
+      @affects_defaulted = false
+      @child_types_defaulted = false
       @provider = provider
       id = permission_hash['identity']
       id = permission_hash['id'] if id.nil? || id.empty?
@@ -110,6 +112,9 @@ class Puppet::Type::Acl
         Puppet.warning("In each ace, when specifying rights, if you include 'modify', it should be without anything else e.g. rights => ['modify']. Please remove the extraneous rights from the manifest to remove this warning. Reference: #{to_s}")
         @rights = [:modify]
       end
+      if @rights.include?(:remove_match_any) && rights.count != 1
+        @rights = [:remove_match_any]
+      end
     end
 
     def ensure_mask_when_mask_specific
@@ -142,6 +147,16 @@ class Puppet::Type::Acl
       @child_types = :none if @affects == :self_only
     end
 
+    def ensure_remove_match_with_defaults
+      return if @child_types.nil? ||@affects.nil?
+      # if the user took the default value of one of these, because we set
+      # a value here for a match, we need to ensure that we handle the case
+      # where they expected a match with something like
+      # @child_types = :none == @child_types = :remove_match_any
+      @affects = :remove_match_any if @child_types == :remove_match_any && @affects_defaulted
+      @child_types = :remove_match_any if @affects == :remove_match_any && @child_types_defaulted
+    end
+
     def identity=(value)
       @identity = validate_non_empty('identity', value)
     end
@@ -162,30 +177,43 @@ class Puppet::Type::Acl
 
     def rights=(value)
       @rights = ensure_unique_values(
-          convert_to_symbols(
+        convert_to_symbols(
           validate_individual_values(
-          validate_array(
+           validate_array(
                'rights',
                validate_non_empty('rights', value)
-          ),
-          :full, :modify, :write, :list, :read, :execute, :mask_specific)))
+           ),
+           :full, :modify, :write, :list, :read, :execute, :mask_specific, :remove_match_any
+          )
+        )
+      )
       ensure_rights_order
       ensure_rights_values_compatible
       ensure_mask_when_mask_specific if @rights.include?(:mask_specific)
     end
 
     def type=(value)
-      @type = convert_to_symbol(validate(value || :allow, :allow, :deny))
+      @type = convert_to_symbol(
+        validate(value || :allow, :allow, :deny, :remove_match_any)
+      )
     end
 
     def child_types=(value)
-      @child_types = convert_to_symbol(validate(value || :all, :all, :objects, :containers, :none))
+      @child_types_defaulted = true if value.nil?
+      @child_types = convert_to_symbol(
+        validate(value || :all, :all, :objects, :containers, :none, :remove_match_any)
+      )
       ensure_none_or_self_only_sync
+      ensure_remove_match_with_defaults
     end
 
     def affects=(value)
-      @affects = convert_to_symbol(validate(value || :all, :all, :self_only, :children_only, :self_and_direct_children_only, :direct_children_only))
+      @affects_defaulted = true if value.nil?
+      @affects = convert_to_symbol(
+        validate(value || :all, :all, :self_only, :children_only, :self_and_direct_children_only, :direct_children_only, :remove_match_any)
+      )
       ensure_none_or_self_only_sync
+      ensure_remove_match_with_defaults
     end
 
     def get_comparison_ids(other = nil)
@@ -230,10 +258,19 @@ class Puppet::Type::Acl
       account_ids = get_comparison_ids(other)
 
       return account_ids[0] == account_ids[1] &&
-          @child_types == other.child_types &&
-          @affects == other.affects &&
           @is_inherited == other.is_inherited &&
-          @type == other.type
+          (@type == other.type ||
+            @type == :remove_match_any ||
+            other.type == :remove_match_any
+          ) &&
+          (@child_types == other.child_types ||
+            @child_types == :remove_match_any ||
+            other.child_types == :remove_match_any
+          ) &&
+          (@affects == other.affects ||
+            @affects == :remove_match_any ||
+            other.affects == :remove_match_any
+          )
     end
 
     # This ensures we are looking at the same ace with the same
@@ -246,7 +283,10 @@ class Puppet::Type::Acl
       return false unless other.is_a?(Ace)
 
       return same?(other) &&
-             @rights == other.rights
+             (@rights == other.rights ||
+               @rights == [:remove_match_any] ||
+               other.rights == [:remove_match_any]
+             )
     end
     alias_method :eql?, :==
 

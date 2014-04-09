@@ -37,19 +37,6 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     end
   end
 
-  def set_perms_absent(permissions, include_inherited = false)
-    resource[:permissions] = permissions
-    #provider.permissions = permissions
-    resource.provider.destroy
-    resource.provider.flush
-
-    if include_inherited
-      provider.permissions
-    else
-      provider.permissions.select { |p| !p.is_inherited? }
-    end
-  end
-
   def get_permissions_for_path(path)
     sd = Puppet::Util::Windows::Security.get_security_descriptor(path)
 
@@ -303,35 +290,6 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         perms_not_empty.must == true
       end
 
-      it "should handle setting folder purge => true" do
-        permissions = [
-            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider),
-            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['full']}, provider)
-        ]
-        resource[:purge] = :true
-
-        set_perms(permissions).must == permissions
-
-        permissions = [
-            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider)
-        ]
-
-        set_perms(permissions).must == permissions
-      end
-
-      it "should handle setting folder protected and purge => true" do
-        permissions = [
-            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider),
-            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['full']}, provider)
-        ]
-        resource[:purge] = :true
-        provider.inherit_parent_permissions = :false
-
-        set_perms(permissions).must == permissions
-        # all permissions including inherited should also be the same
-        get_permissions_for_path(resource[:target]).must == permissions
-      end
-
       it "should handle setting ace inheritance" do
         permissions = [
             Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full'], 'child_types' => 'containers'}, provider),
@@ -488,98 +446,129 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     end
   end
 
-  context "ensure => absent" do
-    let (:permissions) { [
-        Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}),
-        Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['modify']}),
-        Puppet::Type::Acl::Ace.new({'identity' => 'Authenticated Users','rights' => ['write','read','execute']})
-    ] }
-
+  context ":purge" do
     before :each do
-      resource[:target] = set_path('perms_absent')
-      permissions.each do |perm|
-        perm.id = provider.get_account_id(perm.identity)
-      end
-
-      set_perms(permissions).must == permissions
-
-      resource[:ensure] = :absent
+      resource[:target] = set_path('purge_stuff')
     end
 
-    it "should remove specified permissions" do
-      removing_perms_hash = [
-          {'identity' => 'Everyone','rights' => ['full']}
-      ]
-
-      removing_perms = [
-          Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider)
-      ]
-
-      set_perms_absent(removing_perms_hash).must == (permissions - removing_perms)
-    end
-
-    context "when removing non-existing users" do
-      require 'puppet/util/adsi'
-
-      it "should allow it to work with SIDs" do
-        user_name = "jimmy123456_randomyo"
-
-        user = Puppet::Util::ADSI::User.create(user_name) unless Puppet::Util::ADSI::User.exists?(user_name)
-        user = Puppet::Util::ADSI::User.new(user_name) if Puppet::Util::ADSI::User.exists?(user_name)
-        user.commit
-        sid = user.sid.to_s
-
+    context "purge => true" do
+      it "should remove unspecified explicit permissions" do
         permissions = [
-          Puppet::Type::Acl::Ace.new({'identity' => user_name,'rights' => ['modify']}, provider)
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['full']}, provider)
         ]
+        resource[:purge] = :true
+
         set_perms(permissions).must == permissions
 
-        Puppet::Util::ADSI::User.delete(user_name)
-
-        removing_perms_hash = [
-            {'identity' => sid,'rights' => ['modify']}
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider)
         ]
+
+        set_perms(permissions).must == permissions
+      end
+
+      it "with inherit_parent_permissions => false, should remove all but specified permissions" do
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Users','rights' => ['full']}, provider)
+        ]
+        resource[:purge] = :true
+        provider.inherit_parent_permissions = :false
+
+        set_perms(permissions).must == permissions
+        # all permissions including inherited should also be the same
+        get_permissions_for_path(resource[:target]).must == permissions
+      end
+
+      context "when purge => true with a pre-existing manifest and inherit parent permissions is then set false (PUP-2036)" do
+        let (:permissions_hash) { [
+            {'identity' => 'Administrators','rights' => ['full']},
+            {'identity' => 'SYSTEM','rights' => ['full']},
+            {'identity' => 'Administrator','rights' => ['modify']}
+        ] }
+
+        let (:permissions) { [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full']}),
+            Puppet::Type::Acl::Ace.new({'identity' => 'SYSTEM','rights' => ['full']}),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['modify']})
+        ] }
+
+        before :each do
+          resource[:target] = set_path('perms_purge_true_inherit_false_second_sync')
+          resource[:purge] = true
+          permissions.each do |perm|
+            perm.id = provider.get_account_id(perm.identity)
+            perm.identity = provider.get_account_name(perm.identity)
+          end
+          resource[:permissions] = permissions_hash
+
+          set_perms(permissions).must == permissions
+        end
+
+        it "should remove the permissions successfully" do
+          provider.inherit_parent_permissions = false
+          resource.provider.flush
+
+          provider.permissions.must == permissions
+        end
+      end
+    end
+
+    context "purge => listed_permissions" do
+      let (:permissions) { [
+          Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}),
+          Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['modify']}),
+          Puppet::Type::Acl::Ace.new({'identity' => 'Authenticated Users','rights' => ['write','read','execute']})
+      ] }
+
+      before :each do
+        resource[:target] = set_path('perms_remove')
+        permissions.each do |perm|
+          perm.id = provider.get_account_id(perm.identity)
+        end
+
+        set_perms(permissions).must == permissions
+
+      end
+
+      it "should remove specified permissions" do
+        resource[:purge] = :listed_permissions
         removing_perms = [
-            Puppet::Type::Acl::Ace.new({'identity' => sid,'rights' => ['modify']}, provider)
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider)
         ]
 
-        permissions = get_permissions_for_path(resource[:target]).select { |p| !p.is_inherited? }
-        set_perms_absent(removing_perms_hash).must == (permissions - removing_perms)
+        set_perms(removing_perms).must == (permissions - removing_perms)
       end
 
-    end
-  end
+      context "when removing non-existing users" do
+        require 'puppet/util/adsi'
 
-  context "when purge => true with a pre-existing manifest and inherit parent permissions is then set false (PUP-2036)" do
-    let (:permissions_hash) { [
-        {'identity' => 'Administrators','rights' => ['full']},
-        {'identity' => 'SYSTEM','rights' => ['full']},
-        {'identity' => 'Administrator','rights' => ['modify']}
-    ] }
+        it "should allow it to work with SIDs" do
+          user_name = "jimmy123456_randomyo"
 
-    let (:permissions) { [
-        Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full']}),
-        Puppet::Type::Acl::Ace.new({'identity' => 'SYSTEM','rights' => ['full']}),
-        Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['modify']})
-    ] }
+          user = Puppet::Util::ADSI::User.create(user_name) unless Puppet::Util::ADSI::User.exists?(user_name)
+          user = Puppet::Util::ADSI::User.new(user_name) if Puppet::Util::ADSI::User.exists?(user_name)
+          user.commit
+          sid = user.sid.to_s
 
-    before :each do
-      resource[:target] = set_path('perms_purge_true_inherit_false_second_sync')
-      resource[:purge] = true
-      permissions.each do |perm|
-        perm.id = provider.get_account_id(perm.identity)
-        perm.identity = provider.get_account_name(perm.identity)
+          permissions = [
+              Puppet::Type::Acl::Ace.new({'identity' => user_name,'rights' => ['modify']}, provider)
+          ]
+          set_perms(permissions).must == permissions
+
+          Puppet::Util::ADSI::User.delete(user_name)
+
+          resource[:purge] = :listed_permissions
+          removing_perms = [
+              Puppet::Type::Acl::Ace.new({'identity' => sid,'rights' => ['modify']}, provider)
+          ]
+
+          permissions = get_permissions_for_path(resource[:target]).select { |p| !p.is_inherited? }
+          set_perms(removing_perms).must == (permissions - removing_perms)
+        end
+
       end
-      resource[:permissions] = permissions_hash
-
-      set_perms(permissions).must == permissions
-    end
-
-    it "should remove the permissions successfully" do
-      provider.inherit_parent_permissions = false
-      resource.provider.flush
-
-      provider.permissions.must == permissions
     end
   end
 

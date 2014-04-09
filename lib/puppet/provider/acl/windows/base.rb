@@ -61,7 +61,7 @@ class Puppet::Provider::Acl
         end
 
         def get_ace_rights_from_mask(ace)
-          #todo: check that this is a file type and respond appropriately
+          #todo v2 check that this is a file type and respond appropriately
           rights = []
           return rights if ace.nil?
           mask_specific_remainder = ace.mask
@@ -174,13 +174,30 @@ class Puppet::Provider::Acl
         end
         module_function :get_ace_propagation
 
-        def are_permissions_insync?(current_permissions, specified_permissions, should_purge = false)
-          return false if current_permissions.nil? && !specified_permissions.nil?
+        def are_permissions_insync?(current_permissions, specified_permissions, purge_value = :false)
+          return false if current_permissions.nil? && !specified_permissions.nil? && purge_value != :listed_permissions
 
-          current_local_permissions = current_permissions.select { |p| !p.is_inherited? }
+          purge_value = purge_value.to_s.downcase.to_sym unless purge_value.is_a?(Symbol)
+          should_purge = purge_value == :true
+          remove_permissions = purge_value == :listed_permissions
+          if current_permissions.nil?
+            current_local_permissions = []
+          else
+            current_local_permissions = current_permissions.select { |p| !p.is_inherited? }
+          end
 
           if should_purge
             current_local_permissions == specified_permissions
+          elsif remove_permissions
+            return true if specified_permissions.nil?
+            return false unless (specified_permissions & current_local_permissions) == []
+            # a more detailed check is required - hashing is limited with match any
+            specified_permissions.each do |specified_ace|
+              existing_aces = current_local_permissions.select { |a| a == specified_ace }
+              return false unless existing_aces.empty?
+            end
+
+            return true
           else
             return true if specified_permissions.nil?
 
@@ -291,7 +308,6 @@ class Puppet::Provider::Acl
 
         def sync_aces(current_dacl, should_aces, should_purge = false, remove_permissions = false)
           unless remove_permissions
-          #if @resource[:ensure] != :absent
             return should_aces if should_purge
 
             current_dacl.each do |ace|
@@ -318,7 +334,7 @@ class Puppet::Provider::Acl
               next if ace.inherited?
 
               current_ace = Puppet::Type::Acl::Ace.new(convert_to_permissions_hash(ace), self)
-              existing_aces = should_aces.select { |a| a.same?(current_ace) }
+              existing_aces = should_aces.select { |a| a == current_ace }
               next unless existing_aces.empty?
 
               kept_aces << current_ace

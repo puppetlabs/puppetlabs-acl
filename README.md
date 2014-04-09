@@ -30,7 +30,6 @@ At a minimum, you need to provide the target and at least one permission (access
 Minimally expressed sample usage:
 
     acl { 'c:/tempperms':
-      ensure      => present,
       permissions => [
        { identity => 'Administrator', rights => ['full'] },
        { identity => 'Users', rights => ['read','execute'] }
@@ -43,7 +42,6 @@ If you want you can provide a fully expressed ACL. The fully expressed acl in th
 Fully expressed sample usage:
 
     acl { 'c:/tempperms':
-      ensure      => present,
       target      => 'c:/tempperms',
       target_type => 'file',
       purge       => 'false',
@@ -57,19 +55,16 @@ Fully expressed sample usage:
     }
 
 
-Adding in multiple users is done by just adding users to the list of permissions. You can also see that you can specify Domain qualified users and SIDs if you need to. SIDs reference - http://support.microsoft.com/kb/243330
+Users can be specified with SIDs (Security Identifiers) or as fully qualified domain names (FQDN). SIDs reference - http://support.microsoft.com/kb/243330
 
-Multi-user sample usage:
+SID/FQDN User sample usage:
 
     acl { 'c:/tempperms':
-      ensure      => present,
-      purge       => 'true',
       permissions => [
        { identity => 'NT AUTHORITY\SYSTEM', rights => ['modify'] },
        { identity => 'BUILTIN\Users', rights => ['read','execute'] },
        { identity => 'S-1-5-32-544', rights => ['write','read','execute'] }
       ],
-      inherit_parent_permissions => 'false',
     }
 
 
@@ -78,14 +73,12 @@ You can manage the same target across multiple acl resources with some caveats. 
 Manage same ACL resource multiple acls sample usage:
 
     acl { 'c:/tempperms':
-      ensure      => present,
       permissions => [
        { identity => 'Administrator', rights => ['full'] }
      ],
     }
 
     acl { 'tempperms_Users':
-      ensure      => present,,
       target      => 'c:/tempperms',
       permissions => [
        { identity => 'Users', rights => ['read','execute'] }
@@ -98,7 +91,6 @@ Removing upstream inheritance is known as "protecting" the target. When an item 
 Protected ACL sample usage:
 
     acl { 'c:/tempperms':
-      ensure      => present,
       permissions => [
        { identity => 'Administrators', rights => ['full'] },
        { identity => 'Users', rights => ['full'] }
@@ -112,7 +104,6 @@ To lock down a folder to managed explicit ACEs, you want to set `purge => true`.
 Purge sample usage:
 
     acl { 'c:/tempperms':
-      ensure      => present,
       purge       => 'true',
       permissions => [
        { identity => 'Administrators', rights => ['full'] },
@@ -126,7 +117,6 @@ To lock down a folder to only the permissions specified in the manifest resource
 Protected with purge sample usage:
 
     acl { 'c:/tempperms':
-      ensure      => present,
       purge       => 'true',
       permissions => [
        { identity => 'Administrators', rights => ['full'] },
@@ -142,7 +132,6 @@ ACE rights can be: 'full', 'modify', 'write', 'read', 'execute', and/or 'mask_sp
 Rights sample usage:
 
     acl { 'c:/tempperms':
-      ensure      => present,
       permissions => [
        { identity => 'Administrators', rights => ['full'] },
        { identity => 'Administrator', rights => ['modify'] },
@@ -161,7 +150,6 @@ NOTE: Mask specific should ONLY be used when other rights are not specific enoug
 Mask specific sample usage:
 
     acl { 'c:/tempperms':
-      ensure      => present,
       purge       => 'true',
       permissions => [
        { identity => 'Administrators', rights => ['full'] }, #full is same as - 2032127 aka 0x1f01ff but you should use 'full'
@@ -178,7 +166,6 @@ ACEs can be of type 'allow' (default) or 'deny'. Deny ACEs should be listed firs
 Deny ACE sample usage:
 
     acl { 'c:/tempperms':
-      ensure      => present,
       permissions => [
        { identity => 'SYSTEM', rights => ['full'], type=> 'deny', affects => 'self_only' },
        { identity => 'Administrators', rights => ['full'] }
@@ -191,7 +178,6 @@ ACEs have inheritance structures as well aka "child_types": 'all' (default), 'no
 ACE inheritance "child_types" sample usage:
 
     acl { 'c:/tempperms':
-      ensure      => present,
       purge       => 'true',
       permissions => [
        { identity => 'SYSTEM', rights => ['full'], child_types => 'all' },
@@ -208,7 +194,6 @@ ACEs have propagation rules, a nice way of saying "how" they apply permissions t
 ACE propagation "affects" sample usage:
 
     acl { 'c:/tempperms':
-      ensure      => present,
       purge       => 'true',
       permissions => [
        { identity => 'Administrators', rights => ['modify'], affects => 'all' },
@@ -220,13 +205,12 @@ ACE propagation "affects" sample usage:
       inherit_parent_permissions => 'false',
     }
 
-Removing permissions is done by using `ensure => absent`. This will remove permissions from the ACL. Note that you are not able to destroy the security descriptor or Access List with `absent`, only remove explicit permissions. When the example below is done, it will ensure that `Administrator` and `Authenticated Users` are not on the ACL. This comparison is done based on `identity`, `type`, `child_types` and `affects`.
+Removing permissions is done by using `purge => listed_permissions`. This will remove explicit permissions from the ACL. When the example below is done, it will ensure that `Administrator` and `Authenticated Users` are not on the ACL. This comparison is done based on `identity`, `type`, `child_types` and `affects`.
 
 Removing permissions sample usage:
 
     #set permissions
-    acl { 'c:/tempperms/absent':
-      ensure      => present,
+    acl { 'c:/tempperms/remove':
       purge       => 'true',
       permissions => [
        { identity => 'Administrators', rights => ['full'] },
@@ -239,26 +223,24 @@ Removing permissions sample usage:
     }
 
     #now remove some permissions
-    acl { 'remove_tempperms/absent':
-      ensure      => absent,
-      target      => 'c:/tempperms/absent',
-      purge       => 'true',
+    acl { 'remove_tempperms/remove':
+      target      => 'c:/tempperms/remove',
+      purge       => 'listed_permissions',
       permissions => [
        { identity => 'Administrator', rights => ['write'] },
        { identity => 'Authenticated Users', rights => ['full'] }
       ],
       inherit_parent_permissions => 'false',
-      require     => Acl['c:/tempperms/absent'],
+      require     => Acl['c:/tempperms/listed_permissions'],
     }
 
-**Note:** possibly in a second release we could add the ability to target by identity only to ensure is absent.
+**Note:** possibly in a second release we could add the ability to target by identity only to ensure identity is not available.
 
 An interesting note with Windows, you can specify the same identity with different inheritance and propagation and each of those items will actually be managed as separate ACEs.
 
 Same user multiple ACEs sample usage:
 
     acl { 'c:/tempperms':
-      ensure      => present,
       purge       => 'true',
       permissions => [
        { identity => 'SYSTEM', rights => ['modify'], child_types => 'none' },
@@ -282,8 +264,6 @@ Same user multiple ACEs sample usage:
 
  * The Windows Provider in the first release (at least) will not handle permissions with Symlinks. Please explicitly manage the permissions of the target.
  * When using SIDs for identities, autorequire will attempt to match to users with fully qualified names (`User[BUILTIN\Administrators]`) in addition to SIDs (`User[S-1-5-32-544]`). The limitation is that it won't match against `User[Administrators]` as that could cause issues if attempting to match domain accounts versus local accounts with the same name e.g. `Domain\Bob` vs `LOCAL\Bob`.
- * Deny ACEs do not inherit due to bug in framework (outside of acl module).
- * `ensure => absent` does not properly report what the ACEs where changed to.
 
 ##License
 
