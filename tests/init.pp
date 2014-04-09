@@ -318,7 +318,7 @@ acl { 'c:/tempperms/mask_specific':
    { identity => 'Administrators', rights => ['full'] }, #full is same as - 2032127 aka 0x1f01ff
    { identity => 'SYSTEM', rights => ['modify'] }, #modify is same as 1245631 aka 0x1301bf
    { identity => 'Users', rights => ['mask_specific'], mask => '1180073' }, #RX WA #0x1201a9
-   { identity => 'Administrator', rights => ['mask_specific'], mask => '1180032' }  #RA,WA,Rc #1180032  #0x120180
+   { identity => 'Administrator', rights => ['mask_specific'], mask => '1180032' }  #RA,S,WA,Rc #1180032  #0x120180
   ],
   inherit_parent_permissions => 'false',
 }

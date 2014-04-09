@@ -25,6 +25,7 @@ See the section [Installing Modules](http://docs.puppetlabs.com/puppet/2.7/refer
 
 ##Usage
 
+###Minimal
 At a minimum, you need to provide the target and at least one permission (access control entry or ACE). It will default the other settings to sensible defaults.
 
 Minimally expressed sample usage:
@@ -37,7 +38,7 @@ Minimally expressed sample usage:
      ],
     }
 
-
+###Full
 If you want you can provide a fully expressed ACL. The fully expressed acl in the sample below produces the same settings as the minimal sample above.
 
 Fully expressed sample usage:
@@ -56,7 +57,7 @@ Fully expressed sample usage:
       inherit_parent_permissions => 'true',
     }
 
-
+###SID/FQDN
 Adding in multiple users is done by just adding users to the list of permissions. You can also see that you can specify Domain qualified users and SIDs if you need to. SIDs reference - http://support.microsoft.com/kb/243330
 
 Multi-user sample usage:
@@ -72,7 +73,7 @@ Multi-user sample usage:
       inherit_parent_permissions => 'false',
     }
 
-
+###Same Target Multiple Resources
 You can manage the same target across multiple acl resources with some caveats. The title of the resource needs to be unique. It is suggested that you only do this when you would need to (can get confusing). You should not set `purge => 'true'` on any of the resources that apply to the same target or you will see thrashing in reports as the permissions will be added and removed every catalog application. Use this feature with care.
 
 Manage same ACL resource multiple acls sample usage:
@@ -92,7 +93,7 @@ Manage same ACL resource multiple acls sample usage:
      ],
     }
 
-
+###Protect
 Removing upstream inheritance is known as "protecting" the target. When an item is "protected" without `purge => true`, the inherited ACEs will be copied into the target as unmanaged ACEs.
 
 Protected ACL sample usage:
@@ -106,7 +107,7 @@ Protected ACL sample usage:
       inherit_parent_permissions => 'false',
     }
 
-
+###Purge
 To lock down a folder to managed explicit ACEs, you want to set `purge => true`. This will only remove other explicit ACEs from the folder that are unmanaged by this resource. All inherited ACEs will remain (see next example).
 
 Purge sample usage:
@@ -120,7 +121,7 @@ Purge sample usage:
       ],
     }
 
-
+###Protect with Purge
 To lock down a folder to only the permissions specified in the manifest resource, you want to protect the folder and set `purge => 'true'`. This ensure that the only permissions on the folder are the ones that you have set explicitly in the manifest.
 
 Protected with purge sample usage:
@@ -135,7 +136,7 @@ Protected with purge sample usage:
       inherit_parent_permissions => 'false',
     }
 
-
+###ACE Rights
 ACE rights can be: 'full', 'modify', 'write', 'read', 'execute', and/or 'mask_specific'. 'full', 'modify', and 'mask_specific' are mutually exclusive, that is they should be the only thing specified in rights if they are applicable. 'full' indicates all rights, so it is cumulative. 'modify' indicates 'write', 'read', 'execute' and DELETE so it is also cumulative. If you specify 'full' or 'modify' as part of a set of rights with other rights e.g. `rights => ['full','read']`, the `acl` type will issue a warning and remove the other items. You can specify any combination of 'write', 'read', and 'execute'. More on 'mask_specific' in the next section.
 
 
@@ -153,7 +154,7 @@ Rights sample usage:
       inherit_parent_permissions => 'false',
     }
 
-
+###ACE Mask Specific Rights
 ACE `rights => ['mask_specific']` indicates that rights are passed as part of a mask, so the mask is all that will be evaluated. When you specify 'mask_specific' you must also specify `mask` with an integer (passed as a string) that represents the permissions mask. Because the mask is all that is evaluated, it is important that you don't try to combine something like read permissions and then the mask e.g. `rights => ['read','mask_specific']` (invalid scenario). In fact, the `ACL` provider will error if you attempt to do this because it could set the system in an unusable state due to a misunderstanding of how this particular feature works.
 
 NOTE: Mask specific should ONLY be used when other rights are not specific enough. If you specify mask specific with the equivalent of 'full' rights (2032127), and it finds the property to be 'full', it will report making changes to the resource even though nothing is different.
@@ -167,12 +168,12 @@ Mask specific sample usage:
        { identity => 'Administrators', rights => ['full'] }, #full is same as - 2032127 aka 0x1f01ff but you should use 'full'
        { identity => 'SYSTEM', rights => ['modify'] }, #modify is same as 1245631 aka 0x1301bf but you should use 'modify'
        { identity => 'Users', rights => ['mask_specific'], mask => '1180073' }, #RX WA #0x1201a9
-       { identity => 'Administrator', rights => ['mask_specific'], mask => '1180032' }  #RA,WA,Rc #1180032  #0x120180
+       { identity => 'Administrator', rights => ['mask_specific'], mask => '1180032' }  #RA,S,WA,Rc #1180032  #0x120180
       ],
       inherit_parent_permissions => 'false',
     }
 
-
+###ACE Type
 ACEs can be of type 'allow' (default) or 'deny'. Deny ACEs should be listed first before allow ACEs.
 
 Deny ACE sample usage:
@@ -185,7 +186,7 @@ Deny ACE sample usage:
       ],
     }
 
-
+###ACE Child Types (Inheritance)
 ACEs have inheritance structures as well aka "child_types": 'all' (default), 'none', 'containers', and 'objects'. This controls how sub-folders and files will inherit each particular ACE.
 
 ACE inheritance "child_types" sample usage:
@@ -202,7 +203,7 @@ ACE inheritance "child_types" sample usage:
       inherit_parent_permissions => 'false',
     }
 
-
+###ACE Affects (Propagation)
 ACEs have propagation rules, a nice way of saying "how" they apply permissions to containers, objects, children and grandchildren. Propagation aka "affects" can take the value of: 'all' (default), 'self_only', 'children_only', 'direct_children_only', and 'self_and_direct_children_only'.
 
 ACE propagation "affects" sample usage:
@@ -220,6 +221,7 @@ ACE propagation "affects" sample usage:
       inherit_parent_permissions => 'false',
     }
 
+###ACE Purge => Listed Permissions (Removing Permissions)
 Removing permissions is done by using `ensure => absent`. This will remove permissions from the ACL. Note that you are not able to destroy the security descriptor or Access List with `absent`, only remove explicit permissions. When the example below is done, it will ensure that `Administrator` and `Authenticated Users` are not on the ACL. This comparison is done based on `identity`, `type`, `child_types` and `affects`.
 
 Removing permissions sample usage:
@@ -253,6 +255,7 @@ Removing permissions sample usage:
 
 **Note:** possibly in a second release we could add the ability to target by identity only to ensure is absent.
 
+###Same Identity Multiple ACEs
 An interesting note with Windows, you can specify the same identity with different inheritance and propagation and each of those items will actually be managed as separate ACEs.
 
 Same user multiple ACEs sample usage:
