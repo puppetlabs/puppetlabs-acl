@@ -173,6 +173,14 @@ Mask specific sample usage:
       inherit_parent_permissions => 'false',
     }
 
+
+References
+
+ * File/Directory Access Mask Constants - http://msdn.microsoft.com/en-us/library/aa394063(v=vs.85).aspx
+ * File Generic Access Rights - http://msdn.microsoft.com/en-us/library/windows/desktop/aa364399(v=vs.85).aspx
+ * Access Mask Format - http://msdn.microsoft.com/en-us/library/windows/desktop/aa374896(v=vs.85).aspx
+
+
 ###ACE Type
 ACEs can be of type 'allow' (default) or 'deny'. Deny ACEs should be listed first before allow ACEs.
 
