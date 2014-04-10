@@ -531,10 +531,6 @@ describe Puppet::Type.type(:acl) do
         resource[:permissions] = {'identity'=>'bob','rights'=>['write']}
       end
 
-      it "should accept ['list']" do
-        resource[:permissions] = {'identity'=>'bob','rights'=>['list']}
-      end
-
       it "should accept ['read']" do
         resource[:permissions] = {'identity'=>'bob','rights'=>['read']}
       end

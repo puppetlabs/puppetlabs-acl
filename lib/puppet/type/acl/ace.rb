@@ -168,7 +168,7 @@ class Puppet::Type::Acl
                'rights',
                validate_non_empty('rights', value)
           ),
-          :full, :modify, :write, :list, :read, :execute, :mask_specific)))
+          :full, :modify, :write, :read, :execute, :mask_specific)))
       ensure_rights_order
       ensure_rights_values_compatible
       ensure_mask_when_mask_specific if @rights.include?(:mask_specific)
