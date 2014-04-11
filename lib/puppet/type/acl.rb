@@ -228,6 +228,23 @@ Puppet::Type.newtype(:acl) do
 
       super(shouldvalue)
     end
+
+    def self.format_value_for_display(value)
+      if value.is_a? Array
+        formatted_values = value.collect {|value| format_value_for_display(value)}.join(', ')
+        "[#{formatted_values}\n]"
+      elsif value.is_a? Puppet::Type::Acl::Ace
+        "\n #{value.inspect}"
+      elsif value.is_a? Hash
+        hash = value.keys.sort {|a,b| a.to_s <=> b.to_s}.collect do |k|
+          "#{k} => #{format_value_for_display(value[k])}"
+        end.join(', ')
+
+        "\n { #{hash} }"
+      else
+        "'#{value}'"
+      end
+    end
   end
 
   newproperty(:owner) do
