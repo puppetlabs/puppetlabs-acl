@@ -40,7 +40,6 @@ Puppet::Type.newtype(:acl) do
     Minimally expressed sample usage:
 
       acl { 'c:/tempperms':
-        ensure      => present,
         permissions => [
          { identity => 'Administrator', rights => ['full'] },
          { identity => 'Users', rights => ['read','execute'] }
@@ -54,7 +53,6 @@ Puppet::Type.newtype(:acl) do
     Fully expressed sample usage:
 
       acl { 'c:/tempperms':
-        ensure      => present,
         target      => 'c:/tempperms',
         target_type => 'file',
         purge       => 'false',
@@ -79,14 +77,12 @@ Puppet::Type.newtype(:acl) do
     Manage same ACL resource multiple acls sample usage:
 
       acl { 'c:/tempperms':
-        ensure      => present,
         permissions => [
          { identity => 'Administrator', rights => ['full'] }
        ],
       }
 
       acl { 'tempperms_Users':
-        ensure      => present,,
         target      => 'c:/tempperms',
         permissions => [
          { identity => 'Users', rights => ['read','execute'] }
@@ -96,7 +92,6 @@ Puppet::Type.newtype(:acl) do
     Removing upstream inheritance with purge sample usage:
 
       acl { 'c:/tempperms':
-        ensure      => present,
         purge       => 'true',
         permissions => [
          { identity => 'Administrators', rights => ['full'] },
@@ -119,8 +114,6 @@ Puppet::Type.newtype(:acl) do
       self[:target] = self[:name]
     end
   end
-
-  ensurable
 
   newparam(:name) do
     desc "The name of the acl resource. Used for uniqueness. Will set
@@ -154,14 +147,16 @@ Puppet::Type.newtype(:acl) do
     defaultto(:file)
   end
 
-  newparam(:purge, :boolean => true) do
+  newparam(:purge) do
     desc "Purge specifies whether to remove other explicit permissions
       if not specified in the permissions set. This doesn't do anything
       with permissions inherited from parents (to remove those you should
       combine `purge => 'false', inherit_parent_permissions => 'false'`.
+      This also allows you to ensure the permissions listed are not on
+      the ACL with `purge => listed_permissions`.
       The default is false."
-    newvalues(:true, :false)
-    defaultto(false)
+    newvalues(:true, :false, :listed_permissions)
+    defaultto(:false)
   end
 
   newproperty(:permissions, :array_matching => :all) do

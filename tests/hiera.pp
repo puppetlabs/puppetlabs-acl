@@ -19,7 +19,6 @@ file {'c:/temp':
 #}
 
 acl { 'c:\temp':
-  ensure      => present,
   permissions => [
     {
       identity => 'Administrators',
@@ -32,7 +31,6 @@ acl { 'c:\temp':
 
 acl { 'temp_dir_module_name':
   target      => 'c:/temp',
-  ensure      => present,
   permissions => [
     {
       identity => 'bob',
@@ -47,7 +45,6 @@ acl { 'temp_dir_module_name':
 
 acl { 'temp_dir_module2_name':
   target      => 'c:/temp',
-  ensure      => present,
   permissions => [
     {
       identity => 'bill',
