@@ -6,7 +6,11 @@ class Puppet::Type::Acl
   # Control List (ACL) type. ACEs contain information about
   # the trustee, the rights, and on some systems how they are
   # inherited and propagated to subtypes.
-  class Ace
+  class Ace < Hash
+    # < Hash is due to a bug with how Puppet::Resource.to_manifest
+    # does not work through quite the same code and needs to
+    # believe this custom object is a Hash. If issues are later
+    # found, this should be reviewed.
     require Pathname.new(__FILE__).dirname + '../../../' + 'puppet/type/acl/rights'
 
     attr_reader :identity
@@ -272,6 +276,22 @@ class Puppet::Type::Acl
       ace_hash
     end
 
+    # The following methods: keys, values, [](key) make
+    # `puppet resource acl somelocation` believe that
+    # this is actually a Hash and can pull the values
+    # from this object.
+    def keys
+      to_hash.keys
+    end
+
+    def values
+      to_hash.values
+    end
+
+    def [](key)
+      to_hash[key]
+    end
+
     def inspect
       hash = to_hash
       return_value = hash.keys.collect do |key|
@@ -283,11 +303,8 @@ class Puppet::Type::Acl
         end
       end.join(', ')
 
-      "{ #{return_value} }"
+      "\n { #{return_value} }"
     end
-
-    def to_s
-      "\n #{self.inspect}"
-    end
+    alias_method :to_s, :inspect
   end
 end

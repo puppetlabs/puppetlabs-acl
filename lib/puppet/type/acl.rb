@@ -234,7 +234,7 @@ Puppet::Type.newtype(:acl) do
         formatted_values = value.collect {|value| format_value_for_display(value)}.join(', ')
         "[#{formatted_values}\n]"
       elsif value.is_a? Puppet::Type::Acl::Ace
-        "\n #{value.inspect}"
+        "#{value.inspect}"
       elsif value.is_a? Hash
         hash = value.keys.sort {|a,b| a.to_s <=> b.to_s}.collect do |k|
           "#{k} => #{format_value_for_display(value[k])}"
