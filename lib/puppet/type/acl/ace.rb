@@ -18,8 +18,8 @@ class Puppet::Type::Acl
     attr_reader :type
     attr_reader :child_types
     attr_reader :affects
-    attr_accessor :is_inherited
     attr_accessor :mask
+    attr_reader :is_inherited
 
     def initialize(permission_hash, provider = nil)
       @provider = provider
