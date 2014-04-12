@@ -18,8 +18,8 @@ class Puppet::Type::Acl
     attr_reader :type
     attr_reader :child_types
     attr_reader :affects
-    attr_accessor :mask
     attr_reader :is_inherited
+    attr_reader :mask
 
     def initialize(permission_hash, provider = nil)
       @provider = provider
@@ -33,6 +33,7 @@ class Puppet::Type::Acl
       self.child_types = permission_hash['child_types']
       self.affects = permission_hash['affects']
       @is_inherited = permission_hash['is_inherited'] || false
+      @hash = nil
     end
 
     def validate(value,*allowed_values)
@@ -148,6 +149,7 @@ class Puppet::Type::Acl
 
     def identity=(value)
       @identity = validate_non_empty('identity', value)
+      @hash = nil
     end
 
     def id
@@ -162,6 +164,7 @@ class Puppet::Type::Acl
 
     def id=(value)
       @id = value
+      @hash = nil
     end
 
     def rights=(value)
@@ -176,20 +179,29 @@ class Puppet::Type::Acl
       ensure_rights_order
       ensure_rights_values_compatible
       ensure_mask_when_mask_specific if @rights.include?(:mask_specific)
+      @hash = nil
+    end
+
+    def mask=(value)
+      @mask = value
+      @hash = nil
     end
 
     def type=(value)
       @type = convert_to_symbol(validate(value || :allow, :allow, :deny))
+      @hash = nil
     end
 
     def child_types=(value)
       @child_types = convert_to_symbol(validate(value || :all, :all, :objects, :containers, :none))
       ensure_none_or_self_only_sync
+      @hash = nil
     end
 
     def affects=(value)
       @affects = convert_to_symbol(validate(value || :all, :all, :self_only, :children_only, :self_and_direct_children_only, :direct_children_only))
       ensure_none_or_self_only_sync
+      @hash = nil
     end
 
     def get_comparison_ids(other = nil)
@@ -264,6 +276,8 @@ class Puppet::Type::Acl
     end
 
     def to_hash
+      return @hash if @hash
+
       ace_hash = Hash.new
       ace_hash['identity'] = identity
       ace_hash['rights'] = convert_from_symbols(rights)
@@ -273,7 +287,8 @@ class Puppet::Type::Acl
       ace_hash['affects'] = affects unless (affects == :all || affects.nil?)
       ace_hash['is_inherited'] = is_inherited if is_inherited
 
-      ace_hash
+      @hash = ace_hash
+      @hash
     end
 
     # The following methods: keys, values, [](key) make
