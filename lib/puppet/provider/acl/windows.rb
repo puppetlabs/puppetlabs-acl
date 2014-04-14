@@ -85,7 +85,6 @@ Puppet::Type.type(:acl).provide :windows do
 
   def permissions_insync?(current, should)
     should = update_permissions_if_file(should)
-    require 'pry';binding.pry
     are_permissions_insync?(current, should, @resource[:purge])
   end
 
