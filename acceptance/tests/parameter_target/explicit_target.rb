@@ -29,7 +29,6 @@ user { '#{user_id}':
 }
 
 acl { 'explicit_target':
-  ensure => present,
   target => '#{target}',
   permissions => [
   	{ identity => '#{user_id}', rights => ['full'] },

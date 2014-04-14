@@ -8,7 +8,7 @@ target = 'c:/temp/add_perm_file.txt'
 user_id = 'bob'
 
 file_content = 'meowmeowmeow'
-verify_content_command = "cat /cygdrive/c/temp/perm_file.txt"
+verify_content_command = "cat /cygdrive/c/temp/add_perm_file.txt"
 file_content_regex = /#{file_content}/
 
 verify_acl_command = "icacls #{target}"
@@ -29,12 +29,11 @@ file { '#{target}':
 user { '#{user_id}':
 	ensure     => present,
 	groups     => 'Users',
-	managehome => true, 
+	managehome => true,
 	password	 => "L0v3Pupp3t!"
 }
 
 acl { '#{target}':
-  ensure => present,
   permissions => [
   	{ identity => '#{user_id}', rights => ['full'] },
   ],
