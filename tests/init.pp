@@ -322,3 +322,17 @@ acl { 'remove_tempperms/remove':
 #remove BUILTIN\Administrators:(OI)(CI)(F)
 #       BUILTIN\Users:(OI)(CI)(W,Rc,X,RA)
 #       Everyone:(OI)(CI)(Rc,S,X,RA)
+
+file {'c:/tempperms/file.txt':
+  ensure => file,
+  content => 'yup',
+}
+
+acl { 'c:/tempperms/file.txt':
+  purge       => true,
+  permissions => [
+   { identity => 'Administrators', rights => ['full'] },
+   { identity => 'Everyone', rights => ['read'] }
+  ],
+  inherit_parent_permissions => false,
+}
