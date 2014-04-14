@@ -9,7 +9,6 @@ file { '/tmp/acl_test':
 }
 
 acl { '/tmp/acl_test':
-  ensure => present,
   permissions => [
   	{ identity => 'root', rights => ['full'] },
   ],

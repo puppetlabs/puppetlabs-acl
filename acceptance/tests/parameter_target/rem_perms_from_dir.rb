@@ -29,7 +29,6 @@ user { '#{user_id}':
 }
 
 acl { '#{target}':
-  ensure => present,
   permissions => [
   	{ identity => '#{user_id}', rights => ['full'] },
   ],
@@ -39,7 +38,7 @@ MANIFEST
 #Remove Manifest
 acl_manifest_remove = <<-MANIFEST
 acl { '#{target}':
-  ensure => absent,
+  purge => 'listed_permissions',
   permissions => [
     { identity => '#{user_id}', rights => ['full'] },
   ],
