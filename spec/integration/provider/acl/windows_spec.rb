@@ -290,6 +290,19 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         perms_not_empty.must == true
       end
 
+      it "should handle file permissions" do
+        file_path = File.join(resource[:target],"file.txt")
+        FileUtils.touch(file_path)
+        resource[:target] = file_path
+        permissions = [
+            Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider)
+        ]
+        resource[:purge] = true
+        provider.inherit_parent_permissions = :false
+
+        set_perms(permissions).must == permissions
+      end
+
       it "should handle setting ace inheritance" do
         permissions = [
             Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full'], 'child_types' => 'containers'}, provider),

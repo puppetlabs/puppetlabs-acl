@@ -56,6 +56,7 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def permissions=(value)
+    value = update_permissions_if_file(value)
     unless @resource[:purge] == :listed_permissions
       non_existing_users = []
       value.each do |permission|
@@ -67,7 +68,24 @@ Puppet::Type.type(:acl).provide :windows do
     @property_flush[:permissions] = value
   end
 
+  def update_permissions_if_file(permissions)
+    case @resource[:target_type]
+      when :file
+        if File.file?(@resource[:target]) && permissions
+          permissions.each do |perm|
+            if perm.affects == :all
+              perm.affects = :self_only
+            end
+          end
+        end
+    end
+
+    permissions
+  end
+
   def permissions_insync?(current, should)
+    should = update_permissions_if_file(should)
+    require 'pry';binding.pry
     are_permissions_insync?(current, should, @resource[:purge])
   end
 
