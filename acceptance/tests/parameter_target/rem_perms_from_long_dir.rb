@@ -1,18 +1,14 @@
-test_name 'Windows ACL Module - Remove Permissions from a File'
+test_name 'Windows ACL Module - Remove Permissions from a Directory with a Long Name (247 chars)'
 
 confine(:to, :platform => 'windows')
 
 #Globals
 target_parent = 'c:/temp'
-target = 'c:/temp/rem_perm_file.txt'
+target = 'c:/temp/rem_lVTjWTRAaQPPyeaseAsuUhnclarfedIpqIdqwyimqPphcKpojhTHogTUWiaEkiOqbeEZKvNAqDcEjJarQzeNxihARGLytPNseasKZxhRxeCwZsopSUFTKTAgsxsBqRigMlZhFQiELGLZghRwhKXVHuUPxWqmeYCHejdQOoGRYqaxwdIqiYyhhSChEWlggsGToSLmrgPmotSACKrREyohRBPaKRUmlgCGVtrPhasdEfU'
 user_id = 'bob'
 
-file_content = 'I love puppet, puppet love puppet, puppet love!'
-verify_content_command = "cat /cygdrive/c/temp/rem_perm_file.txt"
-file_content_regex = /#{file_content}/
-
 verify_acl_command = "icacls #{target}"
-acl_regex = /.*\\bob:\(F\)/
+acl_regex = /.*\\bob:\(OI\)\(CI\)\(F\)/
 
 #Apply Manifest
 acl_manifest_apply = <<-MANIFEST
@@ -21,8 +17,7 @@ file { '#{target_parent}':
 }
 
 file { '#{target}':
-  ensure  => file,
-  content => '#{file_content}',
+  ensure  => directory,
   require => File['#{target_parent}']
 }
 
@@ -70,10 +65,5 @@ agents.each do |agent|
   step "Verify that ACL Rights are Correct"
   on(agent, verify_acl_command) do |result|
     assert_no_match(acl_regex, result.stdout, 'Unexpected ACL was present!')
-  end
-
-  step "Verify File Data Integrity"
-  on(agent, verify_content_command) do |result|
-    assert_match(file_content_regex, result.stdout, 'Expected file content is invalid!')
   end
 end

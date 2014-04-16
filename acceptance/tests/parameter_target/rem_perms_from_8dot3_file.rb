@@ -1,17 +1,18 @@
-test_name 'Windows ACL Module - Remove Permissions from a File'
+test_name 'Windows ACL Module - Remove Permissions from a 8.3 File'
 
 confine(:to, :platform => 'windows')
 
 #Globals
 target_parent = 'c:/temp'
-target = 'c:/temp/rem_perm_file.txt'
+target = 'c:/temp/rem_file_short_name.txt'
+target8dot3 = 'c:/temp/REM_FI~2.TXT'
 user_id = 'bob'
 
-file_content = 'I love puppet, puppet love puppet, puppet love!'
-verify_content_command = "cat /cygdrive/c/temp/rem_perm_file.txt"
+file_content = 'wax candle butler space station zebra glasses'
+verify_content_command = "cat /cygdrive/c/temp/rem_file_short_name.txt"
 file_content_regex = /#{file_content}/
 
-verify_acl_command = "icacls #{target}"
+verify_acl_command = "icacls #{target8dot3}"
 acl_regex = /.*\\bob:\(F\)/
 
 #Apply Manifest
@@ -33,7 +34,7 @@ user { '#{user_id}':
 	password	 => "L0v3Pupp3t!"
 }
 
-acl { '#{target}':
+acl { '#{target8dot3}':
   permissions => [
   	{ identity => '#{user_id}', rights => ['full'] },
   ],
@@ -42,7 +43,7 @@ MANIFEST
 
 #Remove Manifest
 acl_manifest_remove = <<-MANIFEST
-acl { '#{target}':
+acl { '#{target8dot3}':
   purge => 'listed_permissions',
   permissions => [
     { identity => '#{user_id}', rights => ['full'] },

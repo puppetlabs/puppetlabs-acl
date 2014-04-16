@@ -1,14 +1,16 @@
-test_name 'Windows ACL Module - Remove Permissions from a File'
+test_name 'Windows ACL Module - Remove Permissions from a File with a Long Name (259 chars)'
+
+skip_test("This test requires PE-3075 to be resolved")
 
 confine(:to, :platform => 'windows')
 
 #Globals
 target_parent = 'c:/temp'
-target = 'c:/temp/rem_perm_file.txt'
+target = 'c:/temp/rem_file_zeeNxWihARGLytPggNssxewZsopUFUoncTKAgsxsBqRigMlZEdNTEybqlVTjkDWTRASaQPyeeAsuUohncMlarIRphqIdqwyimqPphRTcKpojhTHoAgTUWiaEkiOqbeeEZKvNAhFQiELGLZghRwhKXVHuUPxWghKXVHuUPxWqmeYCHejdQOoGRYqaxwdIqiYyhhSCAhEWlggsGToSLmrgPmotSACKrREyohRBPaKRUmlgCGVtrP'
 user_id = 'bob'
 
-file_content = 'I love puppet, puppet love puppet, puppet love!'
-verify_content_command = "cat /cygdrive/c/temp/rem_perm_file.txt"
+file_content = 'Happy Happy Happy Happy Happy!'
+verify_content_command = "cat /cygdrive/c/temp/rem_file_zeeNxWihARGLytPggNssxewZsopUFUoncTKAgsxsBqRigMlZEdNTEybqlVTjkDWTRASaQPyeeAsuUohncMlarIRphqIdqwyimqPphRTcKpojhTHoAgTUWiaEkiOqbeeEZKvNAhFQiELGLZghRwhKXVHuUPxWghKXVHuUPxWqmeYCHejdQOoGRYqaxwdIqiYyhhSCAhEWlggsGToSLmrgPmotSACKrREyohRBPaKRUmlgCGVtrP"
 file_content_regex = /#{file_content}/
 
 verify_acl_command = "icacls #{target}"
