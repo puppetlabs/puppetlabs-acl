@@ -100,6 +100,11 @@ Puppet::Type.newtype(:acl) do
         inherit_parent_permissions => 'false',
       }
 
+     Warning: While managing ACLs you could lock the user running
+     Puppet completely out of managing resources using
+     purge => 'true' with inherit_parent_permissions => 'false'.
+     If Puppet is locked out of managing the resource, manual
+     intervention on affected nodes will be required.
 
   EOT
 
@@ -151,7 +156,9 @@ Puppet::Type.newtype(:acl) do
     desc "Purge specifies whether to remove other explicit permissions
       if not specified in the permissions set. This doesn't do anything
       with permissions inherited from parents (to remove those you should
-      combine `purge => 'false', inherit_parent_permissions => 'false'`.
+      combine `purge => 'false', inherit_parent_permissions => 'false'` -
+      be VERY careful in doing so, you could lock out Puppet from
+      managing the resource and manual intervention will be required).
       This also allows you to ensure the permissions listed are not on
       the ACL with `purge => listed_permissions`.
       The default is false."

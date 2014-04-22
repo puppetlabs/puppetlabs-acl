@@ -115,6 +115,8 @@ Purge sample usage:
 ###Protect with Purge
 To lock down a folder to only the permissions specified in the manifest resource, you want to protect the folder and set `purge => 'true'`. This ensure that the only permissions on the folder are the ones that you have set explicitly in the manifest.
 
+**Warning**: While managing ACLs you could lock the user running Puppet completely out of managing resources. Extreme care should be used when using `purge => true` with `inherit_parent_permissions => false` on the `acl`. If this is done and locks Puppet out of managing the resource, manual intervention on affected nodes will be required.
+
 Protected with purge sample usage:
 
     acl { 'c:/tempperms':
