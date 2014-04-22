@@ -276,6 +276,17 @@ Same user multiple ACEs sample usage:
 ##Limitations
 
  * The Windows Provider in the first release (at least) will not handle permissions with Symlinks. Please explicitly manage the permissions of the target.
+ * Each permission (ACE) is determined to be unique based on identity, type, child_types, and affects. While you can technically create more than one ACE that differs from other ACEs only in rights, acl module is not able to tell the difference between those so it will appear that the resource is out of sync every run when it is not. The following is an example of incorrect usage:
+
+````
+    acl { 'c:/tempperms':
+      permissions => [
+       { identity => 'SYSTEM', rights => ['full']},
+       { identity => 'SYSTEM', rights => ['read']}
+     ],
+    }
+````
+
  * Windows 8.3 short name format for files/directories is not supported.
  * When using SIDs for identities, autorequire will attempt to match to users with fully qualified names (`User[BUILTIN\Administrators]`) in addition to SIDs (`User[S-1-5-32-544]`). The limitation is that it won't match against `User[Administrators]` as that could cause issues if attempting to match domain accounts versus local accounts with the same name e.g. `Domain\Bob` vs `LOCAL\Bob`.
 

@@ -187,10 +187,18 @@ Puppet::Type.newtype(:acl) do
       'all' (default), 'objects', 'containers' or 'none'. `Affects` determines
       how the downstream inheritance is propagated. Valid values are
       'all' (default), 'self_only', 'children_only',
-      'self_and_direct_children_only' or 'direct_children_only'. While you
-      will see `is_inherited => 'true'` when running puppet resource acl path,
-      puppet will not be able to manage the inherited permissions so those
-      will need to be removed if using that to build a manifest."
+      'self_and_direct_children_only' or 'direct_children_only'.
+
+      Each permission (ACE) is determined to be unique based on
+      identity, type, child_types, and affects. While you can technically
+      create more than one ACE that differs from other ACEs only in rights,
+      acl module is not able to tell the difference between those so it
+      will appear that the resource is out of sync every run when it is not.
+
+      While you will see `is_inherited => 'true'` when running
+      puppet resource acl path, puppet will not be able to manage the
+      inherited permissions so those will need to be removed if using
+      that to build a manifest."
 
     validate do |value|
       if value.nil? || value.empty?
