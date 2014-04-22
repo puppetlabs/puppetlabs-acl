@@ -60,6 +60,34 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     }.to raise_error(Exception, /Failed to get security descriptor for path/)
   end
 
+  context ":target" do
+    before :each do
+      resource[:target] = set_path('set_target')
+    end
+
+    it "should not allow permissions to be set on directory symlinks (PUP-2338)" do
+      target_path = set_path('symlink_target')
+      resource[:target] = File.expand_path("fake",resource[:target])
+      Puppet::Util::Windows::File.symlink(target_path,resource[:target])
+
+      expect {
+        resource.validate
+      }.to raise_error(Puppet::ResourceError, /Puppet cannot manage ACLs of symbolic links/)
+    end
+
+    it "should not allow permissions to be set on file symlinks (PUP-2338)" do
+      target_path = set_path('symlink_target')
+      file_path = File.join(target_path,"file.txt")
+      FileUtils.touch(file_path)
+      resource[:target] = File.expand_path("fakefile.txt",resource[:target])
+      Puppet::Util::Windows::File.symlink(file_path,resource[:target])
+
+      expect {
+        resource.validate
+      }.to raise_error(Puppet::ResourceError, /Puppet cannot manage ACLs of symbolic links/)
+    end
+  end
+
   context ":owner" do
     before :each do
       resource[:target] = set_path('owner_stuff')

@@ -334,6 +334,10 @@ Puppet::Type.newtype(:acl) do
     if self[:permissions] == []
       raise ArgumentError, "Value for permissions should be an array with at least one element specified."
     end
+
+    if provider.respond_to?(:validate)
+      provider.validate
+    end
   end
 
   autorequire(:file) do
