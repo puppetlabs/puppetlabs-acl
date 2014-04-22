@@ -508,6 +508,16 @@ describe Puppet::Type.type(:acl) do
       resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'child_types'=>'containers','affects'=>'self_only'}
     end
 
+    it 'should format like a hash and ASCIIbetical order properties when displaying' do
+      # properties are out of order here
+      resource[:permissions] = [{'rights'=>['full'], 'identity'=> 'bob'},{'rights'=>['full'], 'identity'=> 'tim'}]
+
+      # and spaced / ordered properly here
+      expected = "[{'identity' => 'bob', 'rights' => ['full']}, {'identity' => 'tim', 'rights' => ['full']}]"
+
+      Puppet::Parameter.format_value_for_display(resource[:permissions]).should == expected
+    end
+
     context ":identity" do
       it "should accept bob" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full']}
