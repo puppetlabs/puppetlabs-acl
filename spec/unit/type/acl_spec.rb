@@ -475,7 +475,7 @@ describe Puppet::Type.type(:acl) do
 
     it "should not allow inherited aces in manifests" do
       expect {
-        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'inherited'=>'true'}
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'is_inherited'=>'true'}
       }.to raise_error(Puppet::ResourceError, /Puppet can not manage inherited ACEs/)
     end
 
