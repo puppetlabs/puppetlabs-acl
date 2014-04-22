@@ -274,6 +274,7 @@ Same user multiple ACEs sample usage:
 ##Limitations
 
  * The Windows Provider in the first release (at least) will not handle permissions with Symlinks. Please explicitly manage the permissions of the target.
+ * Windows 8.3 short name format for files/directories is not supported.
  * When using SIDs for identities, autorequire will attempt to match to users with fully qualified names (`User[BUILTIN\Administrators]`) in addition to SIDs (`User[S-1-5-32-544]`). The limitation is that it won't match against `User[Administrators]` as that could cause issues if attempting to match domain accounts versus local accounts with the same name e.g. `Domain\Bob` vs `LOCAL\Bob`.
 
 ##License
