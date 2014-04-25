@@ -16,7 +16,7 @@ file { "#{target_parent}":
 user { "#{user_id}":
   ensure     => present,
   groups     => 'Users',
-  managehome => true, 
+  managehome => true,
   password   => "L0v3Pupp3t!"
 }
 ->
@@ -31,7 +31,7 @@ MANIFEST
 agents.each do |agent|
   step "Execute Manifest"
   on(agent, puppet('apply', '--debug'), :stdin => acl_manifest) do |result|
-    assert_match(/Error:.*The filename, directory name, or volume label syntax is incorrect/, 
+    assert_match(/Error:.*The filename, directory name, or volume label syntax is incorrect/,
       result.stderr, 'Expected error was not detected!')
   end
 end

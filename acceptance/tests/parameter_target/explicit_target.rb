@@ -22,16 +22,16 @@ file { '#{target}':
 }
 
 user { '#{user_id}':
-	ensure     => present,
-	groups     => 'Users',
-	managehome => true, 
-	password	 => "L0v3Pupp3t!"
+  ensure     => present,
+  groups     => 'Users',
+  managehome => true,
+  password   => "L0v3Pupp3t!"
 }
 
 acl { 'explicit_target':
   target => '#{target}',
   permissions => [
-  	{ identity => '#{user_id}', rights => ['full'] },
+    { identity => '#{user_id}', rights => ['full'] },
   ],
 }
 MANIFEST

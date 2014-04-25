@@ -1,4 +1,4 @@
-test_name 'Windows ACL Module - Add Permissions to a Unicode Directory'
+test_name 'Windows ACL Module - Add Permissions to a Unicode File'
 
 skip_test("This test requires QENG-449 to be resolved")
 
@@ -31,7 +31,7 @@ file { '#{target}':
 user { "#{user_id}":
   ensure     => present,
   groups     => 'Users',
-  managehome => true, 
+  managehome => true,
   password   => "L0v3Pupp3t!"
 }
 

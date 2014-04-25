@@ -10,7 +10,7 @@ file { '/tmp/acl_test':
 
 acl { '/tmp/acl_test':
   permissions => [
-  	{ identity => 'root', rights => ['full'] },
+    { identity => 'root', rights => ['full'] },
   ],
 }
 MANIFEST

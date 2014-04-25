@@ -37,7 +37,7 @@ file { '#{target}':
 user { "#{user_id}":
   ensure     => present,
   groups     => 'Users',
-  managehome => true, 
+  managehome => true,
   password   => "L0v3Pupp3t!",
   require => File['#{target}']
 }

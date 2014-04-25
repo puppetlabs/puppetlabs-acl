@@ -5,7 +5,7 @@ install_pe
 
 step "Install Git on Master"
 on(master, "yum install git -y")
-  
+
 step "Clone Git Repo on Master"
 on(master, "git clone https://github.com/puppetlabs/puppetlabs-acl.git /etc/puppetlabs/puppet/modules/acl")
 
