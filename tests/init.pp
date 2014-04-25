@@ -49,14 +49,14 @@ acl { 'c:/tempperms/minimal':
 acl { 'c:/tempperms/full':
   target      => 'c:/tempperms/full',
   target_type => 'file',
-  purge       => 'false',
+  purge       => false,
   permissions => [
    { identity => 'Administrator', rights => ['full'], type=> 'allow', child_types => 'all', affects => 'all' },
    { identity => 'Users', rights => ['read','execute'], type=> 'allow', child_types => 'all', affects => 'all' }
   ],
   owner       => 'Administrators', #Creator_Owner specific, doesn't manage unless specified
   group       => 'Users', #Creator_Group specific, doesn't manage unless specified
-  inherit_parent_permissions => 'true',
+  inherit_parent_permissions => true,
 }
 
 #C:\tempperms>icacls full
@@ -98,7 +98,7 @@ acl { 'c:/tempperms/protected':
    { identity => 'Administrators', rights => ['full'] },
    { identity => 'Users', rights => ['full'] }
   ],
-  inherit_parent_permissions => 'false',
+  inherit_parent_permissions => false,
 }
 
 acl { 'tempperms_protected':
@@ -106,7 +106,7 @@ acl { 'tempperms_protected':
   permissions => [
    { identity => 'Administrator', rights => ['modify'] }
   ],
-  inherit_parent_permissions => 'false',
+  inherit_parent_permissions => false,
 }
 
 #C:\tempperms>icacls protected
@@ -122,12 +122,12 @@ acl { 'tempperms_protected':
 
 
 acl { 'c:/tempperms/protected_purge':
-  purge       => 'true',
+  purge       => true,
   permissions => [
    { identity => 'Administrators', rights => ['full'] },
    { identity => 'Users', rights => ['full'] }
   ],
-  inherit_parent_permissions => 'false',
+  inherit_parent_permissions => false,
 }
 
 #C:\tempperms>icacls protected_purge
@@ -136,14 +136,14 @@ acl { 'c:/tempperms/protected_purge':
 
 
 acl { 'c:/tempperms/inheritance':
-  purge       => 'true',
+  purge       => true,
   permissions => [
    { identity => 'SYSTEM', rights => ['full'], child_types => 'all' },
    { identity => 'Administrators', rights => ['full'], child_types => 'containers' },
    { identity => 'Administrator', rights => ['full'], child_types => 'objects' },
    { identity => 'Users', rights => ['full'], child_types => 'none' }
   ],
-  inherit_parent_permissions => 'false',
+  inherit_parent_permissions => false,
 }
 
 #C:\tempperms>icacls inheritance
@@ -153,7 +153,7 @@ acl { 'c:/tempperms/inheritance':
 
 
 acl { 'c:/tempperms/propagation':
-  purge       => 'true',
+  purge       => true,
   permissions => [
    { identity => 'Administrators', rights => ['modify'], affects => 'all' },
    { identity => 'Administrators', rights => ['full'], affects => 'self_only' },
@@ -161,7 +161,7 @@ acl { 'c:/tempperms/propagation':
    { identity => 'Users', rights => ['full'], affects => 'children_only' },
    { identity => 'Authenticated Users', rights => ['read'], affects => 'self_and_direct_children_only' }
   ],
-  inherit_parent_permissions => 'false',
+  inherit_parent_permissions => false,
 }
 
 #C:\tempperms>icacls propagation
@@ -221,7 +221,7 @@ acl { 'c:/tempperms/deny':
 
 
 acl { 'c:/tempperms/same_user':
-  purge       => 'true',
+  purge       => true,
   permissions => [
    #{ identity => 'SYSTEM', rights => ['modify'], type=> 'deny', child_types => 'none' },
    { identity => 'SYSTEM', rights => ['modify'], child_types => 'none' },
@@ -238,7 +238,7 @@ acl { 'c:/tempperms/same_user':
    { identity => 'SYSTEM', rights => ['read'], child_types=>'containers', affects => 'self_and_direct_children_only' },
    { identity => 'SYSTEM', rights => ['read'], child_types=>'objects', affects => 'self_and_direct_children_only' }
   ],
-  inherit_parent_permissions => 'false',
+  inherit_parent_permissions => false,
 }
 
 #C:\tempperms>icacls same_user
@@ -259,14 +259,14 @@ acl { 'c:/tempperms/same_user':
 
 
 acl { 'c:/tempperms/rights_ordering':
-  purge       => 'true',
+  purge       => true,
   permissions => [
    { identity => 'SYSTEM', rights => ['execute','read'] },
    { identity => 'SYSTEM', rights => ['read','read'], affects => 'direct_children_only' },
    { identity => 'Administrators', rights => ['full','modify'] },
    { identity => 'Administrator', rights => ['modify','read'] }
   ],
-  inherit_parent_permissions => 'false',
+  inherit_parent_permissions => false,
 }
 
 #this will issue warnings - expected
@@ -278,14 +278,14 @@ acl { 'c:/tempperms/rights_ordering':
 
 
 acl { 'c:/tempperms/mask_specific':
-  purge       => 'true',
+  purge       => true,
   permissions => [
    { identity => 'Administrators', rights => ['full'] }, #full is same as - 2032127 aka 0x1f01ff
    { identity => 'SYSTEM', rights => ['modify'] }, #modify is same as 1245631 aka 0x1301bf
    { identity => 'Users', rights => ['mask_specific'], mask => '1180073' }, #RX WA #0x1201a9
    { identity => 'Administrator', rights => ['mask_specific'], mask => '1180032' }  #RA,S,WA,Rc #1180032  #0x120180
   ],
-  inherit_parent_permissions => 'false',
+  inherit_parent_permissions => false,
 }
 
 #C:\tempperms>icacls mask_specific
@@ -296,7 +296,7 @@ acl { 'c:/tempperms/mask_specific':
 
 
 acl { 'c:/tempperms/remove':
-  purge       => 'true',
+  purge       => true,
   permissions => [
    { identity => 'Administrators', rights => ['full'] },
    { identity => 'Administrator', rights => ['write'] },
@@ -304,7 +304,7 @@ acl { 'c:/tempperms/remove':
    { identity => 'Everyone', rights => ['execute'] },
    { identity => 'Authenticated Users', rights => ['full'] }
   ],
-  inherit_parent_permissions => 'false',
+  inherit_parent_permissions => false,
 }
 
 acl { 'remove_tempperms/remove':
@@ -314,7 +314,7 @@ acl { 'remove_tempperms/remove':
    { identity => 'Administrator', rights => ['write'] },
    { identity => 'Authenticated Users', rights => ['full'] }
   ],
-  inherit_parent_permissions => 'false',
+  inherit_parent_permissions => false,
   require     => Acl['c:/tempperms/remove'],
 }
 

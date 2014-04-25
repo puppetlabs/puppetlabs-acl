@@ -9,14 +9,14 @@
     "LICENSE": "d2794c0df5b907fdace235a619d80314",
     "tests/hiera.yaml": "97f18ff1d7f3de6d5c915abd0dc2f1da",
     "spec/unit/type/acl/ace_spec.rb": "a964cf309d4547a0e81b8d1e17ddf1db",
-    "manifests/init.pp": "ca18db1082980536995d44293ecbb26c",
+    "manifests/init.pp": "91fdf36018e9a995a5d47e061e6012f5",
     ".idea/encodings.xml": "f1c5edfa5b1a67aabcb9e41674afa252",
     ".idea/codeStyleSettings.xml": "008ada5e659b6acb51d65e3033644307",
     "lib/puppet/provider/acl/windows.rb": "54f0bf3eb07d0e3e506a389108158278",
     ".idea/puppetlabs-acl.iml": "4f93073f751d56117106cdc54772f337",
     ".metadata/.plugins/org.eclipse.core.resources/.root/.indexes/history.version": "9e688c58a5487b8eaf69c9e1005ad0bf",
     ".idea/misc.xml": "cb9cc92cdc025150705f3aa18a6dde7b",
-    "README.md": "c4113cbc91c816c5e7392b1a4488d6e8",
+    "README.md": "62d82c2a5c3c3f18fa787163de87d38c",
     ".idea/vcs.xml": "befac2d4c4845c7aba4e3652ddb60f2a",
     "lib/puppet/type/acl/ace.rb": "665b5cf54007086ec9bd8dde33804f75",
     "Rakefile": "5f442b52d07e2ad72d97063cf31fbea9",
@@ -32,7 +32,7 @@
     ".idea/scopes/scope_settings.xml": "3d0b1957d39aa5636904788c54e654cf",
     ".idea/.name": "90e5c5b7af08f83e91b1bf69e9e6e035",
     ".metadata/version.ini": "e77ad89cbe32c2d793ebbf2c743574f4",
-    ".idea/workspace.xml": "d123678841d55ce117aab3b5e0e4c3d2",
+    ".idea/workspace.xml": "e66b726757a61f9eeca36ca729b3d0bf",
     ".idea/inspectionProfiles/Project_Default.xml": "7fe75f1ba44ec1700f53af0bb83b1ebb",
     ".idea/modules.xml": "5e6115c71fccb231b7aa19702b3279ef",
     "spec/spec_helper.rb": "2904afda3f374bac339b6e9eb7f9e009",
@@ -52,9 +52,9 @@
     ".metadata/.plugins/org.eclipse.core.resources/.projects/.com_puppetlabs_geppetto_pptp_target/.location": "d502b20cee20a41f499201384673f4a0",
     ".metadata/.log": "79344c91bfd1912f0d59abe1519c1248",
     ".metadata/.lock": "d41d8cd98f00b204e9800998ecf8427e",
-    "tests/init.pp": "2839400b2812a03c48318e55c459f5e1",
+    "tests/init.pp": "758ce044fea240f876500c89cd2ea119",
     ".metadata/.plugins/org.eclipse.xtext.builder/builder.state": "de9218cb4ac38231a6b1549d3ecbc476",
-    "lib/puppet/type/acl.rb": "d8530aa8e5049c43e488936ea95741e6",
+    "lib/puppet/type/acl.rb": "c0c202f51b5b31ded0ab6ef9afdd9809",
     "Gemfile.lock": "5656a77130d3e2a60676e69b2b77b42a"
   },
   "dependencies": [],
@@ -69,25 +69,25 @@
       "properties": [
         {
           "name": "permissions",
-          "doc": "Permissions is an array containing Access Control Entries\n      (ACEs). Certain Operating Systems require these ACEs to be in\n      explicit order (Windows). Every element in the array is a hash\n      that will at the very least need `identity` and `rights` e.g\n      { identity \u003d\u003e \u0027Administrators\u0027, rights \u003d\u003e [\u0027full\u0027] } and at the\n      very most can include `type`, `child_types`, `affects`, and\n      `mask` (mask only should be with `rights \u003d\u003e [\u0027mask_specific\u0027]`)\n      e.g. `{ identity \u003d\u003e \u0027Administrators\u0027, rights \u003d\u003e [\u0027full\u0027],\n      type\u003d\u003e \u0027allow\u0027, child_types \u003d\u003e \u0027all\u0027, affects \u003d\u003e \u0027all\u0027 }`.\n      `Identity` is a group, user or ID (SID on Windows). The identity must\n      exist on the system and will auto-require on user and group resources.\n      `Rights` is an array that contains \u0027full\u0027, \u0027modify\u0027, \u0027mask_specific\u0027\n      or some combination of \u0027write\u0027, \u0027read\u0027, and \u0027execute\u0027. If you specify\n      \u0027mask_specific\u0027 you must also specify `mask` with an integer (passed\n      as a string) that represents the permissions mask. `Type` is\n      represented as \u0027allow\u0027 (default) or \u0027deny\u0027. `Child_types` determines\n      how an ACE is inherited downstream from the target. Valid values are\n      \u0027all\u0027 (default), \u0027objects\u0027, \u0027containers\u0027 or \u0027none\u0027. `Affects` determines\n      how the downstream inheritance is propagated. Valid values are\n      \u0027all\u0027 (default), \u0027self_only\u0027, \u0027children_only\u0027,\n      \u0027self_and_direct_children_only\u0027 or \u0027direct_children_only\u0027.\n\n      Each permission (ACE) is determined to be unique based on\n      identity, type, child_types, and affects. While you can technically\n      create more than one ACE that differs from other ACEs only in rights,\n      acl module is not able to tell the difference between those so it\n      will appear that the resource is out of sync every run when it is not.\n\n      While you will see `is_inherited \u003d\u003e \u0027true\u0027` when running\n      puppet resource acl path, puppet will not be able to manage the\n      inherited permissions so those will need to be removed if using\n      that to build a manifest."
+          "doc": "Permissions is an array containing Access Control Entries\n      (ACEs). Certain Operating Systems require these ACEs to be in\n      explicit order (Windows). Every element in the array is a hash\n      that will at the very least need `identity` and `rights` e.g\n      `{ identity \u003d\u003e \u0027Administrators\u0027, rights \u003d\u003e [\u0027full\u0027] }` and at the\n      very most can include `type`, `child_types`, `affects`, and\n      `mask` (mask should only be specified be with\n      `rights \u003d\u003e [\u0027mask_specific\u0027]`) e.g. `{ identity \u003d\u003e \u0027Administrators\u0027,\n      rights \u003d\u003e [\u0027full\u0027], type\u003d\u003e \u0027allow\u0027, child_types \u003d\u003e \u0027all\u0027,\n      affects \u003d\u003e \u0027all\u0027 }`.\n\n      `identity` is a group, user or ID (SID on Windows). The identity must\n      exist on the system and will auto-require on user and group resources.\n      This can be in the form of:\n\n        1. User - e.g. `\u0027Bob\u0027` or `\u0027TheNet\\Bob\u0027`\n        2. Group e.g. `\u0027Administrators\u0027` or `\u0027BUILTIN\\Administrators\u0027`\n        3. SID (Security ID) e.g. `\u0027S-1-5-18\u0027`.\n\n      `rights` is an array that contains `\u0027full\u0027`, `\u0027modify\u0027`,\n      `\u0027mask_specific\u0027` or some combination of `\u0027write\u0027`, `\u0027read\u0027`, and\n      `\u0027execute\u0027`. If you specify `\u0027mask_specific\u0027` you must also specify\n      `mask` with an integer (passed as a string) that represents the\n      permissions mask.\n\n      `type` is represented as `\u0027allow\u0027` (default) or `\u0027deny\u0027`.\n\n      `child_types` determines how an ACE is inherited downstream from the\n      target. Valid values are `\u0027all\u0027` (default), `\u0027objects\u0027`, `\u0027containers\u0027`\n      or `\u0027none\u0027`.\n\n      `affects` determines how the downstream inheritance is propagated.\n      Valid values are `\u0027all\u0027` (default), `\u0027self_only\u0027`, `\u0027children_only\u0027`,\n      `\u0027self_and_direct_children_only\u0027` or `\u0027direct_children_only\u0027`.\n\n      Each permission (ACE) is determined to be unique based on\n      identity, type, child_types, and affects. While you can technically\n      create more than one ACE that differs from other ACEs only in rights,\n      acl module is not able to tell the difference between those so it\n      will appear that the resource is out of sync every run when it is not.\n\n      While you will see `is_inherited \u003d\u003e \u0027true\u0027` when running\n      puppet resource acl path, puppet will not be able to manage the\n      inherited permissions so those will need to be removed if using\n      that to build a manifest."
         },
         {
           "name": "owner",
-          "doc": "The owner identity is also known as a trustee or principal\n      that is said to own the particular acl/security descriptor. This\n      can be in the form of: 1. User - e.g. \u0027Bob\u0027 or \u0027TheNet\\Bob\u0027,\n      2. Group e.g. \u0027Administrators\u0027 or \u0027BUILTIN\\Administrators\u0027, 3.\n      SID (Security ID) e.g. \u0027S-1-5-18\u0027. Defaults to not specified on\n      Windows. This allows owner to stay set to whatever it is currently\n      set to (owner can vary depending on the original CREATOR OWNER).\n      The trustee must exist on the system and will auto-require on user\n      and group resources."
+          "doc": "The owner identity is also known as a trustee or principal\n      that is said to own the particular acl/security descriptor. This\n      can be in the form of:\n\n       1. User - e.g. `\u0027Bob\u0027` or `\u0027TheNet\\Bob\u0027`\n       2. Group e.g. `\u0027Administrators\u0027` or `\u0027BUILTIN\\Administrators\u0027`\n       3. SID (Security ID) e.g. `\u0027S-1-5-18\u0027`.\n\n      Defaults to not specified on Windows. This allows owner to stay set\n      to whatever it is currently set to (owner can vary depending on the\n      original CREATOR OWNER). The trustee must exist on the system and\n      will auto-require on user and group resources."
         },
         {
           "name": "group",
-          "doc": "The group identity is also known as a trustee or principal\n      that is said to have access to the particular acl/security descriptor.\n      This can be in the form of: 1. User - e.g. \u0027Bob\u0027 or \u0027TheNet\\Bob\u0027,\n      2. Group e.g. \u0027Administrators\u0027 or \u0027BUILTIN\\Administrators\u0027, 3.\n      SID (Security ID) e.g. \u0027S-1-5-18\u0027. Defaults to not specified on\n      Windows. This allows group to stay set to whatever it is currently\n      set to (group can vary depending on the original CREATOR GROUP).\n      The trustee must exist on the system and will auto-require on user\n      and group resources."
+          "doc": "The group identity is also known as a trustee or principal\n      that is said to have access to the particular acl/security descriptor.\n      This can be in the form of:\n\n       1. User - e.g. `\u0027Bob\u0027` or `\u0027TheNet\\Bob\u0027`\n       2. Group e.g. `\u0027Administrators\u0027` or `\u0027BUILTIN\\Administrators\u0027`\n       3. SID (Security ID) e.g. `\u0027S-1-5-18\u0027`.\n\n      Defaults to not specified on Windows. This allows group to stay set\n      to whatever it is currently set to (group can vary depending on the\n      original CREATOR GROUP). The trustee must exist on the system and\n      will auto-require on user and group resources."
         },
         {
           "name": "inherit_parent_permissions",
-          "doc": "Inherit Parent Permissions specifies whether to inherit\n      permissions from parent ACLs or not. The default is true."
+          "doc": "Inherit Parent Permissions specifies whether to inherit\n      permissions from parent ACLs or not. The default is `true`."
         }
       ],
       "parameters": [
         {
           "name": "name",
-          "doc": "The name of the acl resource. Used for uniqueness. Will set\n      to the target if target is unset."
+          "doc": "The name of the acl resource. Used for uniqueness. Will set\n      the target to this value if target is unset."
         },
         {
           "name": "target",
@@ -95,11 +95,11 @@
         },
         {
           "name": "target_type",
-          "doc": "The type of target for the Acl resource. In the first release\n      of ACL, only :file is allowed. Defaults to :file."
+          "doc": "The type of target for the Acl resource. In the first release\n      of ACL, only `file` is allowed. Defaults to `file`."
         },
         {
           "name": "purge",
-          "doc": "Purge specifies whether to remove other explicit permissions\n      if not specified in the permissions set. This doesn\u0027t do anything\n      with permissions inherited from parents (to remove those you should\n      combine `purge \u003d\u003e \u0027false\u0027, inherit_parent_permissions \u003d\u003e \u0027false\u0027` -\n      be VERY careful in doing so, you could lock out Puppet from\n      managing the resource and manual intervention will be required).\n      This also allows you to ensure the permissions listed are not on\n      the ACL with `purge \u003d\u003e listed_permissions`.\n      The default is false."
+          "doc": "Purge specifies whether to remove other explicit permissions\n      if not specified in the permissions set. This doesn\u0027t do anything\n      with permissions inherited from parents (to remove those you should\n      combine `purge \u003d\u003e \u0027false\u0027, inherit_parent_permissions \u003d\u003e \u0027false\u0027` -\n      be VERY careful in doing so, you could lock out Puppet from\n      managing the resource and manual intervention will be required).\n      This also allows you to ensure the permissions listed are not on\n      the ACL with `purge \u003d\u003e listed_permissions`.\n      The default is `false`."
         }
       ],
       "providers": [

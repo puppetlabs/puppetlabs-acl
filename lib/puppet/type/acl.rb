@@ -122,7 +122,7 @@ Puppet::Type.newtype(:acl) do
 
   newparam(:name) do
     desc "The name of the acl resource. Used for uniqueness. Will set
-      to the target if target is unset."
+      the target to this value if target is unset."
 
     validate do |value|
       if value.nil? or value.empty?
@@ -147,7 +147,7 @@ Puppet::Type.newtype(:acl) do
 
   newparam(:target_type) do
     desc "The type of target for the Acl resource. In the first release
-      of ACL, only :file is allowed. Defaults to :file."
+      of ACL, only `file` is allowed. Defaults to `file`."
     newvalues(:file)
     defaultto(:file)
   end
@@ -161,7 +161,7 @@ Puppet::Type.newtype(:acl) do
       managing the resource and manual intervention will be required).
       This also allows you to ensure the permissions listed are not on
       the ACL with `purge => listed_permissions`.
-      The default is false."
+      The default is `false`."
     newvalues(:true, :false, :listed_permissions)
     defaultto(:false)
   end
@@ -171,23 +171,36 @@ Puppet::Type.newtype(:acl) do
       (ACEs). Certain Operating Systems require these ACEs to be in
       explicit order (Windows). Every element in the array is a hash
       that will at the very least need `identity` and `rights` e.g
-      { identity => 'Administrators', rights => ['full'] } and at the
+      `{ identity => 'Administrators', rights => ['full'] }` and at the
       very most can include `type`, `child_types`, `affects`, and
-      `mask` (mask only should be with `rights => ['mask_specific']`)
-      e.g. `{ identity => 'Administrators', rights => ['full'],
-      type=> 'allow', child_types => 'all', affects => 'all' }`.
-      `Identity` is a group, user or ID (SID on Windows). The identity must
+      `mask` (mask should only be specified be with
+      `rights => ['mask_specific']`) e.g. `{ identity => 'Administrators',
+      rights => ['full'], type=> 'allow', child_types => 'all',
+      affects => 'all' }`.
+
+      `identity` is a group, user or ID (SID on Windows). The identity must
       exist on the system and will auto-require on user and group resources.
-      `Rights` is an array that contains 'full', 'modify', 'mask_specific'
-      or some combination of 'write', 'read', and 'execute'. If you specify
-      'mask_specific' you must also specify `mask` with an integer (passed
-      as a string) that represents the permissions mask. `Type` is
-      represented as 'allow' (default) or 'deny'. `Child_types` determines
-      how an ACE is inherited downstream from the target. Valid values are
-      'all' (default), 'objects', 'containers' or 'none'. `Affects` determines
-      how the downstream inheritance is propagated. Valid values are
-      'all' (default), 'self_only', 'children_only',
-      'self_and_direct_children_only' or 'direct_children_only'.
+      This can be in the form of:
+
+        1. User - e.g. `'Bob'` or `'TheNet\\Bob'`
+        2. Group e.g. `'Administrators'` or `'BUILTIN\\Administrators'`
+        3. SID (Security ID) e.g. `'S-1-5-18'`.
+
+      `rights` is an array that contains `'full'`, `'modify'`,
+      `'mask_specific'` or some combination of `'write'`, `'read'`, and
+      `'execute'`. If you specify `'mask_specific'` you must also specify
+      `mask` with an integer (passed as a string) that represents the
+      permissions mask.
+
+      `type` is represented as `'allow'` (default) or `'deny'`.
+
+      `child_types` determines how an ACE is inherited downstream from the
+      target. Valid values are `'all'` (default), `'objects'`, `'containers'`
+      or `'none'`.
+
+      `affects` determines how the downstream inheritance is propagated.
+      Valid values are `'all'` (default), `'self_only'`, `'children_only'`,
+      `'self_and_direct_children_only'` or `'direct_children_only'`.
 
       Each permission (ACE) is determined to be unique based on
       identity, type, child_types, and affects. While you can technically
@@ -265,13 +278,16 @@ Puppet::Type.newtype(:acl) do
   newproperty(:owner) do
     desc "The owner identity is also known as a trustee or principal
       that is said to own the particular acl/security descriptor. This
-      can be in the form of: 1. User - e.g. 'Bob' or 'TheNet\\Bob',
-      2. Group e.g. 'Administrators' or 'BUILTIN\\Administrators', 3.
-      SID (Security ID) e.g. 'S-1-5-18'. Defaults to not specified on
-      Windows. This allows owner to stay set to whatever it is currently
-      set to (owner can vary depending on the original CREATOR OWNER).
-      The trustee must exist on the system and will auto-require on user
-      and group resources."
+      can be in the form of:
+
+       1. User - e.g. `'Bob'` or `'TheNet\\Bob'`
+       2. Group e.g. `'Administrators'` or `'BUILTIN\\Administrators'`
+       3. SID (Security ID) e.g. `'S-1-5-18'`.
+
+      Defaults to not specified on Windows. This allows owner to stay set
+      to whatever it is currently set to (owner can vary depending on the
+      original CREATOR OWNER). The trustee must exist on the system and
+      will auto-require on user and group resources."
 
     validate do |value|
       if value.nil? || value.empty?
@@ -302,13 +318,16 @@ Puppet::Type.newtype(:acl) do
   newproperty(:group) do
     desc "The group identity is also known as a trustee or principal
       that is said to have access to the particular acl/security descriptor.
-      This can be in the form of: 1. User - e.g. 'Bob' or 'TheNet\\Bob',
-      2. Group e.g. 'Administrators' or 'BUILTIN\\Administrators', 3.
-      SID (Security ID) e.g. 'S-1-5-18'. Defaults to not specified on
-      Windows. This allows group to stay set to whatever it is currently
-      set to (group can vary depending on the original CREATOR GROUP).
-      The trustee must exist on the system and will auto-require on user
-      and group resources."
+      This can be in the form of:
+
+       1. User - e.g. `'Bob'` or `'TheNet\\Bob'`
+       2. Group e.g. `'Administrators'` or `'BUILTIN\\Administrators'`
+       3. SID (Security ID) e.g. `'S-1-5-18'`.
+
+      Defaults to not specified on Windows. This allows group to stay set
+      to whatever it is currently set to (group can vary depending on the
+      original CREATOR GROUP). The trustee must exist on the system and
+      will auto-require on user and group resources."
 
     validate do |value|
       if value.nil? || value.empty?
@@ -338,7 +357,7 @@ Puppet::Type.newtype(:acl) do
 
   newproperty(:inherit_parent_permissions, :boolean => true, :required_features=> :can_inherit_parent_permissions) do
     desc "Inherit Parent Permissions specifies whether to inherit
-      permissions from parent ACLs or not. The default is true."
+      permissions from parent ACLs or not. The default is `true`."
     newvalues(:true,:false)
     defaultto(true)
 

@@ -23,6 +23,74 @@ The best way to install this module is with the `puppet module` subcommand.  On 
 
 See the section [Installing Modules](http://docs.puppetlabs.com/puppet/2.7/reference/modules_installing.html) for more information.
 
+##ACL Type
+
+    acl { 'name':
+      target => 'absolute/path',
+      target_type => '<file>',
+      purge => '<true| false | listed_permissions>',
+      permissions => [
+        { identity => '<identity>',
+          rights => [<rights>],
+          type => '<type>',
+          affects => '<affects>',
+          child_types => '<child_types>'
+        }
+        ],
+      owner => '<owner>',
+      group => '<group>',
+      inherit_parent_permissions => '<true | false>',
+    }
+
+###Parameters
+ * **name** - The name of the acl resource. Used for uniqueness. Will set the target to this value if target is unset.
+
+ * **target** - The location the acl resource is pointing to. In the first release of ACL, this will be a file system location. The default is the name.
+
+ * **target_type** - The type of target for the Acl resource. In the first release of ACL, only `'file'` is allowed. Defaults to `'file'`. Valid values are `file`.
+
+ * **purge** - Purge specifies whether to remove other explicit permissions if not specified in the permissions set. This doesn't do anything with permissions inherited from parents (to remove those you should combine `purge => 'false', inherit_parent_permissions => 'false'`. This also allows you to ensure the permissions listed are not on the ACL with `purge => 'listed_permissions'`. The default is `'false'`. Valid values are `true`, `false`, `listed_permissions`.
+
+###Properties
+
+ * **inherit_parent_permissions** - Inherit Parent Permissions specifies whether to inherit permissions from parent ACLs or not. The default is `true`. Valid values are `true`, `false`. Requires feature `can_inherit_parent_permissions`.
+
+ * **owner** - The owner identity is also known as a trustee or principal that is said to own the particular acl/security descriptor. This can be in the form of:
+   1. User - e.g. `'Bob'` or `'TheNet\Bob'`
+   1. Group e.g. `'Administrators'` or `'BUILTIN\Administrators'`
+   1. SID (Security ID) e.g. `'S-1-5-18'`.
+
+  Defaults to not specified on Windows. This allows owner to stay set to whatever it is currently
+  set to (owner can vary depending on the original CREATOR OWNER). The trustee must exist on the system and will auto-require on user and group resources.
+
+ * **group** - The group identity is also known as a trustee or principal that is said to have access to the particular acl/security descriptor. This can be in the form of:
+   1. User - e.g. `'Bob'` or `'TheNet\Bob'`
+   1. Group e.g. `'Administrators'` or `'BUILTIN\Administrators'`
+   1. SID (Security ID) e.g. `'S-1-5-18'`.
+
+  Defaults to not specified on Windows. This allows group to stay set to whatever it is currently set to (group can vary depending on the original CREATOR GROUP). The trustee must exist on the system and will auto-require on user and group resources.
+
+ * **permissions** - Permissions is an array containing Access Control Entries (ACEs). Certain Operating Systems require these ACEs to be in explicit order (Windows). Every element in the array is a hash that will at the very least need `identity` and `rights` e.g `{ identity => 'Administrators', rights => ['full'] }` and at the very most can include `type`, `child_types`, `affects`, and `mask` (mask should only be specified with `rights => ['mask_specific']`)  e.g. `{ identity => 'Administrators', rights => ['full'], type=> 'allow', child_types => 'all', affects => 'all' }`.
+
+  * `identity` is a group, user or ID (SID on Windows). This can be in the form of:
+    1. User - e.g. `'Bob'` or `'TheNet\Bob'`
+    1. Group e.g. `'Administrators'` or `'BUILTIN\Administrators'`
+    1. SID (Security ID) e.g. `'S-1-5-18'`.
+
+    The `identity` must exist on the system and will auto-require on user and group resources.
+
+  * `rights` is an array that contains `'full'`, `'modify'`, `'mask_specific'` or some combination of `'write'`, `'read'`, and `'execute'`. If you specify `'mask_specific'` you must also specify `mask` with an integer (passed as a string) that represents the permissions mask.
+
+  * `type` is represented as `'allow'` **(default)** or `'deny'`.
+
+  * `child_types` determines how an ACE is inherited downstream from the target. Valid values are `'all'` **(default)**, `'objects'`, `'containers'` or `'none'`.
+
+  * `affects` determines how the downstream inheritance is propagated. Valid values are `'all'` **(default)**, `'self_only'`, `'children_only'`, `'self_and_direct_children_only'` or `'direct_children_only'`.
+
+  Each permission (ACE) is determined to be unique based on `identity`, `type`, `child_types`, and `affects`. While you can technically create more than one ACE that differs from other ACEs only in rights, acl module is not able to tell the difference between those so it will appear that the resource is out of sync every run when it is not.
+
+  While you will see `is_inherited => 'true'` when running `puppet resource acl some_path`, puppet will not be able to manage the inherited permissions so those will need to be removed if using that to build a manifest.
+
 ##Usage
 
 ###Minimal
