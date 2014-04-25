@@ -6,7 +6,11 @@ class Puppet::Type::Acl
   # Control List (ACL) type. ACEs contain information about
   # the trustee, the rights, and on some systems how they are
   # inherited and propagated to subtypes.
-  class Ace
+  class Ace < Hash
+    # < Hash is due to a bug with how Puppet::Resource.to_manifest
+    # does not work through quite the same code and needs to
+    # believe this custom object is a Hash. If issues are later
+    # found, this should be reviewed.
     require Pathname.new(__FILE__).dirname + '../../../' + 'puppet/type/acl/rights'
 
     attr_reader :identity
@@ -14,8 +18,8 @@ class Puppet::Type::Acl
     attr_reader :type
     attr_reader :child_types
     attr_reader :affects
-    attr_accessor :is_inherited
-    attr_accessor :mask
+    attr_reader :is_inherited
+    attr_reader :mask
 
     def initialize(permission_hash, provider = nil)
       @provider = provider
@@ -29,6 +33,7 @@ class Puppet::Type::Acl
       self.child_types = permission_hash['child_types']
       self.affects = permission_hash['affects']
       @is_inherited = permission_hash['is_inherited'] || false
+      @hash = nil
     end
 
     def validate(value,*allowed_values)
@@ -99,22 +104,22 @@ class Puppet::Type::Acl
 
     def ensure_rights_values_compatible
       if @rights.include?(:mask_specific) && rights.count != 1
-        raise ArgumentError, "In each ace, when specifying rights, if you include 'mask_specific', it should be without anything else e.g. rights => ['mask_specific']. Please decide whether 'mask_specific' or predetermined rights and correct the manifest. Reference: #{to_s}"
+        raise ArgumentError, "In each ace, when specifying rights, if you include 'mask_specific', it should be without anything else e.g. rights => ['mask_specific']. Please decide whether 'mask_specific' or predetermined rights and correct the manifest. Reference: #{self.inspect}"
       end
 
       if @rights.include?(:full) && rights.count != 1
-        Puppet.warning("In each ace, when specifying rights, if you include 'full', it should be without anything else e.g. rights => ['full']. Please remove the extraneous rights from the manifest to remove this warning. Reference: #{to_s}")
+        Puppet.warning("In each ace, when specifying rights, if you include 'full', it should be without anything else e.g. rights => ['full']. Please remove the extraneous rights from the manifest to remove this warning. Reference: #{self.inspect}")
         @rights = [:full]
       end
       if @rights.include?(:modify) && rights.count != 1
-        Puppet.warning("In each ace, when specifying rights, if you include 'modify', it should be without anything else e.g. rights => ['modify']. Please remove the extraneous rights from the manifest to remove this warning. Reference: #{to_s}")
+        Puppet.warning("In each ace, when specifying rights, if you include 'modify', it should be without anything else e.g. rights => ['modify']. Please remove the extraneous rights from the manifest to remove this warning. Reference: #{self.inspect}")
         @rights = [:modify]
       end
     end
 
     def ensure_mask_when_mask_specific
       if @rights.include?(:mask_specific) && (@mask.nil? || @mask.empty?)
-        raise ArgumentError, "If you specify rights => ['mask_specific'], you must also include mask => 'value'. Reference: #{to_s}"
+        raise ArgumentError, "If you specify rights => ['mask_specific'], you must also include mask => 'value'. Reference: #{self.inspect}"
       end
     end
 
@@ -132,18 +137,19 @@ class Puppet::Type::Acl
       return unless @child_types == :none || @affects == :self_only
 
       if @child_types == :none && (@affects != :all && @affects != :self_only)
-        Puppet.warning("If child_types => 'none', affects => value will be ignored. Please remove affects or set affects => 'self_only' to remove this warning. Reference: #{to_s}")
+        Puppet.warning("If child_types => 'none', affects => value will be ignored. Please remove affects or set affects => 'self_only' to remove this warning. Reference: #{self.inspect}")
       end
       @affects = :self_only if @child_types == :none
 
       if @affects == :self_only && (@child_types != :all && @child_types != :none)
-        Puppet.warning("If affects => 'self_only', child_types => value will be ignored. Please remove child_types or set child_types => 'none' to remove this warning. Reference: #{to_s}")
+        Puppet.warning("If affects => 'self_only', child_types => value will be ignored. Please remove child_types or set child_types => 'none' to remove this warning. Reference: #{self.inspect}")
       end
       @child_types = :none if @affects == :self_only
     end
 
     def identity=(value)
       @identity = validate_non_empty('identity', value)
+      @hash = nil
     end
 
     def id
@@ -158,6 +164,7 @@ class Puppet::Type::Acl
 
     def id=(value)
       @id = value
+      @hash = nil
     end
 
     def rights=(value)
@@ -172,20 +179,29 @@ class Puppet::Type::Acl
       ensure_rights_order
       ensure_rights_values_compatible
       ensure_mask_when_mask_specific if @rights.include?(:mask_specific)
+      @hash = nil
+    end
+
+    def mask=(value)
+      @mask = value
+      @hash = nil
     end
 
     def type=(value)
       @type = convert_to_symbol(validate(value || :allow, :allow, :deny))
+      @hash = nil
     end
 
     def child_types=(value)
       @child_types = convert_to_symbol(validate(value || :all, :all, :objects, :containers, :none))
       ensure_none_or_self_only_sync
+      @hash = nil
     end
 
     def affects=(value)
       @affects = convert_to_symbol(validate(value || :all, :all, :self_only, :children_only, :self_and_direct_children_only, :direct_children_only))
       ensure_none_or_self_only_sync
+      @hash = nil
     end
 
     def get_comparison_ids(other = nil)
@@ -259,20 +275,51 @@ class Puppet::Type::Acl
              @is_inherited.hash
     end
 
-    def to_s
-      formatted_ace ="\n"
-      formatted_ace << '{ '
-      formatted_ace << "identity => '#{identity}'"
-      formatted_ace << ", rights => #{convert_from_symbols(rights)}"
-      formatted_ace << ", mask => '#{mask}'" if rights == [:mask_specific]
-      formatted_ace << ", type => '#{type}'" unless type == :allow
-      formatted_ace << ", child_types => '#{child_types}'" unless (child_types == :all || child_types == :none)
-      formatted_ace << ", affects => '#{affects}'" unless affects == :all
-      formatted_ace << ", is_inherited => '#{is_inherited}'" if is_inherited
-      formatted_ace << ' }'
+    def to_hash
+      return @hash if @hash
 
-      formatted_ace
+      ace_hash = Hash.new
+      ace_hash['identity'] = identity
+      ace_hash['rights'] = convert_from_symbols(rights)
+      ace_hash['mask'] = mask if (rights == [:mask_specific] && !mask.nil?)
+      ace_hash['type'] = type unless (type == :allow || type.nil?)
+      ace_hash['child_types'] = child_types unless (child_types == :all || child_types == :none || child_types.nil?)
+      ace_hash['affects'] = affects unless (affects == :all || affects.nil?)
+      ace_hash['is_inherited'] = is_inherited if is_inherited
+
+      @hash = ace_hash
+      @hash
     end
 
+    # The following methods: keys, values, [](key) make
+    # `puppet resource acl somelocation` believe that
+    # this is actually a Hash and can pull the values
+    # from this object.
+    def keys
+      to_hash.keys
+    end
+
+    def values
+      to_hash.values
+    end
+
+    def [](key)
+      to_hash[key]
+    end
+
+    def inspect
+      hash = to_hash
+      return_value = hash.keys.collect do |key|
+        key_value = hash[key]
+        if key_value.is_a? Array
+          "#{key} => #{key_value}"
+        else
+          "#{key} => '#{key_value}'"
+        end
+      end.join(', ')
+
+      "\n { #{return_value} }"
+    end
+    alias_method :to_s, :inspect
   end
 end
