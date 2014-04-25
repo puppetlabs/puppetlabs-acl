@@ -89,7 +89,7 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def permissions_should_to_s(should)
-    return '' if should.nil? or !should.kind_of?(Array)
+    return [] if should.nil? or !should.kind_of?(Array)
 
     sd = get_security_descriptor
     should_aces = sync_aces(sd.dacl,should, @resource[:purge] == :true, @resource[:purge] == :listed_permissions)
@@ -98,7 +98,7 @@ Puppet::Type.type(:acl).provide :windows do
   end
 
   def permissions_to_s(permissions)
-    return '' if permissions.nil? or !permissions.kind_of?(Array)
+    return [] if permissions.nil? or !permissions.kind_of?(Array)
 
     perms = permissions.select { |p| !p.is_inherited}
 

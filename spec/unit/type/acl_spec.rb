@@ -508,6 +508,31 @@ describe Puppet::Type.type(:acl) do
       resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'child_types'=>'containers','affects'=>'self_only'}
     end
 
+    context "formatting" do
+      it "when called from puppet resource should format like a hash and ASCIIbetical order properties when displaying" do
+        # properties are out of order here
+        resource[:permissions] = [{'rights'=>['full'], 'child_types' => 'containers', 'identity'=> 'bob'},{'rights'=>['full'], 'identity'=> 'tim'}]
+
+        # ordered asciibetically
+        expected = "[{'child_types' => 'containers', 'identity' => 'bob', 'rights' => ['full']}, {'identity' => 'tim', 'rights' => ['full']}]"
+
+        Puppet::Parameter.format_value_for_display(resource[:permissions]).should == expected
+      end
+
+      it "when called from puppet should format much better when displaying" do
+        # properties are out of order here
+        resource[:permissions] = [{'rights'=>['read','write'], 'type'=> 'deny', 'child_types' => 'containers', 'identity'=> 'bob'},{'rights'=>['full'], 'identity'=> 'tim'}]
+
+        # and spaced / ordered properly here
+        expected = "[
+ { identity => 'bob', rights => [\"write\", \"read\"], type => 'deny', child_types => 'containers' },\s
+ { identity => 'tim', rights => [\"full\"] }
+]"
+
+        resource.parameters[:permissions].class.format_value_for_display(resource[:permissions]).should == expected
+      end
+    end
+
     context ":identity" do
       it "should accept bob" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full']}
