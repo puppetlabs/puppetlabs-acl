@@ -23,15 +23,15 @@ file { '#{target}':
 }
 
 user { '#{user_id}':
-	ensure     => present,
-	groups     => 'Users',
-	managehome => true,
-	password	 => "L0v3Pupp3t!"
+  ensure     => present,
+  groups     => 'Users',
+  managehome => true,
+  password   => "L0v3Pupp3t!"
 }
 
 acl { '#{target}':
-  permissions => [
-  	{ identity => '#{user_id}', type => 'deny', rights => ['mask_specific'], mask => '#{mask}' },
+  permissions  => [
+    { identity => '#{user_id}', type => 'deny', rights => ['mask_specific'], mask => '#{mask}' },
   ],
 }
 MANIFEST
