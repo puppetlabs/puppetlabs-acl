@@ -26,12 +26,12 @@ file { "#{target}":
 user { "#{user_id}":
   ensure     => present,
   groups     => 'Users',
-  managehome => true, 
+  managehome => true,
   password   => "L0v3Pupp3t!"
 }
 
 acl { "#{target}":
-  permissions => [
+  permissions  => [
     { identity => '#{user_id}', rights => ['full'] },
   ],
 }
@@ -40,8 +40,8 @@ MANIFEST
 purge_acl_manifest = <<-MANIFEST
 acl { "#{target}":
   purge        => 'true',
-  inherit_parent_permissions => 'false',
   permissions  => [],
+  inherit_parent_permissions => 'false'
 }
 MANIFEST
 

@@ -31,19 +31,19 @@ file { "#{target}":
 user { "#{user_id_1}":
   ensure     => present,
   groups     => 'Users',
-  managehome => true, 
+  managehome => true,
   password   => "L0v3Pupp3t!"
 }
 
 user { "#{user_id_2}":
   ensure     => present,
   groups     => 'Users',
-  managehome => true, 
+  managehome => true,
   password   => "L0v3Pupp3t!"
 }
 
 acl { "#{target}":
-  permissions => [
+  permissions  => [
     { identity => '#{user_id_1}', rights => ['full'] },
   ],
 }
@@ -54,7 +54,7 @@ acl { "#{target}":
   purge        => 'true',
   permissions  => [
     { identity => '#{user_id_2}', rights => ['full'] },
-  ],
+  ]
 }
 MANIFEST
 
