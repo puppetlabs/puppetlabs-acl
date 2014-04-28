@@ -52,6 +52,12 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     resource.provider = provider
   end
 
+  after :each do
+    if resource[:target] && ::File.exist?(resource[:target])
+      grant_everyone_full_access(resource[:target])
+    end
+  end
+
   it "should throw an error for an invalid target" do
     resource[:target] = "c:/somwerhaear2132312323123123123123123_does_not_exist"
 
