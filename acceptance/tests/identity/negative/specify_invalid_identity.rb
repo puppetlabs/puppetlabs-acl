@@ -24,8 +24,8 @@ file { '#{target}':
 }
 
 acl { '#{target}':
-  permissions => [
-  	{ identity => '#{user_id}', rights => ['full'] },
+  permissions  => [
+    { identity => '#{user_id}', rights => ['full'] },
   ],
 }
 MANIFEST

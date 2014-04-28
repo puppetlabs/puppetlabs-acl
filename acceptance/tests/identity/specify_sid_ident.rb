@@ -36,10 +36,10 @@ file { '#{target}':
 }
 
 user { '#{user_id}':
-	ensure     => present,
-	groups     => 'Users',
-	managehome => true,
-	password	 => "L0v3Pupp3t!"
+  ensure     => present,
+  groups     => 'Users',
+  managehome => true,
+  password   => "L0v3Pupp3t!"
 }
 MANIFEST
 
@@ -54,7 +54,7 @@ agents.each do |agent|
     end
   end
 
-	sid = ''
+  sid = ''
 
   step "Execute Setup Manifest"
   on(agent, puppet('apply', '--debug'), :stdin => setup_manifest) do |result|
@@ -68,14 +68,14 @@ agents.each do |agent|
 
   #ACL manifest
   acl_manifest = <<-MANIFEST
-	acl { '#{target}':
-	  permissions => [
-	  	{ identity => '#{sid}', rights => ['full'] },
-	  ],
-	}
-	MANIFEST
+  acl { '#{target}':
+    permissions => [
+      { identity => '#{sid}', rights => ['full'] },
+    ],
+  }
+  MANIFEST
 
-	step "Execute ACL Manifest"
+  step "Execute ACL Manifest"
   on(agent, puppet('apply', '--debug'), :stdin => acl_manifest) do |result|
     assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
   end

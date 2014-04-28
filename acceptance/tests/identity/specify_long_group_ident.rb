@@ -27,12 +27,12 @@ file { '#{target}':
 }
 
 group { '#{group_id}':
-	ensure => present,
+  ensure => present,
 }
 
 acl { '#{target}':
-  permissions => [
-  	{ identity => '#{group_id}', rights => ['full'] },
+  permissions  => [
+    { identity => '#{group_id}', rights => ['full'] },
   ],
 }
 MANIFEST

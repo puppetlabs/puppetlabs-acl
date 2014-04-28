@@ -33,8 +33,8 @@ group { '#{group_id}':
 }
 
 acl { '#{target}':
-  permissions => [
-  	{ identity => '#{group_id}', rights => ['full'] },
+  permissions  => [
+    { identity => '#{group_id}', rights => ['full'] },
   ],
 }
 MANIFEST
