@@ -19,7 +19,7 @@ group :development, :test do
   gem 'rake'
   gem 'rspec', "~> 2.11.0"
   gem 'mocha', "~> 0.10.5"
-  gem 'beaker', "~> 1.10.0"
+  gem 'beaker', ">= 1.9.0"
   gem 'puppetlabs_spec_helper'
 end
 
