@@ -3,15 +3,18 @@ require 'puppetlabs_spec_helper/module_spec_helper'
 require 'pathname'
 require 'tmpdir'
 require 'fileutils'
-require 'puppet/util/windows/security'
 
-def grant_everyone_full_access(path)
-  sd = Puppet::Util::Windows::Security.get_security_descriptor(path)
-  sd.dacl.allow(
-    'S-1-1-0', #everyone
-    Windows::File::FILE_ALL_ACCESS,
-    Windows::File::OBJECT_INHERIT_ACE | Windows::File::CONTAINER_INHERIT_ACE)
-  Puppet::Util::Windows::Security.set_security_descriptor(path, sd)
+if Puppet.features.microsoft_windows?
+  require 'puppet/util/windows/security'
+
+  def grant_everyone_full_access(path)
+    sd = Puppet::Util::Windows::Security.get_security_descriptor(path)
+    sd.dacl.allow(
+        'S-1-1-0', #everyone
+        Windows::File::FILE_ALL_ACCESS,
+        Windows::File::OBJECT_INHERIT_ACE | Windows::File::CONTAINER_INHERIT_ACE)
+    Puppet::Util::Windows::Security.set_security_descriptor(path, sd)
+  end
 end
 
 RSpec.configure do |config|
