@@ -7,7 +7,7 @@ rights = 'full'
 perm_type = 'deny'
 asset_type = 'file'
 child_inherit_type = 'false'
-file_content = 'Smell-o-vision: brought to you by the makers of Taste-o-vision!'
+file_content = 'She smirked as he distainfully chocked down her tasteless humor.'
 
 parent_name = 'temp'
 target_name = "rem_inherit_#{perm_type}_on_#{asset_type}"
