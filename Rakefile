@@ -23,7 +23,7 @@ end
 desc 'Run Beaker Git Tests'
 task :beaker_git, [:hosts, :tests] do |t, args|
   args.with_defaults({:type => 'git'})
-  puts(build_command(args))
+  system(build_command(args))
 end
 
 def build_command(args)
