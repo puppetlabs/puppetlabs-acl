@@ -33,13 +33,13 @@ file { "#{target}":
 user { "#{user_id}":
   ensure     => present,
   groups     => 'Users',
-  managehome => true, 
+  managehome => true,
   password   => "L0v3Pupp3t!"
 }
 
 acl { "#{target}":
-  purge       => 'true',
-  permissions => [
+  purge           => 'true',
+  permissions     => [
     { identity    => '#{user_id}',
       rights      => ['#{rights}'],
       affects     => '#{prop_type}'
