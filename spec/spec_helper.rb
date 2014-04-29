@@ -1,5 +1,4 @@
 require 'puppetlabs_spec_helper/module_spec_helper'
-#require 'puppet/test/test_helper'
 require 'pathname'
 require 'tmpdir'
 require 'fileutils'
@@ -7,13 +6,12 @@ require 'fileutils'
 if Puppet.features.microsoft_windows?
   require 'puppet/util/windows/security'
 
-  def grant_everyone_full_access(path)
-    sd = Puppet::Util::Windows::Security.get_security_descriptor(path)
-    sd.dacl.allow(
-        'S-1-1-0', #everyone
-        Windows::File::FILE_ALL_ACCESS,
-        Windows::File::OBJECT_INHERIT_ACE | Windows::File::CONTAINER_INHERIT_ACE)
-    Puppet::Util::Windows::Security.set_security_descriptor(path, sd)
+  def take_ownership(path)
+    path = path.gsub('/', '\\')
+    output = %x(takeown.exe /F #{path} /R /A /D Y 2>&1)
+    if $? != 0 #check if the child process exited cleanly.
+      puts "#{path} got error #{output}"
+    end
   end
 end
 
@@ -45,6 +43,9 @@ RSpec.configure do |config|
   config.after :suite do
     # return to original tmpdir
     ENV['TMPDIR'] = oldtmpdir
+    if Puppet::Util::Platform.windows?
+      take_ownership(tmpdir)
+    end
     FileUtils.rm_rf(tmpdir)
   end
 end
