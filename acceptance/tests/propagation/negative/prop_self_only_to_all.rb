@@ -1,23 +1,24 @@
 test_name 'Windows ACL Module - Negative - Propagate "self_only" to "all" Child Types'
 
-skip_test("This test requires FM-1191 to be resolved")
-
 confine(:to, :platform => 'windows')
 
 #Globals
-parent_name = 'temp'
-target_name = 'prop_self_only_to_all'
-
 rights = 'full'
 prop_type = 'self_only'
 affects_child_type = 'all'
 
+parent_name = 'temp'
+target_name = 'prop_self_only_to_all'
+target_child_name = "prop_#{prop_type}_child"
+
 target_parent = "c:/#{parent_name}"
 target = "#{target_parent}/#{target_name}"
+target_child = "#{target}/#{target_child_name}"
 user_id = 'bob'
 
 verify_acl_command = "icacls #{target}"
-acl_regex = /.*\\bob:\(NP\)\(F\)/
+verify_child_acl_command = "icacls #{target_child}"
+acl_regex = /.*\\bob:\(F\)/
 
 #Manifests
 acl_manifest = <<-MANIFEST
@@ -53,6 +54,10 @@ acl { "#{target}":
   ],
   inherit_parent_permissions => 'false'
 }
+->
+file { "#{target_child}":
+  ensure  => directory
+}
 MANIFEST
 
 #Tests
@@ -65,5 +70,10 @@ agents.each do |agent|
   step "Verify that ACL Rights are Correct"
   on(agent, verify_acl_command) do |result|
     assert_match(acl_regex, result.stdout, 'Expected ACL was not present!')
+  end
+
+  step "Verify that ACL Rights are Correct on Child"
+  on(agent, verify_child_acl_command) do |result|
+    assert_no_match(acl_regex, result.stdout, 'Unexpected ACL was present!')
   end
 end
