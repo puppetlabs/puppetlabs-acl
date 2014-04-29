@@ -35,7 +35,7 @@ user { '#{user_id}':
 }
 
 acl { '#{target}':
-  permissions => [
+  permissions  => [
     { identity => '#{user_id}', type => 'allow', rights => [#{rights}] },
   ],
 }
