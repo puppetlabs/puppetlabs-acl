@@ -8,7 +8,7 @@ target_parent = 'c:/temp'
 target = "c:/temp/deny_#{mask}_rights_file.txt"
 user_id = "bob"
 
-file_content = 'Pressure, oh the pressure.'
+file_content = 'Tiny little people with small problems.'
 verify_content_command = "cat /cygdrive/c/temp/deny_#{mask}_rights_file.txt"
 file_content_regex = /#{file_content}/
 
