@@ -20,7 +20,7 @@ group :development, :test do
   gem 'rspec', "~> 2.11.0"
   gem 'mocha', "~> 0.10.5"
   # beaker is not supported to be installed on windows
-  gem 'beaker', ">= 1.9.0" if !RUBY_PLATFORM=~ /win32/
+  gem 'beaker', ">= 1.9.0" unless RUBY_PLATFORM=~ /win32/
   gem 'puppetlabs_spec_helper'
 end
 
