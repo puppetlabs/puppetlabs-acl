@@ -70,6 +70,8 @@ See the section [Installing Modules](http://docs.puppetlabs.com/puppet/2.7/refer
 
   Defaults to not specified on Windows. This allows group to stay set to whatever it is currently set to (group can vary depending on the original CREATOR GROUP). The trustee must exist on the system and will auto-require on user and group resources.
 
+  **NOTE**: On Windows the CREATOR GROUP inherited ACE must be set for the creator's primary group to be set as an ACE automatically. Group is not always widely used. By default the group will also need to be specifically set as an explicit managed ACE. For more information see http://support.microsoft.com/kb/126629
+
  * **permissions** - Permissions is an array containing Access Control Entries (ACEs). Certain Operating Systems require these ACEs to be in explicit order (Windows). Every element in the array is a hash that will at the very least need `identity` and `rights` e.g `{ identity => 'Administrators', rights => ['full'] }` and at the very most can include `type`, `child_types`, `affects`, and `mask` (mask should only be specified with `rights => ['mask_specific']`)  e.g. `{ identity => 'Administrators', rights => ['full'], type=> 'allow', child_types => 'all', affects => 'all' }`.
 
   * `identity` is a group, user or ID (SID on Windows). This can be in the form of:
