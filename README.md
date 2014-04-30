@@ -356,6 +356,7 @@ Same user multiple ACEs sample usage:
 ````
 
  * Windows 8.3 short name format for files/directories is not supported.
+ * Unicode for identities, group, and owner may not work appropriately or at all in the first release.
  * When using SIDs for identities, autorequire will attempt to match to users with fully qualified names (`User[BUILTIN\Administrators]`) in addition to SIDs (`User[S-1-5-32-544]`). The limitation is that it won't match against `User[Administrators]` as that could cause issues if attempting to match domain accounts versus local accounts with the same name e.g. `Domain\Bob` vs `LOCAL\Bob`.
 
 ##License
