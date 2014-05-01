@@ -11,7 +11,7 @@ user_id = "user_렝딴슫있처"
 
 file_content = 'Flying Spaghetti Monster wants to save your soul.'
 verify_content_command = "cat /cygdrive/c/temp/specify_unicode_user_ident.txt"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 verify_acl_command = "icacls #{target}"
 acl_regex = /.*\\user_렝딴슫있처:\(F\)/

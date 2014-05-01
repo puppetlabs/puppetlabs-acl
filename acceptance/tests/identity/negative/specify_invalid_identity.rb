@@ -9,7 +9,7 @@ user_id = "user_not_here"
 
 file_content = 'Car made of cats.'
 verify_content_command = "cat /cygdrive/c/temp/specify_invalid_ident.txt"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 #Manifest
 acl_manifest = <<-MANIFEST

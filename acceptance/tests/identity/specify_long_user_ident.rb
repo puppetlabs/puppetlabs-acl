@@ -9,7 +9,7 @@ user_id = "user_very_long_name1"
 
 file_content = 'Brown cow goes moo.'
 verify_content_command = "cat /cygdrive/c/temp/specify_long_user_ident.txt"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 verify_acl_command = "icacls #{target}"
 acl_regex = /.*\\user_very_long_name1:\(F\)/

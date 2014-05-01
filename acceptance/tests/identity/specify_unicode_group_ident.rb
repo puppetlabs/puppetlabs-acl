@@ -11,7 +11,7 @@ group_id = "group_렝딴슫있처"
 
 file_content = 'Garbage bag full of money.'
 verify_content_command = "cat /cygdrive/c/temp/specify_unicode_group_ident.txt"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 verify_acl_command = "icacls #{target}"
 acl_regex = /.*\\group_렝딴슫있처:\(F\)/

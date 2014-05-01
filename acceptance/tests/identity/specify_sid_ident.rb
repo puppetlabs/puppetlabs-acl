@@ -12,7 +12,7 @@ user_id = 'bob'
 
 file_content = 'Magic unicorn rainbow madness!'
 verify_content_command = "cat /cygdrive/c/temp/specify_sid_ident.txt"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 get_user_sid_command = <<-GETSID
 cmd /c "wmic useraccount where name='#{user_id}' get sid"

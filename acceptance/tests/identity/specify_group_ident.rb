@@ -9,7 +9,7 @@ group_id = 'bobs'
 
 file_content = 'Cat barf.'
 verify_content_command = "cat /cygdrive/c/temp/specify_group_ident.txt"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 verify_acl_command = "icacls #{target}"
 acl_regex = /.*\\bobs:\(F\)/

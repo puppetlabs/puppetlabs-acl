@@ -9,7 +9,7 @@ group_id = "nzxncvkjnzxjkcnvkjzxncvkjznxckjvnzxkjncvzxnvckjnzxkjcnvkjzxncvkjzxnc
 
 file_content = 'A bag of jerks.'
 verify_content_command = "cat /cygdrive/c/temp/specify_257_char_ident.txt"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 #Manifest
 acl_manifest = <<-MANIFEST
