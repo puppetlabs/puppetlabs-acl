@@ -12,7 +12,7 @@ target_name = "use_case_#{test_short_name}.txt"
 target_parent = "c:/#{parent_name}"
 target = "#{target_parent}/#{target_name}"
 
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 user_id = 'bob'
 

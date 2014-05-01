@@ -13,7 +13,7 @@ target_parent = "c:/#{parent_name}"
 target = "#{target_parent}/#{target_name}"
 
 verify_content_command = "cat /cygdrive/c/#{parent_name}/#{target_name}"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 user_id = 'bob'
 

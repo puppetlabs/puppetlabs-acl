@@ -17,7 +17,7 @@ target = "#{target_parent}/#{target_name}"
 target_child = "#{target}/#{target_child_name}"
 
 verify_content_command = "cat /cygdrive/c/#{parent_name}/#{target_name}/#{target_child_name}"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 group = 'Administrators'
 user_id = 'Administrator'

@@ -20,7 +20,7 @@ user_id_5 = 'sally'
 user_id_6 = 'betty'
 
 verify_content_command = "cat /cygdrive/c/#{parent_name}/#{target_name}"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 verify_acl_command = "icacls #{target}"
 user_id_1_ace_regex = /.*\\bob:\(F\)/
