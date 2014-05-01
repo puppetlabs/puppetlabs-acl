@@ -11,7 +11,7 @@ user_id = 'bob'
 
 file_content = 'Salsa Mama! Caliente!'
 verify_content_command = "cat /cygdrive/c/temp/dqcEjJarQzeeNxWihARGLytPggNssxewZsopUFUoncTKAgsxsBqRigMlZEdNTEybqlVTjkDWTRASaQPyeeAsuUohncMlarIRphqIdqwyimqPphRTcKpojhTHoAgTUWiaEkiOqbeeEZKvNAhFQiELGLZghRwhKXVHuUPxWghKXVHuUPxWqmeYCHejdQOoGRYqaxwdIqiYyhhSCAhEWlggsGToSLmrgPmotSACKrREyohRBPaKRUmlgCGVtrP"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 verify_acl_command = "icacls #{target}"
 acl_regex = /.*\\bob:\(F\)/

@@ -10,7 +10,7 @@ user_id = 'bob'
 
 file_content = 'wax candle butler space station zebra glasses'
 verify_content_command = "cat /cygdrive/c/temp/rem_file_short_name.txt"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 verify_acl_command = "icacls #{target8dot3}"
 acl_regex = /.*\\bob:\(F\)/

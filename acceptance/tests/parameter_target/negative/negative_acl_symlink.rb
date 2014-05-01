@@ -13,7 +13,7 @@ user_id = 'bob'
 
 file_content = 'A link to the past.'
 verify_content_command = "cat /cygdrive/c/temp/sym_target_file.txt"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 win_target = "c:\\temp\\sym_target_file.txt"
 win_target_symlink = "c:\\temp\\symlink"

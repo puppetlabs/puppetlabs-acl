@@ -11,7 +11,7 @@ user_id = 'bob'
 
 file_content = 'Puppets and Muppets! Cats on the Interwebs!'
 verify_content_command = "cat /cygdrive/c/temp/unicode_file_\u3140\u3145\u3176\u3145\u3172\u3142\u3144\u3149\u3151\u3167\u3169\u3159\u3158.txt"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 verify_acl_command = "icacls #{target}"
 acl_regex = /.*\\bob:\(F\)/
