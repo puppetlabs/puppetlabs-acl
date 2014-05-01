@@ -16,7 +16,7 @@ owner_id = 'jasqddsweruwqiouroaysfyuasudyfaisoyfqoiuwyefiaysdiyfzixycivzixyvciqy
 
 expected_error = /Error:.*User does not exist/
 verify_content_command = "cat /cygdrive/c/#{parent_name}/#{target_name}"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 #Manifests
 acl_manifest = <<-MANIFEST

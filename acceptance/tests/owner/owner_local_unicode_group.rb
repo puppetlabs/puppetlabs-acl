@@ -17,7 +17,7 @@ user_id = 'bob'
 owner_id = '䎈含㴼罍率䎁叴秀㪲軞'
 
 verify_content_command = "cat /cygdrive/c/#{parent_name}/#{target_name}"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 dosify_target = "c:\\#{parent_name}\\#{target_name}"
 verify_owner_command = "cmd /c \"dir /q #{dosify_target}\""
