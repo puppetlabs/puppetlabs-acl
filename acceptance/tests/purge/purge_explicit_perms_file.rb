@@ -10,7 +10,7 @@ user_id_2 = 'jerry'
 
 file_content = 'Surge Purge Merge'
 verify_content_command = "cat /cygdrive/c/temp/purge_exp_inherit.txt"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 verify_acl_command = "icacls #{target}"
 acl_regex_user_id_1 = /.*\\bob:\(F\)/
