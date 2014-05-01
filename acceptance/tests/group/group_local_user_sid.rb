@@ -29,6 +29,9 @@ file_content_regex = /\A#{file_content}\z/
 verify_group_command = "icacls #{target}"
 group_regex = /.*\\jerry:\(M\)/
 
+#Capture the SID for later use.
+sid = ''
+
 #Manifests
 setup_manifest = <<-MANIFEST
 file { "#{target_parent}":
@@ -66,8 +69,6 @@ agents.each do |agent|
       skip_test("This test cannot run on a Windows 2003 system!")
     end
   end
-
-  sid = ''
 
   step "Execute Setup Manifest"
   on(agent, puppet('apply', '--debug'), :stdin => setup_manifest) do |result|

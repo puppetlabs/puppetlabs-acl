@@ -12,6 +12,7 @@ target_name = "group_#{user_type}.txt"
 target_parent = "c:/#{parent_name}"
 target = "#{target_parent}/#{target_name}"
 user_id = 'bob'
+#256 characters
 group_id = 'jasqddweruwqiouroaysfyuasudyfaisoyfqoiuwyefiaysdiyfzixycivzixyvciqywifyiasdiufyasdygfasirfwerqiuwyeriatsdtfastdfqwyitfastdfawerfytasdytfasydgtaisdytfiasydfiosayghiayhidfhygiasftawyegyfhgaysgfuyasgdyugfasuiyfguaqyfgausydgfaywgfuasgdfuaisydgfausasdfuygsadfyg'
 
 verify_content_command = "cat /cygdrive/c/#{parent_name}/#{target_name}"
