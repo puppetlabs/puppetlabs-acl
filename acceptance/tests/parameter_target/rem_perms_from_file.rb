@@ -9,7 +9,7 @@ user_id = 'bob'
 
 file_content = 'I love puppet, puppet love puppet, puppet love!'
 verify_content_command = "cat /cygdrive/c/temp/rem_perm_file.txt"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 verify_acl_command = "icacls #{target}"
 acl_regex = /.*\\bob:\(F\)/
