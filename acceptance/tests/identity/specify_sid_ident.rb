@@ -23,6 +23,9 @@ sid_regex = /^(S-.+)$/
 verify_acl_command = "icacls #{target}"
 acl_regex = /.*\\bob:\(F\)/
 
+#Capture the SID for later use.
+sid = ''
+
 #Manifest
 setup_manifest = <<-MANIFEST
 file { '#{target_parent}':
@@ -53,8 +56,6 @@ agents.each do |agent|
       skip_test("This test cannot run on a Windows 2003 system!")
     end
   end
-
-  sid = ''
 
   step "Execute Setup Manifest"
   on(agent, puppet('apply', '--debug'), :stdin => setup_manifest) do |result|

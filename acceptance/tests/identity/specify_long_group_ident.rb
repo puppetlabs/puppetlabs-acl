@@ -5,6 +5,7 @@ confine(:to, :platform => 'windows')
 #Globals
 target_parent = 'c:/temp'
 target = 'c:/temp/specify_long_group_ident.txt'
+#256 Characters
 group_id = 'nzxncvkjnzxjkcnvkjzxncvkjznxckjvnzxkjncvzxnvckjnzxkjcnvkjzxncvkjzxncvkjzxncvkjnzxkjcnvkzjxncvkjzxnvckjnzxkjcvnzxkncjvjkzxncvkjzxnvckjnzxjkcvnzxkjncvkjzxncvjkzxncvkjzxnkvcjnzxjkcvnkzxjncvkjzxncvkzckjvnzxkcvnjzxjkcnvzjxkncvkjzxnvkjsdnjkvnzxkjcnvkjznvkjxcbvzs'
 
 file_content = 'Pretty little poodle dressed in noodles.'

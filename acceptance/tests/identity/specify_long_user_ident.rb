@@ -5,6 +5,7 @@ confine(:to, :platform => 'windows')
 #Globals
 target_parent = 'c:/temp'
 target = 'c:/temp/specify_long_user_ident.txt'
+#20 characters
 user_id = "user_very_long_name1"
 
 file_content = 'Brown cow goes moo.'
