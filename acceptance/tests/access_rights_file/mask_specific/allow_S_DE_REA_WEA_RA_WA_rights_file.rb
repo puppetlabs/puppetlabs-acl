@@ -10,7 +10,7 @@ user_id = "bob"
 
 file_content = 'Karate time!'
 verify_content_command = "cat /cygdrive/c/temp/allow_#{mask}_rights_file.txt"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 verify_acl_command = "icacls #{target}"
 acl_regex = /.*\\bob:\(D,REA,WEA,RA,WA\)/

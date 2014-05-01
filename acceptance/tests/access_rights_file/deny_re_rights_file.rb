@@ -10,7 +10,7 @@ user_id = "bob"
 
 file_content = 'Your forcefield is good, but my teleporting is better.'
 verify_content_command = "cat /cygdrive/c/temp/deny_re_rights_file.txt"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 verify_acl_command = "icacls #{target}"
 acl_regex = /.*\\bob:\(DENY\)\(RX\)/

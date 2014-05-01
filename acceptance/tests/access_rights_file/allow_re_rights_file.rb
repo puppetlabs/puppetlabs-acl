@@ -10,7 +10,7 @@ user_id = "bob"
 
 file_content = 'Get on the phone with baked beans!'
 verify_content_command = "cat /cygdrive/c/temp/allow_re_rights_file.txt"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 verify_acl_command = "icacls #{target}"
 acl_regex = /.*\\bob:\(RX\)/
