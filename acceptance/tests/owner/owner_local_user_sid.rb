@@ -30,6 +30,9 @@ dosify_target = "c:\\#{parent_name}\\#{target_name}"
 verify_owner_command = "cmd /c \"dir /q #{dosify_target}\""
 owner_regex = /.*\\jerry/
 
+#Capture the SID for later use.
+sid = ''
+
 #Manifests
 setup_manifest = <<-MANIFEST
 file { "#{target_parent}":
@@ -67,8 +70,6 @@ agents.each do |agent|
       skip_test("This test cannot run on a Windows 2003 system!")
     end
   end
-
-  sid = ''
 
   step "Execute Setup Manifest"
   on(agent, puppet('apply', '--debug'), :stdin => setup_manifest) do |result|
