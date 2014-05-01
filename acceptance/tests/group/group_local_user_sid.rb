@@ -24,7 +24,7 @@ GETSID
 sid_regex = /^(S-.+)$/
 
 verify_content_command = "cat /cygdrive/c/#{parent_name}/#{target_name}"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 verify_group_command = "icacls #{target}"
 group_regex = /.*\\jerry:\(M\)/
