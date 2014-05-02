@@ -10,7 +10,7 @@ user_id_2 = 'jerry'
 
 file_content = 'Surge Purge Merge'
 verify_content_command = "cat /cygdrive/c/temp/purge_exp_inherit.txt"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 verify_acl_command = "icacls #{target}"
 acl_regex_user_id_1 = /.*\\bob:\(F\)/
@@ -31,19 +31,19 @@ file { "#{target}":
 user { "#{user_id_1}":
   ensure     => present,
   groups     => 'Users',
-  managehome => true, 
+  managehome => true,
   password   => "L0v3Pupp3t!"
 }
 
 user { "#{user_id_2}":
   ensure     => present,
   groups     => 'Users',
-  managehome => true, 
+  managehome => true,
   password   => "L0v3Pupp3t!"
 }
 
 acl { "#{target}":
-  permissions => [
+  permissions  => [
     { identity => '#{user_id_1}', rights => ['full'] },
   ],
 }
@@ -54,7 +54,7 @@ acl { "#{target}":
   purge        => 'true',
   permissions  => [
     { identity => '#{user_id_2}', rights => ['full'] },
-  ],
+  ]
 }
 MANIFEST
 
@@ -75,7 +75,7 @@ agents.each do |agent|
     assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
   end
 
-  step "Verify that ACL Rights are Correct"
+  step "Verify that ACL Rights are Correct (Post-Purge)"
   on(agent, verify_acl_command) do |result|
     assert_no_match(acl_regex_user_id_1, result.stdout, 'Unexpected ACL was present!')
     assert_match(acl_regex_user_id_2, result.stdout, 'Expected ACL was not present!')

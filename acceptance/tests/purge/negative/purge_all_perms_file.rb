@@ -9,7 +9,7 @@ user_id = 'bob'
 
 file_content = 'Breakfast is the most important meal of the day.'
 verify_content_command = "cat /cygdrive/c/temp/purge_all_no_inherit.txt"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 verify_acl_command = "icacls #{target}"
 acl_regex_user_id = /.*\\bob:\(F\)/
@@ -31,12 +31,12 @@ file { "#{target}":
 user { "#{user_id}":
   ensure     => present,
   groups     => 'Users',
-  managehome => true, 
+  managehome => true,
   password   => "L0v3Pupp3t!"
 }
 
 acl { "#{target}":
-  permissions => [
+  permissions  => [
     { identity => '#{user_id}', rights => ['full'] },
   ],
 }
@@ -45,8 +45,8 @@ MANIFEST
 purge_acl_manifest = <<-MANIFEST
 acl { "#{target}":
   purge        => 'true',
-  inherit_parent_permissions => 'false',
   permissions  => [],
+  inherit_parent_permissions => 'false'
 }
 MANIFEST
 
