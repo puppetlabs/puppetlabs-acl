@@ -83,7 +83,7 @@ agents.each do |agent|
     assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
   end
 
-  step "Verify that ACL Rights are Correct"
+  step "Verify that ACL Rights are Correct (Post-Purge)"
   on(agent, verify_acl_command, :acceptable_exit_codes => [0,5]) do |result|
     if os_version_win_2003
       assert_match(acl_regex_win_2003, result.stderr, 'Expected failure was not present!')

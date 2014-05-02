@@ -70,7 +70,7 @@ agents.each do |agent|
     assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
   end
 
-  step "Verify that ACL Rights are Correct"
+  step "Verify that ACL Rights are Correct (Post-Purge)"
   on(agent, verify_acl_command) do |result|
     assert_no_match(acl_regex_user_id_1, result.stdout, 'Unexpected ACL was present!')
     assert_match(acl_regex_user_id_2, result.stdout, 'Expected ACL was not present!')
