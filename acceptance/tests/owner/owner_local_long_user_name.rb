@@ -22,7 +22,7 @@ dosify_target = "c:\\#{parent_name}\\#{target_name}"
 verify_owner_command = "cmd /c \"dir /q #{dosify_target}\""
 
 #The dir command chops the username at 16 characters.
-owner_regex = /.*\\long_user_name_j/
+owner_regex = /.*\\long/
 
 #Manifests
 acl_manifest = <<-MANIFEST
