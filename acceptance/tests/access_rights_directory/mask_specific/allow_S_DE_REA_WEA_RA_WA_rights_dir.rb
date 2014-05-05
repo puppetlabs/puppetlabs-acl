@@ -1,15 +1,15 @@
-test_name 'Windows ACL Module - Deny "write" Rights for Identity on Directory'
+test_name 'Windows ACL Module -  Allow Mask Specific "S, DE, REA, WEA, RA, WA" Rights for Identity on Directory'
 
 confine(:to, :platform => 'windows')
 
 #Globals
-rights = "write"
+mask = "1114520"
 target_parent = 'c:/temp'
-target = "c:/temp/deny_#{rights}_rights_dir"
+target = "c:/temp/allow_#{mask}_rights_dir"
 user_id = "bob"
 
 verify_acl_command = "icacls #{target}"
-acl_regex = /.*\\bob:\(OI\)\(CI\)\(DENY\)\(W,Rc\)/
+acl_regex = /.*\\bob:\(OI\)\(CI\)\(D,REA,WEA,RA,WA\)/
 
 #Manifest
 acl_manifest = <<-MANIFEST
@@ -31,7 +31,7 @@ user { '#{user_id}':
 
 acl { '#{target}':
   permissions  => [
-    { identity => '#{user_id}', rights => ['#{rights}'], type => 'deny' },
+    { identity => '#{user_id}', rights => ['mask_specific'], mask => '#{mask}' },
   ],
 }
 MANIFEST
