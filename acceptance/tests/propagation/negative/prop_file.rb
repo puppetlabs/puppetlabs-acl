@@ -16,7 +16,7 @@ target = "#{target_parent}/#{target_name}"
 user_id = 'bob'
 
 verify_content_command = "cat /cygdrive/c/#{parent_name}/#{target_name}"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 verify_manifest = /\{ identity => '.*\\bob', rights => \["full"\], affects => 'self_only' \}/
 verify_acl_command = "icacls #{target}"
@@ -37,13 +37,13 @@ file { '#{target}':
 user { "#{user_id}":
   ensure     => present,
   groups     => 'Users',
-  managehome => true, 
+  managehome => true,
   password   => "L0v3Pupp3t!"
 }
 
 acl { "#{target}":
-  purge       => 'true',
-  permissions => [
+  purge           => 'true',
+  permissions     => [
     { identity    => '#{user_id}',
       rights      => ['#{rights}'],
       affects     => '#{prop_type}',
