@@ -7,7 +7,7 @@ rights = 'full'
 perm_type = 'deny'
 asset_type = 'file'
 child_inherit_type = 'false'
-file_content = 'Smell-o-vision: brought to you by the makers of Taste-o-vision!'
+file_content = 'She smirked as he distainfully chocked down her tasteless humor.'
 
 parent_name = 'temp'
 target_name = "rem_inherit_#{perm_type}_on_#{asset_type}"
@@ -20,7 +20,7 @@ user_id = 'bob'
 user_id_child = 'jerry'
 
 verify_content_command = "cat /cygdrive/c/#{parent_name}/#{target_name}/#{target_child_name}"
-file_content_regex = /#{file_content}/
+file_content_regex = /\A#{file_content}\z/
 
 verify_child_acl_command = "icacls #{target_child}"
 acl_child_regex = /.*\\bob:\(N\)/
