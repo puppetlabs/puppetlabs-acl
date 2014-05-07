@@ -358,6 +358,7 @@ Same user multiple ACEs sample usage:
 ````
 
  * Windows 8.3 short name format for files/directories is not supported.
+ * Using Cygwin to run puppet with ACLs could result in undesirable behavior (on Windows 2008 "Administrator" identity gets translated to "cyg_server", but behaves fine on Windows 2012). We wouldn't recommend using Cygwin to run Puppet with ACL manifests due to this and other possible edge cases.
  * Unicode for identities, group, and owner may not work appropriately or at all in the first release.
  * When using SIDs for identities, autorequire will attempt to match to users with fully qualified names (`User[BUILTIN\Administrators]`) in addition to SIDs (`User[S-1-5-32-544]`). The limitation is that it won't match against `User[Administrators]` as that could cause issues if attempting to match domain accounts versus local accounts with the same name e.g. `Domain\Bob` vs `LOCAL\Bob`.
 
