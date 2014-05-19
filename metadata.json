@@ -1,4 +1,14 @@
 {
+  "requirements": [
+    {
+      "name": "pe",
+      "version_requirement": "3.3.x"
+    },
+    {
+      "name": "puppet",
+      "version_requirement": ">= 3.4.0"
+    }
+  ],
   "author": "puppetlabs",
   "checksums": {
     "lib/puppet/util/monkey_patches.rb": "d36ea4119907b8105ad18a63ebafa006",
