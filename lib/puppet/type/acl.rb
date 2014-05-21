@@ -190,7 +190,8 @@ Puppet::Type.newtype(:acl) do
       `'mask_specific'` or some combination of `'write'`, `'read'`, and
       `'execute'`. If you specify `'mask_specific'` you must also specify
       `mask` with an integer (passed as a string) that represents the
-      permissions mask.
+      permissions mask. It is the numeric representation of the binary
+      flags.
 
       `type` is represented as `'allow'` (default) or `'deny'`.
 
