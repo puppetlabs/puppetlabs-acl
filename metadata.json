@@ -89,10 +89,6 @@
       ]
     }
   ],
-  "puppet_version": [
-    "3.2",
-    "3.3"
-  ],
   "types": [
     {
       "properties": [
