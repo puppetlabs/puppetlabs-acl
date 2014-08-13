@@ -8,6 +8,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
   let (:resource) { Puppet::Type.type(:acl).new(:provider => :windows, :name => "windows_acl") }
   let (:provider) { resource.provider }
   let (:catalog) { Puppet::Resource::Catalog.new }
+  let (:base) { Puppet::Provider::Acl::Windows::Base }
 
   before :each do
     resource.provider = provider
@@ -250,141 +251,141 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       end
 
       it "should have only full if ace.mask contains GENERIC_ALL" do
-        ace.expects(:mask).returns(::Windows::Security::GENERIC_ALL).times(0..10)
+        ace.expects(:mask).returns(base::GENERIC_ALL).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:full]
       end
 
       it "should have only full if ace.mask contains FILE_ALL_ACCESS" do
-        ace.expects(:mask).returns( ::Windows::File::FILE_ALL_ACCESS).times(0..10)
+        ace.expects(:mask).returns( base::FILE_ALL_ACCESS).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:full]
       end
 
       it "should contain read, write, execute if ace.mask contains GENERIC_WRITE, GENERIC_READ, and GENERIC_EXECUTE" do
-        ace.expects(:mask).returns(::Windows::Security::GENERIC_WRITE |
-                                   ::Windows::Security::GENERIC_READ |
-                                   ::Windows::Security::GENERIC_EXECUTE ).times(0..10)
+        ace.expects(:mask).returns(base::GENERIC_WRITE |
+                                   base::GENERIC_READ |
+                                   base::GENERIC_EXECUTE ).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:write,:read,:execute]
       end
 
       it "should contain read, write, execute if ace.mask contains FILE_GENERIC_WRITE, FILE_GENERIC_READ, and FILE_GENERIC_EXECUTE" do
-        ace.expects(:mask).returns(::Windows::File::FILE_GENERIC_WRITE |
-                                   ::Windows::File::FILE_GENERIC_READ |
-                                   ::Windows::File::FILE_GENERIC_EXECUTE ).times(0..10)
+        ace.expects(:mask).returns(base::FILE_GENERIC_WRITE |
+                                   base::FILE_GENERIC_READ |
+                                   base::FILE_GENERIC_EXECUTE ).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:write,:read,:execute]
       end
 
       it "should contain write, execute if ace.mask contains FILE_GENERIC_WRITE and FILE_GENERIC_EXECUTE" do
-        ace.expects(:mask).returns(::Windows::File::FILE_GENERIC_WRITE |
-                                   ::Windows::File::FILE_GENERIC_EXECUTE ).times(0..10)
+        ace.expects(:mask).returns(base::FILE_GENERIC_WRITE |
+                                   base::FILE_GENERIC_EXECUTE ).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:write,:execute]
       end
 
       it "should contain modify if ace.mask contains GENERIC_WRITE, GENERIC_READ, GENERIC_EXECUTE and contains DELETE" do
-        ace.expects(:mask).returns(::Windows::Security::GENERIC_WRITE |
-                                   ::Windows::Security::GENERIC_READ |
-                                   ::Windows::Security::GENERIC_EXECUTE |
-                                   ::Windows::Security::DELETE ).times(0..10)
+        ace.expects(:mask).returns(base::GENERIC_WRITE |
+                                   base::GENERIC_READ |
+                                   base::GENERIC_EXECUTE |
+                                   base::DELETE ).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:modify]
       end
 
       it "should contain modify if ace.mask contains FILE_GENERIC_WRITE, FILE_GENERIC_READ, FILE_GENERIC_EXECUTE and contains DELETE" do
-        ace.expects(:mask).returns(::Windows::File::FILE_GENERIC_WRITE |
-                                   ::Windows::File::FILE_GENERIC_READ |
-                                   ::Windows::File::FILE_GENERIC_EXECUTE |
-                                   ::Windows::Security::DELETE ).times(0..10)
+        ace.expects(:mask).returns(base::FILE_GENERIC_WRITE |
+                                   base::FILE_GENERIC_READ |
+                                   base::FILE_GENERIC_EXECUTE |
+                                   base::DELETE ).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:modify]
       end
 
       it "should contain read, execute if ace.mask contains GENERIC_READ and GENERIC_EXECUTE" do
-        ace.expects(:mask).returns(::Windows::Security::GENERIC_READ |
-                                   ::Windows::Security::GENERIC_EXECUTE).times(0..10)
+        ace.expects(:mask).returns(base::GENERIC_READ |
+                                   base::GENERIC_EXECUTE).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:read,:execute]
       end
 
       it "should contain read, execute if ace.mask contains FILE_GENERIC_READ and FILE_GENERIC_EXECUTE" do
-        ace.expects(:mask).returns(::Windows::File::FILE_GENERIC_READ |
-                                   ::Windows::File::FILE_GENERIC_EXECUTE).times(0..10)
+        ace.expects(:mask).returns(base::FILE_GENERIC_READ |
+                                   base::FILE_GENERIC_EXECUTE).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:read,:execute]
       end
 
       it "should contain write if ace.mask contains GENERIC_WRITE" do
-        ace.expects(:mask).returns(::Windows::Security::GENERIC_WRITE).times(0..10)
+        ace.expects(:mask).returns(base::GENERIC_WRITE).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:write]
       end
 
       it "should contain write if ace.mask contains FILE_GENERIC_WRITE" do
-        ace.expects(:mask).returns(::Windows::File::FILE_GENERIC_WRITE).times(0..10)
+        ace.expects(:mask).returns(base::FILE_GENERIC_WRITE).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:write]
       end
 
       it "should contain mask_specific if ace.mask only contains FILE_WRITE_DATA" do
-        ace.expects(:mask).returns(::Windows::File::FILE_WRITE_DATA).times(0..10)
+        ace.expects(:mask).returns(base::FILE_WRITE_DATA).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:mask_specific]
       end
 
       it "should contain mask_specific if ace.mask only contains FILE_APPEND_DATA" do
-        ace.expects(:mask).returns(::Windows::File::FILE_APPEND_DATA).times(0..10)
+        ace.expects(:mask).returns(base::FILE_APPEND_DATA).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:mask_specific]
       end
 
       it "should contain read if ace.mask contains GENERIC_READ" do
-        ace.expects(:mask).returns(::Windows::Security::GENERIC_READ).times(0..10)
+        ace.expects(:mask).returns(base::GENERIC_READ).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:read]
       end
 
       it "should contain read if ace.mask contains FILE_GENERIC_READ" do
-        ace.expects(:mask).returns(::Windows::File::FILE_GENERIC_READ).times(0..10)
+        ace.expects(:mask).returns(base::FILE_GENERIC_READ).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:read]
       end
 
       it "should contain mask_specific if ace.mask contains FILE_GENERIC_READ | FILE_WRITE_ATTRIBUTES" do
-        ace.expects(:mask).returns(::Windows::File::FILE_GENERIC_READ |
-                                   ::Windows::File::FILE_WRITE_ATTRIBUTES).times(0..10)
+        ace.expects(:mask).returns(base::FILE_GENERIC_READ |
+                                   base::FILE_WRITE_ATTRIBUTES).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:mask_specific]
       end
 
       it "should contain mask_specific if ace.mask only contains FILE_READ_DATA" do
-        ace.expects(:mask).returns(::Windows::File::FILE_READ_DATA).times(0..10)
+        ace.expects(:mask).returns(base::FILE_READ_DATA).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:mask_specific]
       end
 
       it "should contain execute if ace.mask contains GENERIC_EXECUTE" do
-        ace.expects(:mask).returns(::Windows::Security::GENERIC_EXECUTE).times(0..10)
+        ace.expects(:mask).returns(base::GENERIC_EXECUTE).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:execute]
       end
 
       it "should contain execute if ace.mask contains FILE_GENERIC_EXECUTE" do
-        ace.expects(:mask).returns(::Windows::File::FILE_GENERIC_EXECUTE).times(0..10)
+        ace.expects(:mask).returns(base::FILE_GENERIC_EXECUTE).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:execute]
       end
 
       it "should contain mask_specific if ace.mask only contains FILE_EXECUTE" do
-        ace.expects(:mask).returns(::Windows::File::FILE_EXECUTE).times(0..10)
+        ace.expects(:mask).returns(base::FILE_EXECUTE).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:mask_specific]
       end
 
       it "should contain mask_specific if ace.mask contains permissions too specific" do
-        ace.expects(:mask).returns(::Windows::File::DELETE).times(0..10)
+        ace.expects(:mask).returns(base::DELETE).times(0..10)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:mask_specific]
       end
@@ -399,7 +400,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
         it "should return true for Administrators and specifying Administrators even if one specifies sid and other non-required information" do
           admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']}, provider)
-          admin2 = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'id'=>"S-1-5-32-544", 'mask'=>::Windows::File::GENERIC_ALL, 'is_inherited'=>false})
+          admin2 = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'id'=>"S-1-5-32-544", 'mask'=>base::GENERIC_ALL, 'is_inherited'=>false})
           provider.are_permissions_insync?([admins], [admin2]).must be_true
         end
 
@@ -480,7 +481,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
         it "should return true for Administrators and specifying Administrators even if one specifies sid and other non-required information" do
           admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']}, provider)
-          admin2 = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'id'=>"S-1-5-32-544", 'mask'=>::Windows::File::GENERIC_ALL, 'is_inherited'=>false}, provider)
+          admin2 = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'id'=>"S-1-5-32-544", 'mask'=>base::GENERIC_ALL, 'is_inherited'=>false}, provider)
           provider.are_permissions_insync?([admins], [admin2], :true).must be_true
         end
 
@@ -525,7 +526,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
         it "should return false for Administrators and specifying Administrators even if one specifies sid and other non-required information" do
           admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full']}, provider)
-          admin2 = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'id'=>"S-1-5-32-544", 'mask'=>::Windows::File::GENERIC_ALL, 'is_inherited'=>false}, provider)
+          admin2 = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'id'=>"S-1-5-32-544", 'mask'=>base::GENERIC_ALL, 'is_inherited'=>false}, provider)
           provider.are_permissions_insync?([admins], [admin2], :listed_permissions).must be_false
         end
 
@@ -577,109 +578,109 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
       it "should return FILE_ALL_ACCESS if ace.rights includes 'full'" do
         ace.rights = ['full']
-        Puppet::Provider::Acl::Windows::Base.get_account_mask(ace).must be ::Windows::File::FILE_ALL_ACCESS
+        Puppet::Provider::Acl::Windows::Base.get_account_mask(ace).must be base::FILE_ALL_ACCESS
       end
 
       it "should return mask including FILE_DELETE if ace.rights includes 'modify'" do
         ace.rights = ['modify']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & ::Windows::File::DELETE).must be ::Windows::File::DELETE
+        (mask & base::DELETE).must be base::DELETE
       end
 
       it "should return mask including FILE_GENERIC_WRITE if ace.rights includes 'modify'" do
         ace.rights = ['modify']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & ::Windows::File::FILE_GENERIC_WRITE).must be ::Windows::File::FILE_GENERIC_WRITE
+        (mask & base::FILE_GENERIC_WRITE).must be base::FILE_GENERIC_WRITE
       end
 
       it "should return mask including FILE_GENERIC_READ if ace.rights includes 'modify'" do
         ace.rights = ['modify']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & ::Windows::File::FILE_GENERIC_READ).must be ::Windows::File::FILE_GENERIC_READ
+        (mask & base::FILE_GENERIC_READ).must be base::FILE_GENERIC_READ
       end
 
       it "should return mask including FILE_GENERIC_EXECUTE if ace.rights includes 'modify'" do
         ace.rights = ['modify']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & ::Windows::File::FILE_GENERIC_EXECUTE).must be ::Windows::File::FILE_GENERIC_EXECUTE
+        (mask & base::FILE_GENERIC_EXECUTE).must be base::FILE_GENERIC_EXECUTE
       end
 
       it "should return mask that doesn't include FILE_ALL_ACCESS if ace.rights includes 'modify'" do
         ace.rights = ['modify']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & ::Windows::File::FILE_ALL_ACCESS).must_not be ::Windows::File::FILE_ALL_ACCESS
+        (mask & base::FILE_ALL_ACCESS).must_not be base::FILE_ALL_ACCESS
       end
 
       it "should return mask including FILE_GENERIC_WRITE if ace.rights includes 'write'" do
         ace.rights = ['write']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & ::Windows::File::FILE_GENERIC_WRITE).must be ::Windows::File::FILE_GENERIC_WRITE
+        (mask & base::FILE_GENERIC_WRITE).must be base::FILE_GENERIC_WRITE
       end
 
       it "should return mask that doesn't include FILE_GENERIC_READ if ace.rights only includes 'write'" do
         ace.rights = ['write']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & ::Windows::File::FILE_GENERIC_READ).must_not be ::Windows::File::FILE_GENERIC_READ
+        (mask & base::FILE_GENERIC_READ).must_not be base::FILE_GENERIC_READ
       end
 
       it "should return mask that doesn't include FILE_GENERIC_EXECUTE if ace.rights only includes 'write'" do
         ace.rights = ['write']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & ::Windows::File::FILE_GENERIC_EXECUTE).must_not be ::Windows::File::FILE_GENERIC_EXECUTE
+        (mask & base::FILE_GENERIC_EXECUTE).must_not be base::FILE_GENERIC_EXECUTE
       end
 
       it "should return mask including FILE_GENERIC_READ if ace.rights includes 'read'" do
         ace.rights = ['read']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & ::Windows::File::FILE_GENERIC_READ).must be ::Windows::File::FILE_GENERIC_READ
+        (mask & base::FILE_GENERIC_READ).must be base::FILE_GENERIC_READ
       end
 
       it "should return mask that doesn't include FILE_GENERIC_WRITE if ace.rights only includes 'read'" do
         ace.rights = ['read']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & ::Windows::File::FILE_GENERIC_WRITE).must_not be ::Windows::File::FILE_GENERIC_WRITE
+        (mask & base::FILE_GENERIC_WRITE).must_not be base::FILE_GENERIC_WRITE
       end
 
       it "should return mask that doesn't include FILE_GENERIC_EXECUTE if ace.rights only includes 'read'" do
         ace.rights = ['read']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & ::Windows::File::FILE_GENERIC_EXECUTE).must_not be ::Windows::File::FILE_GENERIC_EXECUTE
+        (mask & base::FILE_GENERIC_EXECUTE).must_not be base::FILE_GENERIC_EXECUTE
       end
 
       it "should return mask including FILE_GENERIC_EXECUTE if ace.rights only includes 'execute'" do
         ace.rights = ['execute']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & ::Windows::File::FILE_GENERIC_EXECUTE).must be ::Windows::File::FILE_GENERIC_EXECUTE
+        (mask & base::FILE_GENERIC_EXECUTE).must be base::FILE_GENERIC_EXECUTE
       end
 
       it "should return mask that doesn't include FILE_GENERIC_WRITE if ace.rights only includes 'execute'" do
         ace.rights = ['execute']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & ::Windows::File::FILE_GENERIC_WRITE).must_not be ::Windows::File::FILE_GENERIC_WRITE
+        (mask & base::FILE_GENERIC_WRITE).must_not be base::FILE_GENERIC_WRITE
       end
 
       it "should return mask that doesn't include FILE_GENERIC_READ if ace.rights only includes 'execute'" do
         ace.rights = ['execute']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & ::Windows::File::FILE_GENERIC_READ).must_not be ::Windows::File::FILE_GENERIC_READ
+        (mask & base::FILE_GENERIC_READ).must_not be base::FILE_GENERIC_READ
       end
 
       it "should return mask that doesn't include FILE_GENERIC_READ if ace.rights only includes 'execute'" do
         ace.rights = ['execute']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & ::Windows::File::FILE_GENERIC_READ).must_not be ::Windows::File::FILE_GENERIC_READ
+        (mask & base::FILE_GENERIC_READ).must_not be base::FILE_GENERIC_READ
       end
 
       it "should return mask that includes FILE_GENERIC_READ if ace.rights == ['read',execute']" do
         ace.rights = ['read','execute']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & ::Windows::File::FILE_GENERIC_READ).must be ::Windows::File::FILE_GENERIC_READ
+        (mask & base::FILE_GENERIC_READ).must be base::FILE_GENERIC_READ
       end
 
       it "should return mask that includes FILE_GENERIC_EXECUTE if ace.rights == ['read',execute']" do
         ace.rights = ['read','execute']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & ::Windows::File::FILE_GENERIC_EXECUTE).must be ::Windows::File::FILE_GENERIC_EXECUTE
+        (mask & base::FILE_GENERIC_EXECUTE).must be base::FILE_GENERIC_EXECUTE
       end
     end
 
@@ -842,11 +843,11 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
       before :each do
         # explicit (CI)(OI)
-        current_dacl.allow(provider.get_account_id('Users'), ::Windows::File::FILE_ALL_ACCESS, Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE)
+        current_dacl.allow(provider.get_account_id('Users'), base::FILE_ALL_ACCESS, Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE)
         # explicit (IO) no propagate
-        current_dacl.allow(provider.get_account_id('Users'), ::Windows::File::FILE_GENERIC_READ | ::Windows::File::FILE_GENERIC_EXECUTE, Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE )
+        current_dacl.allow(provider.get_account_id('Users'), base::FILE_GENERIC_READ | base::FILE_GENERIC_EXECUTE, Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE )
         # add inherited
-        current_dacl.allow(provider.get_account_id('Administrators'), ::Windows::File::FILE_ALL_ACCESS, Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::INHERITED_ACE )
+        current_dacl.allow(provider.get_account_id('Administrators'), base::FILE_ALL_ACCESS, Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::INHERITED_ACE )
       end
 
       it "should ignore the current dacl aces and only return the should aces when purge => true" do
@@ -856,13 +857,13 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
       it "should not add inherited to returned aces" do
         current_dacl = Puppet::Util::Windows::AccessControlList.new()
-        current_dacl.allow(provider.get_account_id('Administrators'), ::Windows::File::FILE_ALL_ACCESS, Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::INHERITED_ACE )
+        current_dacl.allow(provider.get_account_id('Administrators'), base::FILE_ALL_ACCESS, Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE | Puppet::Util::Windows::AccessControlEntry::INHERITED_ACE )
         provider.sync_aces(current_dacl,should_aces,should_purge).must == should_aces
       end
 
       it "should add an unmanaged deny ace to the front of the array" do
         should_aces[0].type.must == :allow
-        current_dacl.deny(provider.get_account_id('Administrator'), ::Windows::File::FILE_ALL_ACCESS, 0x0)
+        current_dacl.deny(provider.get_account_id('Administrator'), base::FILE_ALL_ACCESS, 0x0)
         aces = provider.sync_aces(current_dacl,should_aces,should_purge)
 
         sut_ace = aces[0]
@@ -872,8 +873,8 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
       it "should add unmanaged deny aces to the front of the array in proper order" do
         should_aces[0].type.must == :allow
-        current_dacl.deny(provider.get_account_id('Administrator'), ::Windows::File::FILE_ALL_ACCESS, 0x0)
-        current_dacl.deny(provider.get_account_id('Users'), ::Windows::File::FILE_ALL_ACCESS, 0x0)
+        current_dacl.deny(provider.get_account_id('Administrator'), base::FILE_ALL_ACCESS, 0x0)
+        current_dacl.deny(provider.get_account_id('Users'), base::FILE_ALL_ACCESS, 0x0)
         aces = provider.sync_aces(current_dacl,should_aces,should_purge)
 
         sut_ace = aces[0]
@@ -883,8 +884,8 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
       it "should add unmanaged deny aces after existing managed deny aces" do
         should_aces = [Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'type'=>'deny'}),Puppet::Type::Acl::Ace.new({'identity'=>'Administrator', 'rights'=>['modify']})]
-        current_dacl.deny(provider.get_account_id('Administrator'), ::Windows::File::FILE_ALL_ACCESS, 0x0)
-        current_dacl.deny(provider.get_account_id('Users'), ::Windows::File::FILE_ALL_ACCESS, 0x0)
+        current_dacl.deny(provider.get_account_id('Administrator'), base::FILE_ALL_ACCESS, 0x0)
+        current_dacl.deny(provider.get_account_id('Users'), base::FILE_ALL_ACCESS, 0x0)
         aces = provider.sync_aces(current_dacl,should_aces,should_purge)
 
         sut_ace = aces[2]
@@ -895,8 +896,8 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       it "should add unmanaged deny aces after existing managed deny aces when there are no allowed aces" do
         should_aces = [Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'type'=>'deny'})]
         current_dacl = Puppet::Util::Windows::AccessControlList.new()
-        current_dacl.deny(provider.get_account_id('Administrator'), ::Windows::File::FILE_ALL_ACCESS, 0x0)
-        current_dacl.deny(provider.get_account_id('Users'), ::Windows::File::FILE_ALL_ACCESS, 0x0)
+        current_dacl.deny(provider.get_account_id('Administrator'), base::FILE_ALL_ACCESS, 0x0)
+        current_dacl.deny(provider.get_account_id('Users'), base::FILE_ALL_ACCESS, 0x0)
         aces = provider.sync_aces(current_dacl,should_aces,should_purge)
 
         sut_ace = aces[2]
@@ -919,7 +920,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         dacl = provider.convert_to_dacl(resource[:permissions])
         dacl.each do |ace|
           ace.sid.must == provider.get_account_id('Administrator')
-          (ace.mask & ::Windows::File::FILE_ALL_ACCESS).must be ::Windows::File::FILE_ALL_ACCESS
+          (ace.mask & base::FILE_ALL_ACCESS).must be base::FILE_ALL_ACCESS
         end
       end
     end
