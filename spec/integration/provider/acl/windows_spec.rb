@@ -585,13 +585,19 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       end
 
       context "when removing non-existing users" do
-        require 'puppet/util/adsi'
+        begin
+          require 'puppet/util/windows/adsi'
+        rescue LoadError
+          require 'puppet/util/adsi'
+        end
+
+        let (:adsi) { Puppet::Util::Windows.constants.include?(:ADSI) ? Puppet::Util::Windows::ADSI : Puppet::Util::ADSI }
 
         it "should allow it to work with SIDs" do
           user_name = "jimmy123456_randomyo"
 
-          user = Puppet::Util::ADSI::User.create(user_name) unless Puppet::Util::ADSI::User.exists?(user_name)
-          user = Puppet::Util::ADSI::User.new(user_name) if Puppet::Util::ADSI::User.exists?(user_name)
+          user = adsi::User.create(user_name) unless adsi::User.exists?(user_name)
+          user = adsi::User.new(user_name) if adsi::User.exists?(user_name)
           user.commit
           sid = user.sid.to_s
 
@@ -600,7 +606,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
           ]
           set_perms(permissions).must == permissions
 
-          Puppet::Util::ADSI::User.delete(user_name)
+          adsi::User.delete(user_name)
 
           resource[:purge] = :listed_permissions
           removing_perms = [

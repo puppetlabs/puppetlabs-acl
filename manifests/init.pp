@@ -26,23 +26,23 @@
 # **Autorequires:** If Puppet is managing the user, group or
 # target of an acl resource, the acl type will autorequire
 # them.
-# 
+#
 # === Parameters
-# 
+#
 # [*name*]
 #   The name of the acl resource. Used for uniqueness. Will set
 #   the target to this value if target is unset.
-# 
+#
 # [*target*]
 #   The location the acl resource is pointing to. In the first
 #   release of ACL, this will be a file system location.
 #   The default is the name.
-# 
+#
 # [*target_type*]
 #   The type of target for the Acl resource. In the first release
 #   of ACL, only `file` is allowed. Defaults to `file`.
 #   Valid values are `file`.
-# 
+#
 # [*purge*]
 #   Purge specifies whether to remove other explicit permissions
 #   if not specified in the permissions set. This doesn't do anything
@@ -52,7 +52,7 @@
 #   the ACL with `purge => 'listed_permissions'`.
 #   The default is false.
 #   Valid values are `true`, `false`, `listed_permissions`.
-# 
+#
 # === Properties
 #
 # [*inherit_parent_permissions*]
@@ -60,7 +60,7 @@
 #   permissions from parent ACLs or not. The default is `true`.
 #   Valid values are `true`, `false`.
 #   Requires features can_inherit_parent_permissions.
-# 
+#
 # [*owner*]
 #   The owner identity is also known as a trustee or principal
 #   that is said to own the particular acl/security descriptor. This
@@ -71,7 +71,7 @@
 #   set to (owner can vary depending on the original CREATOR OWNER).
 #   The trustee must exist on the system and will auto-require on user
 #   and group resources.
-# 
+#
 # [*group*]
 #   The group identity is also known as a trustee or principal
 #   that is said to have access to the particular acl/security descriptor.
@@ -82,7 +82,7 @@
 #   set to (group can vary depending on the original CREATOR GROUP).
 #   The trustee must exist on the system and will auto-require on user
 #   and group resources.
-# 
+#
 # [*permissions*]
 #   Permissions is an array containing Access Control Entries
 #   (ACEs). Certain Operating Systems require these ACEs to be in
@@ -96,20 +96,20 @@
 #
 #   `identity` is a group, user or ID (SID on Windows). The identity must
 #   exist on the system and will auto-require on user and group resources.
-#   
+#
 #   `rights` is an array that contains 'full', 'modify', 'mask_specific'
 #   or some combination of 'write', 'read', and 'execute'. If you specify
 #   'mask_specific' you must also specify `mask` with an integer (passed
-#   as a string) that represents the permissions mask. 
+#   as a string) that represents the permissions mask.
 #
-#   `type` is represented as 'allow' (default) or 'deny'. 
+#   `type` is represented as 'allow' (default) or 'deny'.
 #
-#   `child_types` determines how an ACE is inherited downstream from the target. 
+#   `child_types` determines how an ACE is inherited downstream from the target.
 #   Valid values are `'all'` (default), `'objects'`, `'containers'` or `'none'`.
 #
-#   `affects` determines how the downstream inheritance is propagated. Valid 
+#   `affects` determines how the downstream inheritance is propagated. Valid
 #   values are `'all'` (default), `'self_only'`, `'children_only'`,
-#   `'self_and_direct_children_only'` or `'direct_children_only'`. 
+#   `'self_and_direct_children_only'` or `'direct_children_only'`.
 #
 #   Each permission (ACE) is determined to be unique based on `identity`,
 #   `type`, `child_types`, and `affects`. While you can technically create more
@@ -177,7 +177,7 @@
 #      { identity => 'Users', rights => ['read','execute'] }
 #    ],
 #   }
-# 
+#
 # Removing upstream inheritance with purge sample usage:
 #   acl { 'c:/tempperms':
 #     purge       => 'true',
