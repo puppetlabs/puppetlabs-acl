@@ -1,14 +1,30 @@
-test_name "Install ACL Module on Master"
+test_name "Install Foss"
 
-step "Install FOSS"
-install_puppet({ :version        =>  ENV['PUPPET_VERSION'] || '3.6.2',
-                 :default_action => 'gem_install'                       })
+version = ENV['PUPPET_VERSION'] || '3.6.2'
+download_url = ENV['WIN_DOWNLOAD_URL'] || 'https://dowloads.puppetlabs.com/windows/'
+proj_root = File.expand_path(File.join(File.dirname(__FILE__), '../..'))
+hosts.each do |host|
+  if host['platform'] =~ /windows/
+    step "Install foss from MSI"
+    install_puppet_from_msi(host,
+                            {
+                                :win_download_url => download_url,
+                                :version => version
+                            })
+    result = on host, "echo #{host['distmoduledir']}/acl"
+    target = result.raw_output.chomp
+  else
+    install_puppet_from_gem host, {}
+    target = "#{host['distmoduledir']}/acl"
+  end
+  step "Install ACL to host"
 
-step "Clone Git Repo on Master"
-on(master, "mkdir -p #{master['distmoduledir']}")
-on(master, "git clone https://github.com/puppetlabs/puppetlabs-acl.git /etc/puppet/modules/acl")
+  on host, "mkdir -p #{host['distmoduledir']}/acl"
 
-step "Plug-in Sync Each Agent"
-with_puppet_running_on master, :main => { :verbose => true, :daemonize => true } do
-  on agents, puppet("plugin download --server #{master}")
+  %w(lib manifests metadata.json).each do |file|
+    scp_to host, "#{proj_root}/#{file}", "#{target}"
+  end
 end
+
+
+
