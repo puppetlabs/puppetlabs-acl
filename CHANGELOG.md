@@ -1,3 +1,8 @@
+##2014-08-25 - Supported Release 1.0.3
+###Summary
+
+This release enables compatibility with x64-native ruby and puppet 3.7
+
 ##2014-07-15 - Supported Release 1.0.2
 ###Summary
 
