@@ -1,7 +1,7 @@
 test_name "Install Foss"
 
-version = ENV['PUPPET_VERSION'] || '3.6.2-1066-g5010aba-x64'
-download_url = ENV['WIN_DOWNLOAD_URL'] || 'http://builds.puppetlabs.lan/puppet/5010aba1b89f04788736dd49227c46617516bb92/artifacts/windows/'
+version = ENV['PUPPET_VERSION'] || '3.6.2'
+download_url = ENV['WIN_DOWNLOAD_URL'] || 'http://downloads.puppetlabs.com/windows/'
 proj_root = File.expand_path(File.join(File.dirname(__FILE__), '../..'))
 hosts.each do |host|
   if host['platform'] =~ /windows/
