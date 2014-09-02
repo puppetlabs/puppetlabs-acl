@@ -4,7 +4,11 @@ step "Install PE"
 install_pe
 
 step "Install Git on Master"
-on(master, "yum install git -y")
+git = case master['platform']
+      when /debian|ubuntu/ then 'git-core'
+      when /el/            then 'git'
+      end
+install_package master, git
 
 step "Clone Git Repo on Master"
 on(master, "git clone https://github.com/puppetlabs/puppetlabs-acl.git /etc/puppetlabs/puppet/modules/acl")

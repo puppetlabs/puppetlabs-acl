@@ -1,6 +1,7 @@
 require 'rake'
 require 'rspec/core/rake_task'
 require 'puppetlabs_spec_helper/rake_tasks'
+require 'beaker/tasks/test' unless RUBY_PLATFORM =~ /win32/
 
 task :default => [:test]
 
