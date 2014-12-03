@@ -256,6 +256,16 @@ describe Puppet::Type.type(:acl) do
         reqs[0].target.must == resource
       end
 
+      def test_should_not_set_autorequired_file(resource_path,file_path)
+        resource[:target] = resource_path
+        dir = Puppet::Type.type(:file).new(:path => file_path)
+        catalog.add_resource resource
+        catalog.add_resource dir
+        reqs = resource.autorequire
+
+        reqs.must be_empty
+      end
+
       it "should autorequire an existing file resource when acl.target matches file.path exactly" do
         test_should_set_autorequired_file('c:/temp',"c:/temp")
       end
@@ -272,12 +282,12 @@ describe Puppet::Type.type(:acl) do
         test_should_set_autorequired_file('C:/temp',"C:/temp")
       end
 
-      it "should autorequire an existing file resource when acl.target volume is uppercase C and file.path is lowercase c" do
-        test_should_set_autorequired_file('C:/temp',"c:/temp")
+      it "should not autorequire an existing file resource when acl.target volume is uppercase C and file.path is lowercase c" do
+        test_should_not_set_autorequired_file('C:/temp',"c:/temp")
       end
 
-      it "should autorequire an existing file resource when acl.target volume is lowercase C and file.path is uppercase C" do
-        test_should_set_autorequired_file('c:/temp',"C:/temp")
+      it "should not autorequire an existing file resource when acl.target volume is lowercase C and file.path is uppercase C" do
+        test_should_not_set_autorequired_file('c:/temp',"C:/temp")
       end
 
       it "should not autorequire an existing file resource when it is different than acl.target" do
