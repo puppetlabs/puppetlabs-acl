@@ -1,3 +1,8 @@
+##2014-12-30 - Supported Release 1.0.4
+### Summary
+
+Bug fixes and typo in README
+
 ##2014-08-25 - Supported Release 1.0.3
 ###Summary
 
