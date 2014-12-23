@@ -1,4 +1,5 @@
 .rspec
+.DS_Store
 .*.sw[op]
 .bundle/
 coverage/

@@ -382,15 +382,7 @@ Puppet::Type.newtype(:acl) do
     if self[:target] && self[:target_type] == :file
       target_path = File.expand_path(self[:target]).to_s
 
-      # There is a bug with the casing on the volume (c:/ versus C:/)
-      #  causing resources to not be found by the catalog checking
-      #  against lowercase and uppercase corrects that.
-      target_path[0] = target_path[0].downcase
-      unless file_resource = catalog.resource(:file, target_path)
-        target_path[0] = target_path[0].upcase
-        file_resource = catalog.resource(:file, target_path)
-      end
-      required_file << file_resource.to_s if file_resource
+      required_file << target_path
     end
 
     required_file
@@ -407,29 +399,29 @@ Puppet::Type.newtype(:acl) do
 
     if self[:owner]
       if has_account_name_method
-        required_users << "User[#{provider.get_account_name(self[:owner])}]"
+        required_users << "#{provider.get_account_name(self[:owner])}"
       end
 
       # add the unqualified item whether qualified is found or not
-      required_users << "User[#{self[:owner]}]"
+      required_users << "#{self[:owner]}"
     end
 
     if self[:group]
       if has_account_name_method
-        required_users << "User[#{provider.get_account_name(self[:group])}]"
+        required_users << "#{provider.get_account_name(self[:group])}"
       end
 
       # add the unqualified item whether qualified is found or not
-      required_users << "User[#{self[:group]}]"
+      required_users << "#{self[:group]}"
     end
 
     permissions = self[:permissions]
     unless permissions.nil?
       permissions.each do |permission|
         if has_account_name_method
-          required_users << "User[#{provider.get_account_name(permission.identity)}]"
+          required_users << "#{provider.get_account_name(permission.identity)}"
         end
-        required_users << "User[#{permission.identity}]"
+        required_users << "#{permission.identity}"
       end
     end
 
@@ -447,29 +439,29 @@ Puppet::Type.newtype(:acl) do
 
     if self[:owner]
       if has_account_group_method
-        required_groups << "Group[#{provider.get_group_name(self[:owner])}]"
+        required_groups << "#{provider.get_group_name(self[:owner])}"
       end
 
       # add the unqualified item whether qualified is found or not
-      required_groups << "Group[#{self[:owner]}]"
+      required_groups << "#{self[:owner]}"
     end
 
     if self[:group]
       if has_account_group_method
-        required_groups << "Group[#{provider.get_group_name(self[:group])}]"
+        required_groups << "#{provider.get_group_name(self[:group])}"
       end
 
       # add the unqualified item whether qualified is found or not
-      required_groups << "Group[#{self[:group]}]"
+      required_groups << "#{self[:group]}"
     end
 
     permissions = self[:permissions]
     unless permissions.nil?
       permissions.each do |permission|
         if has_account_group_method
-          required_groups << "Group[#{provider.get_group_name(permission.identity)}]"
+          required_groups << "#{provider.get_group_name(permission.identity)}"
         end
-        required_groups << "Group[#{permission.identity}]"
+        required_groups << "#{permission.identity}"
       end
     end
 
