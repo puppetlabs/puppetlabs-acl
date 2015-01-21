@@ -89,10 +89,10 @@
 #   explicit order (Windows). Every element in the array is a hash
 #   that will at the very least need `identity` and `rights` e.g
 #   `{ identity => 'Administrators', rights => ['full'] }` and at the
-#   very most can include `type`, `child_types`, `affects`, and
+#   very most can include `perm_type`, `child_types`, `affects`, and
 #   `mask` (mask should only be specified with `rights => ['mask_specific']`)
 #   e.g. `{ identity => 'Administrators', rights => ['full'],
-#   type=> 'allow', child_types => 'all', affects => 'all' }`.
+#   perm_type=> 'allow', child_types => 'all', affects => 'all' }`.
 #
 #   `identity` is a group, user or ID (SID on Windows). The identity must
 #   exist on the system and will auto-require on user and group resources.
@@ -102,7 +102,7 @@
 #   'mask_specific' you must also specify `mask` with an integer (passed
 #   as a string) that represents the permissions mask.
 #
-#   `type` is represented as 'allow' (default) or 'deny'.
+#   `perm_type` is represented as 'allow' (default) or 'deny'.
 #
 #   `child_types` determines how an ACE is inherited downstream from the target.
 #   Valid values are `'all'` (default), `'objects'`, `'containers'` or `'none'`.
@@ -112,7 +112,7 @@
 #   `'self_and_direct_children_only'` or `'direct_children_only'`.
 #
 #   Each permission (ACE) is determined to be unique based on `identity`,
-#   `type`, `child_types`, and `affects`. While you can technically create more
+#   `perm_type`, `child_types`, and `affects`. While you can technically create more
 #   than one ACE that differs from other ACEs only in rights, acl module
 #   is not able to tell the difference between those so it will appear that
 #   the resource is out of sync every run when it is not.
@@ -144,9 +144,9 @@
 #     target_type => 'file',
 #     purge       => 'false',
 #     permissions => [
-#      { identity => 'Administrator', rights => ['full'], type=> 'allow',
+#      { identity => 'Administrator', rights => ['full'], perm_type=> 'allow',
 # child_types => 'all', affects => 'all' },
-#      { identity => 'Users', rights => ['read','execute'], type=> 'allow',
+#      { identity => 'Users', rights => ['read','execute'], perm_type=> 'allow',
 # child_types => 'all', affects => 'all' }
 #     ],
 #     owner       => 'Administrators', #Creator_Owner specific, doesn't manage

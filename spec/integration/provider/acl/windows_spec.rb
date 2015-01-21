@@ -26,7 +26,6 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
   end
 
   def set_perms(permissions, include_inherited = false)
-    #resource[:permissions] = permissions
     provider.permissions = permissions
     resource.provider.flush
 
@@ -223,7 +222,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     it "should contain aces that are access allowed" do
        at_least_one = false
        provider.permissions.each do |ace|
-         if ace.type == :allow
+         if ace.perm_type == :allow
            at_least_one = true
            break
          end
@@ -289,7 +288,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       end
 
       it "should handle fully specified permissions" do
-        permissions = [Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full'], 'type'=>'allow','child_types'=>'all','affects'=>'all'}, provider)]
+        permissions = [Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full'], 'perm_type'=>'allow','child_types'=>'all','affects'=>'all'}, provider)]
         set_perms(permissions).must == permissions
       end
 
@@ -365,7 +364,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
       it "should handle deny" do
         permissions = [
-            Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['full'], 'type' => 'deny'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['full'], 'perm_type' => 'deny'}, provider),
             Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full']}, provider)
         ]
         resource[:purge] = :true
@@ -378,7 +377,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
       it "should handle deny when affects => 'self_only'" do
         permissions = [
-            Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['full'], 'type' => 'deny', 'affects'=>'self_only'}, provider),
+            Puppet::Type::Acl::Ace.new({'identity' => 'Administrator','rights' => ['full'], 'perm_type' => 'deny', 'affects'=>'self_only'}, provider),
             Puppet::Type::Acl::Ace.new({'identity' => 'Administrators','rights' => ['full']}, provider)
         ]
         resource[:purge] = :true

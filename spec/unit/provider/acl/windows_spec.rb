@@ -126,7 +126,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
     context ".get_ace_type" do
       it "should return allow if ace is nil" do
-        ace.stubs(:type).returns(1) #ensure no false readings
+        ace.stubs(:perm_type).returns(1) #ensure no false readings
         ace.expects(:nil?).returns(true)
 
         Puppet::Provider::Acl::Windows::Base.get_ace_type(ace).must == :allow
@@ -423,8 +423,8 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         end
 
         it "should return false for Administrators and specifying Administrators if types are different" do
-          admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'type'=>'allow'})
-          admin2 = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'type'=>'deny'})
+          admins = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'perm_type'=>'allow'})
+          admin2 = Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'perm_type'=>'deny'})
           provider.are_permissions_insync?([admins], [admin2]).must be_false
         end
 
@@ -862,46 +862,46 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       end
 
       it "should add an unmanaged deny ace to the front of the array" do
-        should_aces[0].type.must == :allow
+        should_aces[0].perm_type.must == :allow
         current_dacl.deny(provider.get_account_id('Administrator'), base::FILE_ALL_ACCESS, 0x0)
         aces = provider.sync_aces(current_dacl,should_aces,should_purge)
 
         sut_ace = aces[0]
-        sut_ace.type.must == :deny
+        sut_ace.perm_type.must == :deny
         sut_ace.identity.must == provider.get_account_name('Administrator')
       end
 
       it "should add unmanaged deny aces to the front of the array in proper order" do
-        should_aces[0].type.must == :allow
+        should_aces[0].perm_type.must == :allow
         current_dacl.deny(provider.get_account_id('Administrator'), base::FILE_ALL_ACCESS, 0x0)
         current_dacl.deny(provider.get_account_id('Users'), base::FILE_ALL_ACCESS, 0x0)
         aces = provider.sync_aces(current_dacl,should_aces,should_purge)
 
         sut_ace = aces[0]
-        sut_ace.type.must == :deny
+        sut_ace.perm_type.must == :deny
         sut_ace.identity.must == provider.get_account_name('Administrator')
       end
 
       it "should add unmanaged deny aces after existing managed deny aces" do
-        should_aces = [Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'type'=>'deny'}),Puppet::Type::Acl::Ace.new({'identity'=>'Administrator', 'rights'=>['modify']})]
+        should_aces = [Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'perm_type'=>'deny'}),Puppet::Type::Acl::Ace.new({'identity'=>'Administrator', 'rights'=>['modify']})]
         current_dacl.deny(provider.get_account_id('Administrator'), base::FILE_ALL_ACCESS, 0x0)
         current_dacl.deny(provider.get_account_id('Users'), base::FILE_ALL_ACCESS, 0x0)
         aces = provider.sync_aces(current_dacl,should_aces,should_purge)
 
         sut_ace = aces[2]
-        sut_ace.type.must == :deny
+        sut_ace.perm_type.must == :deny
         sut_ace.identity.must == provider.get_account_name('Users')
       end
 
       it "should add unmanaged deny aces after existing managed deny aces when there are no allowed aces" do
-        should_aces = [Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'type'=>'deny'})]
+        should_aces = [Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 1=>'deny'})]
         current_dacl = Puppet::Util::Windows::AccessControlList.new()
         current_dacl.deny(provider.get_account_id('Administrator'), base::FILE_ALL_ACCESS, 0x0)
         current_dacl.deny(provider.get_account_id('Users'), base::FILE_ALL_ACCESS, 0x0)
         aces = provider.sync_aces(current_dacl,should_aces,should_purge)
 
         sut_ace = aces[2]
-        sut_ace.type.must == :deny
+        sut_ace.perm_type.must == :deny
         sut_ace.identity.must == provider.get_account_name('Users')
       end
 

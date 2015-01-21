@@ -36,7 +36,7 @@ user { '#{user_id}':
 
 acl { '#{target}':
   permissions  => [
-    { identity => '#{user_id}', type => 'deny', rights => ['mask_specific'], mask => '#{mask}' },
+    { identity => '#{user_id}', perm_type => 'deny', rights => ['mask_specific'], mask => '#{mask}' },
   ],
 }
 MANIFEST

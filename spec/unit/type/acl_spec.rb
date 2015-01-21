@@ -519,11 +519,11 @@ describe Puppet::Type.type(:acl) do
 
       it "when called from puppet should format much better when displaying" do
         # properties are out of order here
-        resource[:permissions] = [{'rights'=>['read','write'], 'type'=> 'deny', 'child_types' => 'containers', 'identity'=> 'bob'},{'rights'=>['full'], 'identity'=> 'tim'}]
+        resource[:permissions] = [{'rights'=>['read','write'], 'perm_type'=> 'deny', 'child_types' => 'containers', 'identity'=> 'bob'},{'rights'=>['full'], 'identity'=> 'tim'}]
 
         # and spaced / ordered properly here
         expected = "[
- { identity => 'bob', rights => [\"write\", \"read\"], type => 'deny', child_types => 'containers' },\s
+ { identity => 'bob', rights => [\"write\", \"read\"], perm_type => 'deny', child_types => 'containers' },\s
  { identity => 'tim', rights => [\"full\"] }
 ]"
 
@@ -684,35 +684,56 @@ describe Puppet::Type.type(:acl) do
       end
     end
 
-    context ":type" do
+    context ":perm_type" do
       it "should default to allow" do
         resource[:permissions] = {'identity' =>'bob','rights'=>['full']}
-        resource[:permissions][0].type.should == :allow
+        resource[:permissions][0].perm_type.should == :allow
       end
 
       it "should accept allow" do
-        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'type'=>'allow'}
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'perm_type'=>'allow'}
       end
 
       it "should accept deny" do
-        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'type'=>'deny'}
+        resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'perm_type'=>'deny'}
       end
 
       it "should reject any other value" do
         expect {
-          resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'type'=>'what'}
+          resource[:permissions] = {'identity' =>'bob','rights'=>['full'],'perm_type'=>'what'}
         }.to raise_error(Puppet::ResourceError, /Invalid value "what". Valid values are/)
       end
 
       it "should reject empty" do
         expect {
-          resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'type'=>''}
+          resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'perm_type'=>''}
         }.to raise_error(Puppet::ResourceError, /Invalid value "". Valid values are/)
       end
 
       it "should set default value on nil" do
-        resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'type'=>nil}
-        resource[:permissions][0].type.should == :allow
+        resource[:permissions] = {'identity'=>'bob','rights'=>['full'],'perm_type'=>nil}
+        resource[:permissions][0].perm_type.should == :allow
+      end
+
+      it "should munge `type` to `perm_type`" do
+        resource[:permissions] = {'identity' => 'bob', 'rights' => ['full'], 'type' => 'deny'}
+        resource[:permissions][0].perm_type.should == :deny
+      end
+
+      it 'should throw a warning when using type' do
+        resource[:permissions] = {'identity' => 'bob', 'rights' => ['full'], 'type' => 'deny'}
+        expect(@logs[0].level).to equal(:warning)
+        @logs[0].message.should match(/Permission `type` is deprecated and has been replaced with perm_type for allow or deny/)
+      end
+      context 'setting both type and permtype' do
+        it 'should throw error with different values' do
+          expect{
+            resource[:permissions] = {'identity' => 'bob', 'rights' => ['full'], 'type' => 'deny', 'perm_type' => 'allow'}
+          }.to raise_error(Puppet::ResourceError, /Can not accept both `type` => deny and `perm_type` => allow/)
+        end
+        it 'should not throw an error if both are the same' do
+          resource[:permissions] = {'identity' => 'bob', 'rights' => ['full'], 'type' => 'deny', 'perm_type' => 'deny'}
+        end
       end
     end
 
@@ -824,7 +845,7 @@ describe Puppet::Type.type(:acl) do
       end
 
       it "should set defaults" do
-        resource[:permissions][0].type.should == :allow
+        resource[:permissions][0].perm_type.should == :allow
         resource[:permissions][0].child_types.should == :all
         resource[:permissions][0].affects.should == :all
       end

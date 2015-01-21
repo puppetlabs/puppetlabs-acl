@@ -10,8 +10,8 @@ def location_for(place, fake_version = nil)
   end
 end
 
-gem "puppet", '~> 3.4.0' #*location_for(ENV['PUPPET_LOCATION'] || '~> 3.4.0')
-gem "facter", *location_for(ENV['FACTER_LOCATION'] || '~> 1.6')
+gem "puppet", '~> 3.7.0' #*location_for(ENV['PUPPET_LOCATION'] || '~> 3.4.0')
+gem "facter", *location_for(ENV['FACTER_LOCATION'] || '~> 2.0')
 gem "hiera", *location_for(ENV['HIERA_LOCATION'] || '~> 1.0')
 
 beaker_version = ENV['BEAKER_VERSION']
