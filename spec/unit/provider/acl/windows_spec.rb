@@ -894,7 +894,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       end
 
       it "should add unmanaged deny aces after existing managed deny aces when there are no allowed aces" do
-        should_aces = [Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 1=>'deny'})]
+        should_aces = [Puppet::Type::Acl::Ace.new({'identity'=>'Administrators', 'rights'=>['full'], 'perm_type'=>'deny'})]
         current_dacl = Puppet::Util::Windows::AccessControlList.new()
         current_dacl.deny(provider.get_account_id('Administrator'), base::FILE_ALL_ACCESS, 0x0)
         current_dacl.deny(provider.get_account_id('Users'), base::FILE_ALL_ACCESS, 0x0)

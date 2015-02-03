@@ -585,7 +585,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
       context "when removing non-existing users" do
         begin
-          require 'puppet/util/windows/adsi'
+          require 'puppet/util/windows/adsi' if Puppet.features.microsoft_windows?
         rescue LoadError
           require 'puppet/util/adsi'
         end
