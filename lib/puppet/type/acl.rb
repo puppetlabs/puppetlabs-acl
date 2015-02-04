@@ -57,8 +57,8 @@ Puppet::Type.newtype(:acl) do
         target_type => 'file',
         purge       => 'false',
         permissions => [
-         { identity => 'Administrator', rights => ['full'], type=> 'allow', child_types => 'all', affects => 'all' },
-         { identity => 'Users', rights => ['read','execute'], type=> 'allow', child_types => 'all', affects => 'all' }
+         { identity => 'Administrator', rights => ['full'], perm_type=> 'allow', child_types => 'all', affects => 'all' },
+         { identity => 'Users', rights => ['read','execute'], perm_type=> 'allow', child_types => 'all', affects => 'all' }
         ],
         owner       => 'Administrators', #Creator_Owner specific, doesn't manage unless specified
         group       => 'Users', #Creator_Group specific, doesn't manage unless specified
@@ -172,7 +172,7 @@ Puppet::Type.newtype(:acl) do
       explicit order (Windows). Every element in the array is a hash
       that will at the very least need `identity` and `rights` e.g
       `{ identity => 'Administrators', rights => ['full'] }` and at the
-      very most can include `type`, `child_types`, `affects`, and
+      very most can include `perm_type`, `child_types`, `affects`, and
       `mask` (mask should only be specified be with
       `rights => ['mask_specific']`) e.g. `{ identity => 'Administrators',
       rights => ['full'], type=> 'allow', child_types => 'all',
@@ -193,7 +193,7 @@ Puppet::Type.newtype(:acl) do
       permissions mask. It is the numeric representation of the binary
       flags.
 
-      `type` is represented as `'allow'` (default) or `'deny'`.
+      `perm_type` is represented as `'allow'` (default) or `'deny'`.
 
       `child_types` determines how an ACE is inherited downstream from the
       target. Valid values are `'all'` (default), `'objects'`, `'containers'`
@@ -204,7 +204,7 @@ Puppet::Type.newtype(:acl) do
       `'self_and_direct_children_only'` or `'direct_children_only'`.
 
       Each permission (ACE) is determined to be unique based on
-      identity, type, child_types, and affects. While you can technically
+      identity, perm_type, child_types, and affects. While you can technically
       create more than one ACE that differs from other ACEs only in rights,
       acl module is not able to tell the difference between those so it
       will appear that the resource is out of sync every run when it is not.

@@ -25,8 +25,8 @@ ACL (Access Control List)
         * [Removing ACE permissions](#removing-ace-permissions)
         * [Same identity, multiple ACEs](#same-identity-multiple-aces)
 5. [Limitations - Known issues in acl](#limitations)
-6. [Development - Guide for contributing to the module](#development) 
-     
+6. [Development - Guide for contributing to the module](#development)
+
 
 ##Overview
 
@@ -40,7 +40,7 @@ ACLs typically contain a list of access control entries (ACEs). An ACE is a defi
 
 ##Setup
 
-The best way to install this module is by executing the following command on your puppet master or local Puppet install: 
+The best way to install this module is by executing the following command on your puppet master or local Puppet install:
 
     $ puppet module install [--modulepath <path>] puppetlabs/acl
 
@@ -48,7 +48,7 @@ The above command also includes the optional argument to specify your puppet mas
 
 ###Beginning with acl
 
-Each ACE has one of four possible statuses and the order you list the ACEs in is important for which status is applied first. The allow/deny types available are: 'explicit deny', 'explicit allow', 'inherited deny', and 'inherited allow'. 
+Each ACE has one of four possible statuses and the order you list the ACEs in is important for which status is applied first. The allow/deny types available are: 'explicit deny', 'explicit allow', 'inherited deny', and 'inherited allow'.
 
 You cannot specify inherited ACEs in a manifest; you can only specify whether to allow upstream inheritance to flow into the managed target location (known as security descriptor). Please ensure your modeled resources follow this order or Windows will complain. The `acl` type **does not** enforce or complain about ACE order.
 
@@ -76,7 +76,7 @@ Below is an example of the `acl` type with all parameters and properties.
       permissions => [
         { identity => '<identity>',
           rights => [<rights>],
-          type => '<type>',
+          perm_type => '<perm_type>',
           affects => '<affects>',
           child_types => '<child_types>'
         }
@@ -96,7 +96,7 @@ The name of the ACL resource; will be used for `target` if `target` is not set.
 
 Specifies whether to remove other explicit permissions if not specified in the `permissions` property. Valid values are 'true', 'false', and 'listed_permissions'. Default is 'false'.
 
-You can use this parameter to ensure specific permissions are absent from the ACL with `purge => 'listed_permissions'`. 
+You can use this parameter to ensure specific permissions are absent from the ACL with `purge => 'listed_permissions'`.
 
 This parameter does not impact permissions inherited from parents. To remove parent permissions, combine `purge => 'false'` with `inherit_parent_permissions => 'false'`. **Note:** Be VERY careful when removing parent permissions, as it is possible to lock out Puppet from managing the resource, which will require manual intervention.
 
@@ -108,28 +108,28 @@ The location of the ACL resource. Defaults to `name` value. If you're using the 
 
 The type of target for the ACL resource. The only valid value is 'file'.
 
-####Properties 
+####Properties
 
 #####`group`
 
 The entity or entities that have access to a particular ACL descriptor. The group identity is also known as a trustee or principal. Valid inputs can be in the form of:
-   
+
    * User - e.g. 'Bob' or 'TheNet\Bob'
    * Group - e.g. 'Administrators' or 'BUILTIN\Administrators'
    * SID (Security ID) - e.g. 'S-1-5-18'
 
 No default value will be enforced by Puppet. Using the default will allow the group to stay set to whatever it is currently set to (group can vary depending on the original CREATOR GROUP). Since the identity must exist on the system in order to be used, Puppet will make sure they exist by creating them as needed.
 
-**NOTE**: On Windows the CREATOR GROUP inherited ACE must be set for the creator's primary group to be set as an ACE automatically. Group is not always widely used. By default the group will also need to be specifically set as an explicit managed ACE. See [Microsoft's page](http://support.microsoft.com/kb/126629) for instructions on enabling CREATOR GROUP. 
-  
+**NOTE**: On Windows the CREATOR GROUP inherited ACE must be set for the creator's primary group to be set as an ACE automatically. Group is not always widely used. By default the group will also need to be specifically set as an explicit managed ACE. See [Microsoft's page](http://support.microsoft.com/kb/126629) for instructions on enabling CREATOR GROUP.
+
 #####`inherit_parent_permissions`
 
 Specifies whether to inherit permissions from parent ACLs. Valid values are 'true' and 'false'. Default is 'true'.
 
-#####`owner` 
+#####`owner`
 
 The entity/entities that owns the particular ACL descriptor. The owner entity is also known as a trustee or principal. Valid inputs can be in the form of:
-   
+
    * User - e.g. 'Bob' or 'TheNet\Bob'
    * Group e.g. 'Administrators' or 'BUILTIN\Administrators'
    * SID (Security ID) e.g. 'S-1-5-18'
@@ -141,21 +141,21 @@ No default value will be enforced by Puppet. Using the default will allow the ow
 An array containing Access Control Entries (ACEs). The ACEs must be in explicit order. The elements must be presented in a hash that minimally requires `identity` and `rights` values.
 
 ```
-… 
+…
 permissions => [
     { identity => 'Administrators', rights => ['full'] }
 ]
 ```
-The available elements in the hash are: `identity`, `rights`, `type`, `child_types`, `affects`, and `mask`. The `mask` entry should only be specified with `rights => ['mask_specific']`. For instance,
+The available elements in the hash are: `identity`, `rights`, `perm_type`, `child_types`, `affects`, and `mask`. The `mask` entry should only be specified with `rights => ['mask_specific']`. For instance,
 
 ```
-… 
+…
 permissions => [
-    { identity => 'Administrators', rights => ['full'], type=> 'allow', child_types => 'all', affects => 'all' }
+    { identity => 'Administrators', rights => ['full'], perm_type=> 'allow', child_types => 'all', affects => 'all' }
 ]
 ```
 
-Each permission (ACE) is determined to be unique based on `identity`, `type`, `child_types`, and `affects`. While you can technically create more than one ACE that differs from other ACEs only in rights, acl module is not able to tell the difference between those so it will appear that the resource is out of sync every run when it is not.
+Each permission (ACE) is determined to be unique based on `identity`, `perm_type`, `child_types`, and `affects`. While you can technically create more than one ACE that differs from other ACEs only in rights, acl module is not able to tell the difference between those so it will appear that the resource is out of sync every run when it is not.
 
 While you will see `is_inherited => 'true'` when running `puppet resource acl some_path`, puppet will not be able to manage the inherited permissions so those will need to be removed if using that to build a manifest.
 
@@ -165,8 +165,8 @@ While you will see `is_inherited => 'true'` when running `puppet resource acl so
     * User - e.g. 'Bob' or 'TheNet\Bob'
     * Group e.g. 'Administrators' or 'BUILTIN\Administrators'
     * SID (Security ID) e.g. 'S-1-5-18'
-  * `rights` is an array that can have the following values: 'full', 'modify', 'mask_specific', 'write', 'read', and 'execute'. The 'full', 'modify', and 'mask_specific' values are mutually exclusive and must be the *only* value specified in `rights`. The 'full' value indicates all rights. The 'modify' value is cumulative, implying 'write', 'read', 'execute' *and* DELETE all in one. If you specify 'full' or 'modify' as part of a set of rights with other rights, e.g. `rights => ['full','read']`, the `acl` type will issue a warning and remove the other items. You can specify any combination of 'write', 'read', and 'execute'. If you specify 'mask_specific', you must also specify the `mask` element in the `permissions` hash with an [integer](http://msdn.microsoft.com/en-us/library/aa394063(v=vs.85).aspx) passed as a string. 
-    
+  * `rights` is an array that can have the following values: 'full', 'modify', 'mask_specific', 'write', 'read', and 'execute'. The 'full', 'modify', and 'mask_specific' values are mutually exclusive and must be the *only* value specified in `rights`. The 'full' value indicates all rights. The 'modify' value is cumulative, implying 'write', 'read', 'execute' *and* DELETE all in one. If you specify 'full' or 'modify' as part of a set of rights with other rights, e.g. `rights => ['full','read']`, the `acl` type will issue a warning and remove the other items. You can specify any combination of 'write', 'read', and 'execute'. If you specify 'mask_specific', you must also specify the `mask` element in the `permissions` hash with an [integer](http://msdn.microsoft.com/en-us/library/aa394063(v=vs.85).aspx) passed as a string.
+
 ```
 acl { 'c:/tempperms':
       permissions => [
@@ -179,11 +179,13 @@ acl { 'c:/tempperms':
       inherit_parent_permissions => 'false',
     }
 ```
- 
+
   * `mask` is an element that only works if 'mask_specific' is set in the `rights` element. The value must be an [integer representing mask permissions](http://msdn.microsoft.com/en-us/library/aa394063(v=vs.85).aspx) passed in a string.
-  * `type` can be 'allow' or 'deny', and defaults to 'allow'.
+  * `perm_type` can be 'allow' or 'deny', and defaults to 'allow'.
   * `child_types` determines how an ACE is inherited downstream from the target. Valid values are 'all', 'objects', 'containers' or 'none'. Defaults to 'all'.
   * `affects` determines how the downstream inheritance is propagated. Valid values are 'all', 'self_only', 'children_only', 'self_and_direct_children_only', or 'direct_children_only'. Defaults to 'all'.
+
+**NOTE** The `type` element is deprecated and has been replaced with `perm_type`, as the word `type` is a reserved keyword in Puppet 4.
 
 ###Examples
 
@@ -197,8 +199,8 @@ The fully expressed ACL in the sample below produces the same settings as the [m
       target_type => 'file',
       purge       => 'false',
       permissions => [
-       { identity => 'Administrator', rights => ['full'], type=> 'allow', child_types => 'all', affects => 'all' },
-       { identity => 'Users', rights => ['read','execute'], type=> 'allow', child_types => 'all', affects => 'all' }
+       { identity => 'Administrator', rights => ['full'], perm_type=> 'allow', child_types => 'all', affects => 'all' },
+       { identity => 'Users', rights => ['read','execute'], perm_type=> 'allow', child_types => 'all', affects => 'all' }
       ],
       owner       => 'Administrators', #Creator_Owner specific, doesn't manage unless specified
       group       => 'Users', #Creator_Group specific, doesn't manage unless specified
@@ -221,7 +223,7 @@ Users can be specified with [SIDs](http://support.microsoft.com/kb/243330) (Secu
 
 ####Same target, multiple resources
 
-You can manage the same target across multiple ACL resources with some caveats: the title of the resource needs to be unique, and you should only do so when you absolutely need to since it can get confusing quickly. 
+You can manage the same target across multiple ACL resources with some caveats: the title of the resource needs to be unique, and you should only do so when you absolutely need to since it can get confusing quickly.
 
 You should not set `purge => 'true'` on any of the resources that apply to the same target or you will see thrashing in reports, as the permissions will be added and removed on every catalog application. **Use this feature with care.**
 
@@ -231,7 +233,7 @@ You should not set `purge => 'true'` on any of the resources that apply to the s
        { identity => 'Administrator', rights => ['full'] }
      ],
     }
-    
+
     acl { 'tempperms_Users':
       target      => 'c:/tempperms',
       permissions => [
@@ -311,14 +313,14 @@ Enabling `rights => ['mask_specific']` indicates that rights are passed as part 
  * Access Mask Format - http://msdn.microsoft.com/en-us/library/windows/desktop/aa374896(v=vs.85).aspx
 
 
-####Deny ACE 
+####Deny ACE
 
-ACEs can be of `type` 'allow' or 'deny'. Deny ACEs should be listed first before allow ACEs.
+ACEs can be of `perm_type` 'allow' or 'deny'. Deny ACEs should be listed first before allow ACEs.
 
 ```
     acl { 'c:/tempperms':
       permissions => [
-       { identity => 'SYSTEM', rights => ['full'], type=> 'deny', affects => 'self_only' },
+       { identity => 'SYSTEM', rights => ['full'], perm_type=> 'deny', affects => 'self_only' },
        { identity => 'Administrators', rights => ['full'] }
       ],
     }
@@ -326,7 +328,7 @@ ACEs can be of `type` 'allow' or 'deny'. Deny ACEs should be listed first before
 
 ####ACE inheritance
 
-ACEs have inheritance structures controlled by [`child_types`](#permissions), which determine how sub-folders and files will inherit each particular ACE. 
+ACEs have inheritance structures controlled by [`child_types`](#permissions), which determine how sub-folders and files will inherit each particular ACE.
 
 ```
     acl { 'c:/tempperms':
@@ -419,9 +421,9 @@ With Windows, you can specify the same `identity` with different inheritance and
 ##Limitations
 
  * The Windows Provider in the first release (at least) will not handle permissions with Symlinks. Please explicitly manage the permissions of the target.
- * Each permission (ACE) is determined to be unique based on `identity`, `type`, `child_types`, and `affects`. While you can technically create more than one ACE that differs from other ACEs only in `rights`, the acl module is not able to tell the difference between those, so it will appear that the resource is out of sync every run when it is not.
+ * Each permission (ACE) is determined to be unique based on `identity`, `perm_type`, `child_types`, and `affects`. While you can technically create more than one ACE that differs from other ACEs only in `rights`, the acl module is not able to tell the difference between those, so it will appear that the resource is out of sync every run when it is not.
 
-``` 
+```
   !!!DO NOT DO THIS!!!
   acl { 'c:/tempperms':
       permissions => [
@@ -435,7 +437,7 @@ With Windows, you can specify the same `identity` with different inheritance and
  * Using Cygwin to run puppet with ACLs could result in undesirable behavior (on Windows 2008 'Administrator' identity might be translated to 'cyg_server', but may behave fine on other systems like Windows 2012). We wouldn't recommend using Cygwin to run Puppet with ACL manifests due to this and other possible edge cases. This tends to happen when using Cygwin SSHD with public key authentication.
  * Unicode for identities, group, and owner may not work appropriately or at all in the first release.
  * When using SIDs for identities, autorequire will attempt to match to users with fully qualified names (User[BUILTIN\Administrators]) in addition to SIDs (User[S-1-5-32-544]). The limitation is that it won't match against 'User[Administrators]' as that could cause issues if attempting to match domain accounts versus local accounts with the same name e.g. 'Domain\Bob' vs 'LOCAL\Bob'.
- 
+
 Please log tickets and issues at our [Module Issue Tracker](https://tickets.puppetlabs.com/browse/MODULES).
 
 ##Development

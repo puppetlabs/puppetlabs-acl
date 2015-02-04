@@ -94,8 +94,8 @@ describe "Ace" do
     end
 
     it "should not be equal if aces are different by type" do
-      left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'type'=>'allow'}).hash
-      right = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'type'=>'deny'}).hash
+      left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'perm_type'=>'allow'}).hash
+      right = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'perm_type'=>'deny'}).hash
 
       expect(left).to_not eq right
     end
@@ -206,8 +206,8 @@ describe "Ace" do
     end
 
     it "should not be equal if aces are different by type" do
-      left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'type'=>'allow'})
-      right = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'type'=>'deny'})
+      left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'perm_type'=>'allow'})
+      right = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'perm_type'=>'deny'})
 
       expect(left).to_not eq right
     end
@@ -318,8 +318,8 @@ describe "Ace" do
     end
 
     it "should be false if aces are different by type" do
-      left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'type'=>'allow'})
-      right = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'type'=>'deny'})
+      left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'perm_type'=>'allow'})
+      right = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'perm_type'=>'deny'})
 
       expect(left.same? right).to be_false
     end

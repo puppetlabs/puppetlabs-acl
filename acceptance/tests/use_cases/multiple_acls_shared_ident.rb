@@ -87,28 +87,28 @@ user { "#{user_id_2}":
 
 acl { "#{target}":
   permissions  => [
-    { identity => '#{user_id_1}', type => 'allow', rights => ['read'] },
-    { identity => '#{user_id_2}', type => 'deny', rights => ['read','execute'] },
-    { identity => '#{group_1}', type => 'allow', rights => ['read'] },
-    { identity => '#{group_2}', type => 'allow', rights => ['read'] }
+    { identity => '#{user_id_1}', perm_type => 'allow', rights => ['read'] },
+    { identity => '#{user_id_2}', perm_type => 'deny', rights => ['read','execute'] },
+    { identity => '#{group_1}', perm_type => 'allow', rights => ['read'] },
+    { identity => '#{group_2}', perm_type => 'allow', rights => ['read'] }
   ],
 }
 ->
 acl { "#{target_child}":
   permissions  => [
-    { identity => '#{user_id_1}', type => 'allow', rights => ['write'] },
-    { identity => '#{user_id_2}', type => 'deny', rights => ['write'] },
-    { identity => '#{group_1}', type => 'allow', rights => ['execute'] },
-    { identity => '#{group_2}', type => 'allow', rights => ['execute'] }
+    { identity => '#{user_id_1}', perm_type => 'allow', rights => ['write'] },
+    { identity => '#{user_id_2}', perm_type => 'deny', rights => ['write'] },
+    { identity => '#{group_1}', perm_type => 'allow', rights => ['execute'] },
+    { identity => '#{group_2}', perm_type => 'allow', rights => ['execute'] }
   ],
 }
 ->
 acl { "#{target_grand_child}":
   permissions  => [
-    { identity => '#{user_id_1}', type => 'deny', rights => ['full'] },
-    { identity => '#{user_id_2}', type => 'deny', rights => ['full'] },
-    { identity => '#{group_1}', type => 'allow', rights => ['full'] },
-    { identity => '#{group_2}', type => 'allow', rights => ['full'] },
+    { identity => '#{user_id_1}', perm_type => 'deny', rights => ['full'] },
+    { identity => '#{user_id_2}', perm_type => 'deny', rights => ['full'] },
+    { identity => '#{group_1}', perm_type => 'allow', rights => ['full'] },
+    { identity => '#{group_2}', perm_type => 'allow', rights => ['full'] },
   ],
 }
 MANIFEST

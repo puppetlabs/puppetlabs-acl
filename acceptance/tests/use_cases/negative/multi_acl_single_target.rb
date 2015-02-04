@@ -36,14 +36,14 @@ file { "#{target}":
 acl { "first_acl":
   target       => '#{target}',
   permissions  => [
-    { identity => '#{user_id}',type => 'deny', rights => ['full'] }
+    { identity => '#{user_id}',perm_type => 'deny', rights => ['full'] }
   ],
 }
 
 acl { "second_acl":
   target       => '#{target}',
   permissions  => [
-    { identity => '#{user_id}',type => 'deny', rights => ['full'] }
+    { identity => '#{user_id}',perm_type => 'deny', rights => ['full'] }
   ],
 }
 MANIFEST

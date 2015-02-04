@@ -59,9 +59,9 @@ user { "#{user_id_child}":
 acl { "#{target}":
   purge        => 'true',
   permissions  => [
-    { identity => '#{user_id}',
-      rights   => ['#{rights}'],
-      type     => '#{perm_type}'
+    { identity  => '#{user_id}',
+      rights    => ['#{rights}'],
+      perm_type => '#{perm_type}'
     },
     { identity => 'Administrators',
       rights   => ['full']
@@ -72,9 +72,9 @@ acl { "#{target}":
 ->
 acl { "#{target_child}":
   permissions  => [
-    { identity => '#{user_id_child}',
-      rights   => ['#{rights}'],
-      type     => '#{perm_type}'
+    { identity  => '#{user_id_child}',
+      rights    => ['#{rights}'],
+      perm_type => '#{perm_type}'
     }
   ],
   inherit_parent_permissions => '#{child_inherit_type}'

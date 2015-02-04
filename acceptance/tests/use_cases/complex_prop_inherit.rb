@@ -72,27 +72,31 @@ file { "#{target}":
 acl { "#{target}":
   purge           => 'true',
   permissions     => [
-    { identity    => 'Administrators',type => 'allow', rights => ['full'] },
+    {
+      identity    => 'Administrators',
+      perm_type => 'allow',
+      rights => ['full']
+    },
     { identity    => '#{user_id_1}',
-      type        => 'allow',
+      perm_type   => 'allow',
       rights      => ['read'],
       affects     => 'children_only',
       child_types => 'all'
     },
     { identity    => '#{user_id_2}',
-      type        => 'deny',
+      perm_type   => 'deny',
       rights      => ['read','execute'],
       affects     => 'children_only',
       child_types => 'objects'
     },
     { identity    => '#{group_1}',
-      type        => 'allow',
+      perm_type   => 'allow',
       rights      => ['read'],
       affects     => 'children_only',
       child_types => 'containers'
     },
     { identity    => '#{group_2}',
-      type        => 'allow',
+      perm_type   => 'allow',
       rights      => ['read'],
       affects     => 'children_only',
       child_types => 'all'
@@ -109,13 +113,13 @@ acl { "#{target_child}":
   purge           => 'true',
   permissions     => [
     { identity    => '#{user_id_1}',
-      type        => 'deny',
+      perm_type   => 'deny',
       rights      => ['modify'],
       affects     => 'children_only',
       child_types => 'objects'
     },
     { identity    => '#{user_id_2}',
-      type        => 'allow',
+      perm_type   => 'allow',
       rights      => ['full'],
       affects     => 'children_only',
       child_types => 'containers'
@@ -131,7 +135,7 @@ file { "#{target_grand_child}":
 acl { "#{target_grand_child}":
   permissions  => [
     { identity    => '#{group_2}',
-      type        => 'deny',
+      perm_type   => 'deny',
       rights      => ['full'],
       affects     => 'self_only'
     }

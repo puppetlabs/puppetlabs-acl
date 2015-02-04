@@ -15,7 +15,7 @@ class Puppet::Type::Acl
 
     attr_reader :identity
     attr_reader :rights
-    attr_reader :type
+    attr_reader :perm_type
     attr_reader :child_types
     attr_reader :affects
     attr_reader :is_inherited
@@ -29,14 +29,21 @@ class Puppet::Type::Acl
       self.id = permission_hash['id']
       @mask = permission_hash['mask']
       self.rights = permission_hash['rights']
-      self.type = permission_hash['type']
+      self.perm_type = permission_hash['perm_type']
+      if permission_hash['type']
+        Puppet.deprecation_warning('Permission `type` is deprecated and has been replaced with perm_type for allow or deny')
+        if permission_hash['perm_type'] && permission_hash['type'] != permission_hash['perm_type']
+          raise ArgumentError, "Can not accept both `type` => #{permission_hash['type']} and `perm_type` => #{permission_hash['perm_type']}"
+        end
+        self.perm_type = permission_hash['type']
+      end
       self.child_types = permission_hash['child_types']
       self.affects = permission_hash['affects']
       @is_inherited = permission_hash['is_inherited'] || false
       @hash = nil
     end
 
-    def validate(value,*allowed_values)
+    def validate(value, *allowed_values)
       validator = Puppet::Parameter::ValueCollection.new
       validator.newvalues(*allowed_values)
       validator.validate(value)
@@ -55,7 +62,7 @@ class Puppet::Type::Acl
       value.downcase.to_sym
     end
 
-    def validate_non_empty(name,value)
+    def validate_non_empty(name, value)
       if value.nil? or value == ''
         raise ArgumentError, "A non-empty #{name} must be specified."
       end
@@ -66,15 +73,15 @@ class Puppet::Type::Acl
       value
     end
 
-    def validate_array(name,values)
+    def validate_array(name, values)
       raise ArgumentError, "Value for #{name} should be an array. Perhaps try ['#{values}']?" unless values.kind_of?(Array)
 
       values
     end
 
-    def validate_individual_values(values,*allowed_values)
+    def validate_individual_values(values, *allowed_values)
       values.each do |value|
-        validate(value,*allowed_values)
+        validate(value, *allowed_values)
       end
 
       values
@@ -170,12 +177,12 @@ class Puppet::Type::Acl
     def rights=(value)
       @rights = ensure_unique_values(
           convert_to_symbols(
-          validate_individual_values(
-          validate_array(
-               'rights',
-               validate_non_empty('rights', value)
-          ),
-          :full, :modify, :write, :read, :execute, :mask_specific)))
+              validate_individual_values(
+                  validate_array(
+                      'rights',
+                      validate_non_empty('rights', value)
+                  ),
+                  :full, :modify, :write, :read, :execute, :mask_specific)))
       ensure_rights_order
       ensure_rights_values_compatible
       ensure_mask_when_mask_specific if @rights.include?(:mask_specific)
@@ -187,8 +194,8 @@ class Puppet::Type::Acl
       @hash = nil
     end
 
-    def type=(value)
-      @type = convert_to_symbol(validate(value || :allow, :allow, :deny))
+    def perm_type=(value)
+      @perm_type = convert_to_symbol(validate(value || :allow, :allow, :deny))
       @hash = nil
     end
 
@@ -249,7 +256,7 @@ class Puppet::Type::Acl
           @child_types == other.child_types &&
           @affects == other.affects &&
           @is_inherited == other.is_inherited &&
-          @type == other.type
+          @perm_type == other.perm_type
     end
 
     # This ensures we are looking at the same ace with the same
@@ -262,17 +269,18 @@ class Puppet::Type::Acl
       return false unless other.is_a?(Ace)
 
       return same?(other) &&
-             @rights == other.rights
+          @rights == other.rights
     end
+
     alias_method :eql?, :==
 
     def hash
       return get_comparison_ids[0].hash ^
-             @rights.hash ^
-             @type.hash ^
-             @child_types.hash ^
-             @affects.hash ^
-             @is_inherited.hash
+          @rights.hash ^
+          @perm_type.hash ^
+          @child_types.hash ^
+          @affects.hash ^
+          @is_inherited.hash
     end
 
     def to_hash
@@ -282,7 +290,7 @@ class Puppet::Type::Acl
       ace_hash['identity'] = identity
       ace_hash['rights'] = convert_from_symbols(rights)
       ace_hash['mask'] = mask if (rights == [:mask_specific] && !mask.nil?)
-      ace_hash['type'] = type unless (type == :allow || type.nil?)
+      ace_hash['perm_type'] = perm_type unless (perm_type == :allow || perm_type.nil?)
       ace_hash['child_types'] = child_types unless (child_types == :all || child_types == :none || child_types.nil?)
       ace_hash['affects'] = affects unless (affects == :all || affects.nil?)
       ace_hash['is_inherited'] = is_inherited if is_inherited
@@ -320,6 +328,7 @@ class Puppet::Type::Acl
 
       "\n { #{return_value} }"
     end
+
     alias_method :to_s, :inspect
   end
 end

@@ -35,8 +35,8 @@ file { "#{target}":
 
 acl { "#{target}":
   permissions  => [
-    { identity => '#{user_id}',type => 'allow', rights => ['full'] },
-    { identity => '#{user_id}',type => 'deny', rights => ['full'] }
+    { identity => '#{user_id}',perm_type => 'allow', rights => ['full'] },
+    { identity => '#{user_id}',perm_type => 'deny', rights => ['full'] }
   ],
 }
 MANIFEST

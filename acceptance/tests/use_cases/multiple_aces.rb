@@ -86,12 +86,12 @@ user { "#{user_id_6}":
 
 acl { "#{target}":
   permissions  => [
-    { identity => '#{user_id_1}', type => 'allow', rights => ['full'] },
-    { identity => '#{user_id_2}', type => 'deny', rights => ['modify'] },
-    { identity => '#{user_id_3}', type => 'allow', rights => ['read'] },
-    { identity => '#{user_id_4}', type => 'deny', rights => ['read','execute'] },
-    { identity => '#{user_id_5}', type => 'allow', rights => ['write','execute'] },
-    { identity => '#{user_id_6}', type => 'deny', rights => ['write','read'] }
+    { identity => '#{user_id_1}', perm_type => 'allow', rights => ['full'] },
+    { identity => '#{user_id_2}', perm_type => 'deny', rights => ['modify'] },
+    { identity => '#{user_id_3}', perm_type => 'allow', rights => ['read'] },
+    { identity => '#{user_id_4}', perm_type => 'deny', rights => ['read','execute'] },
+    { identity => '#{user_id_5}', perm_type => 'allow', rights => ['write','execute'] },
+    { identity => '#{user_id_6}', perm_type => 'deny', rights => ['write','read'] }
   ],
 }
 MANIFEST

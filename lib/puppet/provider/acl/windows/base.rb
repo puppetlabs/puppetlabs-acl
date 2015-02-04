@@ -112,7 +112,7 @@ class Puppet::Provider::Acl
           affects = get_ace_propagation(ace)
           is_inherited = ace.inherited?
           hash = {'identity'=>"#{identity}", 'id'=>"#{sid}", 'rights'=>rights,
-                  'type'=>ace_type, 'child_types'=> child_types,
+                  'perm_type'=>ace_type, 'child_types'=> child_types,
                   'affects'=>affects, 'is_inherited'=>is_inherited,
                   'mask'=>"#{ace.mask}" }
 
@@ -267,7 +267,7 @@ class Puppet::Provider::Acl
             sid = get_account_id(permission.identity)
             mask = get_account_mask(permission)
             flags = get_account_flags(permission)
-            case permission.type
+            case permission.perm_type
               when :allow
                 dacl.allow(sid, mask, flags)
               when :deny
@@ -371,9 +371,9 @@ class Puppet::Provider::Acl
               next unless existing_aces.empty?
 
               # munge in existing unmanaged aces
-              case current_ace.type
+              case current_ace.perm_type
                 when :deny
-                  last_allow_index = should_aces.index{ |a| a.type == :allow}
+                  last_allow_index = should_aces.index{ |a| a.perm_type == :allow}
                   should_aces.insert(last_allow_index,current_ace) if last_allow_index
                   should_aces << current_ace unless last_allow_index
                 when :allow
