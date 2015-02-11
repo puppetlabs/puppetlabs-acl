@@ -1,3 +1,11 @@
+##2015-02-17 - Supported Release 1.1.0
+### Summary
+
+Deprecates `type` in permissions array has been renamed to `perm_type`
+
+#### Features
+- Permissions parameter now takes array of hashes with `perm_type` instead of Puppet 4.0 protected word `type`
+
 ##2014-12-30 - Supported Release 1.0.4
 ### Summary
 

@@ -1,12 +1,20 @@
 {
   "name": "puppetlabs-acl",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "author": "puppetlabs",
   "summary": "This module provides the ability to manage ACLs on nodes",
-  "license": "Apache License, Version 2.0",
+  "license": "Apache-2.0",
   "source": "git://github.com/puppetlabs/puppetlabs-acl.git",
   "project_page": "https://github.com/puppetlabs/puppetlabs-acl",
   "issues_url": "https://tickets.puppetlabs.com/browse/MODULES/component/11945",
+  "tags": [
+    "microsoft",
+    "access control list",
+    "access control entry",
+    "acl",
+    "ace",
+    "file permissions"
+  ],
   "requirements": [
     {
       "name": "pe",
