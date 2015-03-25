@@ -56,7 +56,7 @@ Windows processes ACEs in order of appearance within the ACL. It expects them to
  3. 'inherited deny'
  4. 'inherited allow'
 
-The `acl` type does not enforce the above order, and applies the ACEs based on order of appearance in your manifest. If that differs from the ordering above, Windows generates an error message.
+The `acl` type does not enforce the above order, and applies the ACEs based on order of appearance in your manifest. If that differs from the ordering above, node users who view or update the ACL through the Windows Security graphical interface receive a warning message: "The permissions on [filename] are incorrectly ordered, which may cause some entries to be ineffective."
 
 **Note:** You cannot specify inherited ACEs in a manifest; you can only specify whether to allow upstream inheritance to flow into the managed ACL.
 
