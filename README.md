@@ -6,7 +6,7 @@ acl
 1. [Overview - What is the acl module?](#overview)
 2. [Module Description - What does the module do?](#module-description)
 3. [Setup - The basics of getting started with acl](#setup)
-    * [Beginning with acl - Installation](#beginning-with-apache)
+    * [Beginning with acl - Installation](#beginning-with-acl)
 4. [Usage - The custom type available for configuration](#usage)
 5. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
 6. [Limitations - Known issues in acl](#limitations)
@@ -18,7 +18,7 @@ The acl module lets you use Puppet to manage Access Control Lists (ACLs) on Wind
 
 ##Module Description
 
-Windows uses Access Control Lists (ACLs) to store permissions information. The acl module adds a type and provider for managing that information through Puppet.
+Windows uses Access Control Lists (ACLs) to store permissions information. An ACL is typically made up of a series of Access Control Entries (ACEs), representing individual permissions. The acl module adds a type and provider to let you manage all that information through Puppet.
 
 ##Setup
 
@@ -50,9 +50,15 @@ acl { 'c:/tempperms':
 
 A typical ACL is made up of access control entries (ACEs), which represent individual permissions. Each ACE comprises a defined trustee (an identity, representing a user, group, or system process), a set of rights, an inheritance and propagation strategy, and an allowed/denied status.
 
-Each ACE has one of four possible statuses: 'explicit deny', 'explicit allow', 'inherited deny', and 'inherited allow'. The order of ACEs within the ACL determines which one is applied first.
+Windows processes ACEs in order of appearance within the ACL. It expects them to be pre-sorted by allowed/denied status in the following order:
+ 1. 'explicit deny'
+ 2. 'explicit allow'
+ 3. 'inherited deny'
+ 4. 'inherited allow'
 
-You cannot specify inherited ACEs in a manifest; you can only specify whether to allow upstream inheritance to flow into the managed ACL. If your modeled resources don't follow this order, Windows complains. The `acl` type **does not** enforce or complain about ACE order.
+The `acl` type does not enforce the above order, and applies the ACEs based on order of appearance in your manifest. If that differs from the ordering above, Windows generates an error message.
+
+**Note:** You cannot specify inherited ACEs in a manifest; you can only specify whether to allow upstream inheritance to flow into the managed ACL.
 
 ###Manage a basic ACL with all parameters expressed
 
