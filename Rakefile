@@ -29,6 +29,12 @@ task :beaker_git, [:hosts, :tests] do |t, args|
   system(build_command(args))
 end
 
+desc 'Run Beaker Puppet-Agent tests'
+Beaker::Tasks::RakeTask.new("beaker:test:puppet-agent", :hosts) do |t,args|
+  t.type = 'puppet-agent'
+  t.hosts = args[:hosts]
+end
+
 def build_command(args)
   cmd_parts = []
   cmd_parts << "beaker"
