@@ -67,14 +67,14 @@ The fully expressed ACL in the sample below produces the same settings as the [m
 ~~~
 acl { 'c:/tempperms':
   target                     => 'c:/tempperms',
-  purge                      => 'false',
+  purge                      => false,
   permissions                => [
    { identity => 'Administrator', rights => ['full'], perm_type=> 'allow', child_types => 'all', affects => 'all' },
    { identity => 'Users', rights => ['read','execute'], perm_type=> 'allow', child_types => 'all', affects => 'all' }
   ],
   owner                      => 'Administrators', #Creator_Owner specific, doesn't manage unless specified
   group                      => 'Users', #Creator_Group specific, doesn't manage unless specified
-  inherit_parent_permissions => 'true',
+  inherit_parent_permissions => true,
 }
 ~~~
 
@@ -92,7 +92,7 @@ acl { 'c:/tempperms':
    { identity => 'Users', rights => ['read','execute'] }
    { identity => 'Everyone', rights => ['read'] }
   ],
-  inherit_parent_permissions => 'false',
+  inherit_parent_permissions => false,
 }
 ~~~
 
@@ -168,7 +168,7 @@ acl { 'c:/tempperms':
    { identity => 'Administrators', rights => ['full'] },
    { identity => 'Users', rights => ['full'] }
   ],
-  inherit_parent_permissions => 'false',
+  inherit_parent_permissions => false,
 }
 ~~~
 
@@ -178,7 +178,7 @@ You cannot purge inherited permissions; you can only purge explicit permissions.
 
 ~~~
 acl { 'c:/tempperms':
-  purge       => 'true',
+  purge       => true,
   permissions => [
    { identity => 'Administrators', rights => ['full'] },
    { identity => 'Users', rights => ['full'] }
@@ -196,12 +196,12 @@ To fully restrict a target's permissions to the ones specified in your manifest,
 
 ~~~
 acl { 'c:/tempperms':
-  purge                           => 'true',
+  purge                           => true,
   permissions                     => [
    { identity => 'Administrators', rights => ['full'] },
    { identity => 'Users', rights => ['full'] }
   ],
-  inherit_parent_permissions => 'false',
+  inherit_parent_permissions => false,
 }
 ~~~
 
@@ -213,14 +213,14 @@ If none of the standard `rights` values meets your specific needs, you can speci
 
 ~~~
 acl { 'c:/tempperms':
-  purge                      => 'true',
+  purge                      => true,
   permissions                => [
    { identity => 'Administrators', rights => ['full'] }, #full is same as - 2032127 aka 0x1f01ff but you should use 'full'
    { identity => 'SYSTEM', rights => ['modify'] }, #modify is same as 1245631 aka 0x1301bf but you should use 'modify'
    { identity => 'Users', rights => ['mask_specific'], mask => 1180073 }, #RX WA #0x1201a9
    { identity => 'Administrator', rights => ['mask_specific'], mask => 1180032 }  #RA,S,WA,Rc #1180032  #0x120180
   ],
-  inherit_parent_permissions => 'false',
+  inherit_parent_permissions => false,
 }
 ~~~
 
@@ -251,14 +251,14 @@ The inheritance structure of ACEs is controlled by [`child_types`](#permissions)
 
 ~~~
 acl { 'c:/tempperms':
-  purge                      => 'true',
+  purge                      => true,
   permissions                => [
    { identity => 'SYSTEM', rights => ['full'], child_types => 'all' },
    { identity => 'Administrators', rights => ['full'], child_types => 'containers' },
    { identity => 'Administrator', rights => ['full'], child_types => 'objects' },
    { identity => 'Users', rights => ['full'], child_types => 'none' }
   ],
-  inherit_parent_permissions => 'false',
+  inherit_parent_permissions => false,
 }
 ~~~
 
@@ -268,7 +268,7 @@ ACEs have propagation rules which guide how they apply permissions to containers
 
 ~~~
 acl { 'c:/tempperms':
-  purge                      => 'true',
+  purge                      => true,
   permissions                => [
    { identity => 'Administrators', rights => ['modify'], affects => 'all' },
    { identity => 'Administrators', rights => ['full'], affects => 'self_only' },
@@ -276,7 +276,7 @@ acl { 'c:/tempperms':
    { identity => 'Users', rights => ['full'], affects => 'children_only' },
    { identity => 'Authenticated Users', rights => ['read'], affects => 'self_and_direct_children_only' }
   ],
-  inherit_parent_permissions => 'false',
+  inherit_parent_permissions => false,
 }
 ~~~
 
@@ -287,7 +287,7 @@ To remove permissions, set `purge => listed_permissions`. This removes explicit 
 ~~~
 #set permissions
 acl { 'c:/tempperms/remove':
-  purge                      => 'true',
+  purge                      => true,
   permissions                => [
    { identity => 'Administrators', rights => ['full'] },
    { identity => 'Administrator', rights => ['write'] },
@@ -295,7 +295,7 @@ acl { 'c:/tempperms/remove':
    { identity => 'Everyone', rights => ['execute'] },
    { identity => 'Authenticated Users', rights => ['full'] }
   ],
-  inherit_parent_permissions => 'false',
+  inherit_parent_permissions => false,
 }
 
 #now remove some permissions
@@ -306,7 +306,7 @@ acl { 'remove_tempperms/remove':
    { identity => 'Administrator', rights => ['write'] },
    { identity => 'Authenticated Users', rights => ['full'] }
   ],
-  inherit_parent_permissions => 'false',
+  inherit_parent_permissions => false,
   require                    => Acl['c:/tempperms/remove'],
 }
 ~~~
@@ -317,7 +317,7 @@ With Windows, you can specify the same `identity` with different inheritance and
 
 ~~~
 acl { 'c:/tempperms':
-  purge                      => 'true',
+  purge                      => true,
   permissions                => [
    { identity => 'SYSTEM', rights => ['modify'], child_types => 'none' },
    { identity => 'SYSTEM', rights => ['modify'], child_types => 'containers' },
@@ -333,7 +333,7 @@ acl { 'c:/tempperms':
    { identity => 'SYSTEM', rights => ['read'], child_types=>'containers', affects => 'self_and_direct_children_only' },
    { identity => 'SYSTEM', rights => ['read'], child_types=>'objects', affects => 'self_and_direct_children_only' }
   ],
-  inherit_parent_permissions => 'false',
+  inherit_parent_permissions => false,
 }
 ~~~
 
