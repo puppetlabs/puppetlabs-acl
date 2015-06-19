@@ -25,13 +25,15 @@ group :development, :test do
   gem 'rake'
   gem 'rspec', "~> 2.11.0"
   gem 'mocha', "~> 0.10.5"
-  # beaker is not supported to be installed on windows
+  gem 'puppetlabs_spec_helper'
+end
+group :system_tests do
   if beaker_version
     gem 'beaker', *location_for(beaker_version)
   else
     gem 'beaker',                :require => false, :platforms => :ruby
   end
-  gem 'puppetlabs_spec_helper'
+  gem 'beaker-puppet_install_helper', :require => false
 end
 
 # see http://projects.puppetlabs.com/issues/21698
