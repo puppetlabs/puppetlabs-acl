@@ -1,7 +1,11 @@
 require 'rake'
 require 'rspec/core/rake_task'
 require 'puppetlabs_spec_helper/rake_tasks'
-require 'beaker/tasks/test' unless RUBY_PLATFORM =~ /win32/
+begin
+  require 'beaker/tasks/test' unless RUBY_PLATFORM =~ /win32/
+rescue LoadError
+  #Do nothing, only installed with system_tests group 
+end
 
 task :default => [:test]
 
