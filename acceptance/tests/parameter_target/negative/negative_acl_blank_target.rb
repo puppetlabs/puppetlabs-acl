@@ -20,6 +20,6 @@ MANIFEST
 agents.each do |agent|
   step "Execute Manifest"
   on(agent, puppet('apply', '--debug'), :stdin => acl_manifest, :acceptable_exit_codes => [1]) do |result|
-    assert_match(/Error:.*A non-empty name must be specified/, result.stderr, 'Expected error was not detected!')
+    assert_match(/Error:.*(A non-empty name must be specified|Empty string title at)/, result.stderr, 'Expected error was not detected!')
   end
 end
