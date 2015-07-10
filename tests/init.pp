@@ -53,12 +53,12 @@ acl { 'c:/tempperms/full':
   permissions                => [
     { identity    => 'Administrator',
       rights      => ['full'],
-      type        => 'allow',
+      perm_type   => 'allow',
       child_types => 'all',
       affects     => 'all' },
     { identity    => 'Users',
       rights      => ['read','execute'],
-      type        => 'allow',
+      perm_type   => 'allow',
       child_types => 'all',
       affects     => 'all' }
   ],
@@ -231,7 +231,7 @@ file { ['c:/tempperms/propagation/child_object.txt',
 
 acl { 'c:/tempperms/deny':
   permissions => [
-    { identity => 'SYSTEM', rights => ['full'], type=> 'deny' }
+    { identity => 'SYSTEM', rights => ['full'], perm_type => 'deny' }
   ],
 }
 
