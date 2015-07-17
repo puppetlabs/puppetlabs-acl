@@ -1,3 +1,13 @@
+##2015-07-28 - Supported Release 1.1.1
+### Summary
+
+Add Puppet 4 and PE 2015.2.0 to metadata
+
+#### Features
+- README updates
+- Acceptance test fixes
+- Gemfile changes
+
 ##2015-02-17 - Supported Release 1.1.0
 ### Summary
 
