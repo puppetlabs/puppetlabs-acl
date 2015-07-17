@@ -10,28 +10,28 @@ init:
 - 'mkdir C:\ProgramData\PuppetLabs\puppet\var && exit 0'
 environment:
   matrix:
-  - PUPPET_GEM_VERSION: 3.4.3
+  - PUPPET_GEM_VERSION: ~> 3.0
     RUBY_VER: 193
-  - PUPPET_GEM_VERSION: 3.7.5
-    RUBY_VER: 193
-  - PUPPET_GEM_VERSION: 3.7.5
+  - PUPPET_GEM_VERSION: ~> 3.0
     RUBY_VER: 200-x64
-  - PUPPET_GEM_VERSION: 4.0.0
+  - PUPPET_GEM_VERSION: ~> 4.0
     RUBY_VER: 21
-  - PUPPET_GEM_VERSION: 4.0.0
+  - PUPPET_GEM_VERSION: ~> 4.0
     RUBY_VER: 21-x64
+  - PUPPET_GEM_VERSION: 3.4.0
+    RUBY_VER: 193
 matrix:
   fast_finish: true
 install:
 - SET PATH=C:\Ruby%RUBY_VER%\bin;%PATH%
 - gem install bundler --quiet --no-ri --no-rdoc
-- bundle install --jobs 4 --retry 2 --without development
+- bundle install --jobs 4 --retry 2 --without system_tests
 - type Gemfile.lock
-build_script:
-- 'bundle exec puppet apply -e "user {''Administrator'': ensure=>present, password => ''Th!s1sS#cur3@@@2129021'', groups=>[''Administrators''],}" && exit 0'
+build: off
 test_script:
 - bundle exec puppet -V
 - ruby -v
+- 'bundle exec puppet apply -e "user {''Administrator'': ensure=>present, password => ''Th!s1sS#cur3@@@2129021'', groups=>[''Administrators''],}" && exit 0'
 - bundle exec rspec spec/unit spec/integration -fd -b
 notifications:
 - provider: Email
