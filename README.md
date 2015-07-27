@@ -8,6 +8,20 @@ acl
 3. [Setup - The basics of getting started with acl](#setup)
     * [Beginning with acl - Installation](#beginning-with-acl)
 4. [Usage - The custom type available for configuration](#usage)
+    * [Manage a basic ACL with all parameters expressed](#manage-a-basic-acl-with-all-parameters-expressed)
+    * [Manage multiple permissions at once](#manage-multiple-permissions-at-once)
+    * [Same target, multiple resources](#same-target-multiple-resources)
+    * [Identify users and groups with SID or FQDN](#identify-users-and-groups-with-sid-or-fqdn)
+    * [Use multiple resources to manage the same target](#use-multiple-resources-to-manage-the-same-target)
+    * [Protect a target from inherited permissions](#protect-a-target-from-inherited-permissions)
+    * [Purge unmanaged explicit permissions](#purge-unmanaged-explicit-permissions)
+    * [Protect a target and purge all unmanaged permissions](#protect-a-target-and-purge-all-unmanaged-permissions)
+    * [Set ACE mask_specific rights](#set-ace-mask_specific-rights)
+    * [Explicitly deny permissions](#explicitly-deny-permissions)
+    * [Set ACE inheritance](#set-ace-inheritance)
+    * [Set ACE propagation](#set-ace-propagation)
+    * [Remove ACE permissions](#remove-ace-permissions)
+    * [Use same identity, multiple ACEs](#use-same-identity-multiple-aces)
 5. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
 6. [Limitations - Known issues in acl](#limitations)
 7. [Development - Guide for contributing to the module](#development)
@@ -25,7 +39,7 @@ Windows uses Access Control Lists (ACLs) to store permissions information. An AC
 Install this module with the following command:
 
 
-~~~
+~~~puppet
 $ puppet module install [--modulepath <path>] puppetlabs/acl
 ~~~
 
@@ -36,7 +50,7 @@ The above command also includes the optional argument to specify your Puppet mas
 For a basic implementation of the acl module, provide a target ACL and at least one permission:
 
 
-~~~
+~~~puppet
 acl { 'c:/tempperms':
   permissions => [
    { identity => 'Administrator', rights => ['full'] },
@@ -64,7 +78,7 @@ The `acl` type does not enforce the above order, and applies the ACEs based on o
 
 The fully expressed ACL in the sample below produces the same settings as the [minimal sample](beginning-with-acl) in the Setup section, without relying on defaults.
 
-~~~
+~~~puppet
 acl { 'c:/tempperms':
   target                     => 'c:/tempperms',
   purge                      => false,
@@ -83,7 +97,7 @@ acl { 'c:/tempperms':
 
 The `permissions` parameter is passed as an array, allowing it to accept multiple ACEs in the form of hashes.
 
-~~~
+~~~puppet
 acl { 'c:/tempperms':
   permissions                => [
    { identity => 'Administrators', rights => ['full'] },
@@ -100,7 +114,8 @@ acl { 'c:/tempperms':
 
 
 **Wrong:**
-~~~
+
+~~~puppet
 acl { 'c:/tempperms':
   permissions => [
     { identity => 'SYSTEM', rights => ['read']},
@@ -111,7 +126,7 @@ acl { 'c:/tempperms':
 
 **Right:**
 
-~~~
+~~~puppet
 acl { 'c:/tempperms':
   permissions => [
     { identity => 'SYSTEM', rights => ['read','write']}
@@ -127,7 +142,7 @@ For more detail, see the Reference section on [`permissions`](#permissions).
 
 You can identify a user or group using a [security identifier](http://support.microsoft.com/kb/243330) (SID) or a fully qualified domain name (FQDN).
 
-~~~
+~~~puppet
 acl { 'c:/tempperms':
   permissions => [
    { identity => 'NT AUTHORITY\SYSTEM', rights => ['modify'] },
@@ -143,7 +158,7 @@ You can manage the same target across multiple ACL resources, as long as each re
 
 **Warning:** Use this feature with care; it can get confusing quickly. Do not set `purge => 'true'` on any of the resources that apply to the same target. Doing so causes thrashing in reports, as the permissions are added and removed on every catalog application.
 
-~~~
+~~~puppet
 acl { 'c:/tempperms':
   permissions => [
    { identity => 'Administrator', rights => ['full'] }
@@ -162,7 +177,7 @@ acl { 'tempperms_Users':
 
 Removing upstream inheritance is known as "protecting" the target. When an item is protected without `purge => true`, the inherited ACEs are copied into the target as unmanaged ACEs.
 
-~~~
+~~~puppet
 acl { 'c:/tempperms':
   permissions                => [
    { identity => 'Administrators', rights => ['full'] },
@@ -176,7 +191,7 @@ acl { 'c:/tempperms':
 
 You cannot purge inherited permissions; you can only purge explicit permissions. To lock down a folder to managed explicit ACEs, set `purge => true`. This only removes other explicit ACEs from the folder that are unmanaged by this resource. All inherited ACEs remain (see next example).
 
-~~~
+~~~puppet
 acl { 'c:/tempperms':
   purge       => true,
   permissions => [
@@ -188,13 +203,11 @@ acl { 'c:/tempperms':
 
 ####Protect a target and purge all unmanaged permissions
 
-
 To fully restrict a target's permissions to the ones specified in your manifest, protect it as above and set `purge => 'true'`.
 
 **Warning**: When removing permissions, make sure the user running Puppet always has FULL rights on the target. If Puppet loses its permission to manage a resource, you'll need to restore it manually at the node level.
 
-
-~~~
+~~~puppet
 acl { 'c:/tempperms':
   purge                           => true,
   permissions                     => [
@@ -205,13 +218,13 @@ acl { 'c:/tempperms':
 }
 ~~~
 
-####ACE mask_specific rights
+####Set ACE mask_specific rights
 
 If none of the standard `rights` values meets your specific needs, you can specify more granular rights by setting `rights => ['mask_specific']` and supplying a 'mask' element with an integer representing a [permissions mask](http://msdn.microsoft.com/en-us/library/aa394063(v=vs.85).aspx). You can't combine the mask with other values, such as read permissions.
 
 **NOTE:** 'mask_specific' should ONLY be used when other rights are not specific enough. If you specify 'mask_specific' with the equivalent of 'full' rights (2032127), and Puppet finds the property to be 'full', it reports making changes to the resource even though nothing is different.
 
-~~~
+~~~puppet
 acl { 'c:/tempperms':
   purge                      => true,
   permissions                => [
@@ -233,10 +246,9 @@ acl { 'c:/tempperms':
 
 ####Explicitly deny permissions
 
-
 By default, each ACE grants the described permissions to the target. However, you can reverse that by setting `perm_type => 'deny'`, which explicitly removes the described permissions. List your 'deny' ACEs first, before your 'allow' ACEs.
 
-~~~
+~~~puppet
 acl { 'c:/tempperms':
   permissions => [
    { identity => 'SYSTEM', rights => ['full'], perm_type=> 'deny', affects => 'self_only' },
@@ -245,11 +257,11 @@ acl { 'c:/tempperms':
 }
 ~~~
 
-####ACE inheritance
+####Set ACE inheritance
 
 The inheritance structure of ACEs is controlled by [`child_types`](#permissions), which determine how files and sub-folders inherit each ACE.
 
-~~~
+~~~puppet
 acl { 'c:/tempperms':
   purge                      => true,
   permissions                => [
@@ -262,11 +274,11 @@ acl { 'c:/tempperms':
 }
 ~~~
 
-####ACE propagation
+####Set ACE propagation
 
 ACEs have propagation rules which guide how they apply permissions to containers, objects, children, and grandchildren. Propagation is determined by [`affects`](#permissions), which can take the value of: 'all', 'self_only', 'children_only', 'direct_children_only', and 'self_and_direct_children_only'. Microsoft has a [good matrix](http://msdn.microsoft.com/en-us/library/ms229747.aspx) that outlines when and why you might use each of these values.
 
-~~~
+~~~puppet
 acl { 'c:/tempperms':
   purge                      => true,
   permissions                => [
@@ -280,11 +292,11 @@ acl { 'c:/tempperms':
 }
 ~~~
 
-####Removing ACE permissions
+####Remove ACE permissions
 
 To remove permissions, set `purge => listed_permissions`. This removes explicit permissions from the ACL based on their `identity`, `perm_type`, `child_types` and `affects` attributes. The example below ensures that 'Administrator' and 'Authenticated Users' are not on the ACL.
 
-~~~
+~~~puppet
 #set permissions
 acl { 'c:/tempperms/remove':
   purge                      => true,
@@ -315,7 +327,7 @@ acl { 'remove_tempperms/remove':
 
 With Windows, you can specify the same `identity` with different inheritance and propagation. Each of the resulting items is managed as a separate ACE.
 
-~~~
+~~~puppet
 acl { 'c:/tempperms':
   purge                      => true,
   permissions                => [
@@ -434,7 +446,6 @@ To ensure that a specific set of permissions are absent from the ACL, set `purge
  * We don't recommend using the acl module with Cywin, because it can yield inconsistent results --- especially when using Cygwin SSHD with public key authentication. For example, the 'Administrator' identity might work normally on Windows 2012, but on Windows 2008 it might be translated to 'cyg_server' (or vice-versa).
 
  * Unicode encoding isn't supported in the `identity`, `group`, or `owner` parameters.
-
 
  * When using SIDs for identities, autorequire tries to match to users with fully qualified names (e.g., User[BUILTIN\Administrators]) in addition to SIDs (User[S-1-5-32-544]). However, it can't match against 'User[Administrators]', because that could cause issues if domain accounts and local accounts share the same name e.g., 'Domain\Bob' and 'LOCAL\Bob'.
 
