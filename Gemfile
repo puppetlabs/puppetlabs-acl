@@ -29,7 +29,7 @@ group :development do
   gem 'rake',                                :require => false
   gem 'rspec', '~>2.14.1',                   :require => false
   gem 'puppet-lint',                         :require => false
-  gem 'puppetlabs_spec_helper', '~>0.10.3',  :require => false
+  gem 'puppetlabs_spec_helper', '~>1.0.0',   :require => false
   gem 'puppet_facts',                        :require => false
   gem 'mocha', '~>0.10.5',                   :require => false
 end
