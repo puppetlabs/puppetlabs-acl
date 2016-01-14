@@ -163,7 +163,8 @@ acl { 'c:/tempperms/inheritance':
 }
 
 #C:\tempperms>icacls inheritance
-#inheritance BUILTIN\Administrators:(CI)(F)
+#inheritance  NT AUTHORITY\SYSTEM:(OI)(CI)(F)
+#            BUILTIN\Administrators:(CI)(F)
 #            WIN-QR952GIDHVE\Administrator:(OI)(F)
 #            BUILTIN\Users:(F)
 
@@ -405,3 +406,7 @@ acl { 'c:/tempperms/file.txt':
   ],
   inherit_parent_permissions => false,
 }
+
+#C:\tempperms>icacls file.txt
+#file.txt BUILTIN\Administrators:(F)
+#         Everyone:(R)
