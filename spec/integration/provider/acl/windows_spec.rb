@@ -176,7 +176,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     end
 
     it "should be true by default" do
-      provider.inherit_parent_permissions.must be_true
+      provider.inherit_parent_permissions.must be_truthy
     end
 
     context ".flush" do
@@ -185,7 +185,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       end
 
       it "should do nothing if inheritance is set to true (default)" do
-        provider.inherit_parent_permissions.must be_true
+        provider.inherit_parent_permissions.must be_truthy
 
         # puppet will not make this call if values are in sync
         #provider.inherit_parent_permissions = :true
@@ -196,12 +196,12 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
       end
 
       it "should update inheritance to false when set to :false" do
-        provider.inherit_parent_permissions.must be_true
+        provider.inherit_parent_permissions.must be_truthy
         provider.inherit_parent_permissions = false
 
         resource.provider.flush
 
-        provider.inherit_parent_permissions.must be_false
+        provider.inherit_parent_permissions.must be false
       end
     end
   end
@@ -228,7 +228,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
          end
        end
 
-       at_least_one.must be_true
+       at_least_one.must be_truthy
     end
 
     it "should contain aces that allow inheritance" do
@@ -241,7 +241,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         end
       end
 
-      at_least_one.must be_true
+      at_least_one.must be_truthy
     end
 
     it "should contain aces that are inherited" do
@@ -253,7 +253,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         end
       end
 
-      at_least_one.must be_true
+      at_least_one.must be_truthy
     end
 
     it "should contain aces that propagate inheritance" do
@@ -266,7 +266,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         end
       end
 
-      at_least_one.must be_true
+      at_least_one.must be_truthy
     end
 
     context "when setting permissions" do

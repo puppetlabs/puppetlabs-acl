@@ -239,28 +239,28 @@ describe "Ace" do
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']})
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']})
 
-      expect(left.same? right).to be_true
+      expect(left.same? right).to be true
     end
 
     it "should be true for two like aces even with extra information" do
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'id'=> 'S-32-12-0','mask'=>'2023422'})
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']})
 
-      expect(left.same? right).to be_true
+      expect(left.same? right).to be true
     end
 
     it "should be true for two like aces when one has sid" do
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Everyone', 'id'=>'S-1-1-0','rights' => ['full']})
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']})
 
-      expect(left.same? right).to be_true
+      expect(left.same? right).to be true
     end
 
     it "should be true for two like aces when both have same sid but identities are different" do
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'id'=>'S-1-1-0', 'rights' => ['full']})
       right = Puppet::Type::Acl::Ace.new({'identity' => 'BUILT IN\Administrators', 'id'=>'S-1-1-0','rights' => ['full']})
 
-      expect(left.same? right).to be_true
+      expect(left.same? right).to be true
     end
 
     it "should be true for two like aces when identities evaluate to the same because provider" do
@@ -270,7 +270,7 @@ describe "Ace" do
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']}, provider)
       right = Puppet::Type::Acl::Ace.new({'identity' => 'BUILT IN\Administrators', 'rights' => ['full']}, provider)
 
-      expect(left.same? right).to be_true
+      expect(left.same? right).to be true
     end
 
     it "should be false for two like aces when identities do not evaluate to the same because provider" do
@@ -280,7 +280,7 @@ describe "Ace" do
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']}, provider)
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']})
 
-      expect(left.same? right).to be_false
+      expect(left.same? right).to be false
     end
 
     it "should be true for two aces when SIDs evaluate to the same because provider" do
@@ -290,7 +290,7 @@ describe "Ace" do
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']}, provider)
       right = Puppet::Type::Acl::Ace.new({'identity' => 'NOTAdministrators', 'rights' => ['full']}, provider)
 
-      expect(left.same? right).to be_true
+      expect(left.same? right).to be true
     end
 
     it "should be false for two like aces when SIDs evaluate different because provider" do
@@ -300,49 +300,49 @@ describe "Ace" do
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']}, provider)
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']}, provider)
 
-      expect(left.same? right).to be_false
+      expect(left.same? right).to be false
     end
 
     it "should be true if aces are different by rights" do
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']})
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['modify']})
 
-      expect(left.same? right).to be_true
+      expect(left.same? right).to be true
     end
 
     it "should be false if aces are different by identities" do
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']})
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Users', 'rights' => ['full']})
 
-      expect(left.same? right).to be_false
+      expect(left.same? right).to be false
     end
 
     it "should be false if aces are different by type" do
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'perm_type'=>'allow'})
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'perm_type'=>'deny'})
 
-      expect(left.same? right).to be_false
+      expect(left.same? right).to be false
     end
 
     it "should be false if aces are different by child_types" do
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'child_types'=>'all'})
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'child_types'=>'objects'})
 
-      expect(left.same? right).to be_false
+      expect(left.same? right).to be false
     end
 
     it "should be false if aces are different by affects" do
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'affects'=>'all'})
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'affects'=>'children_only'})
 
-      expect(left.same? right).to be_false
+      expect(left.same? right).to be false
     end
 
     it "should be false if aces are different by is_inherited" do
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'is_inherited'=>'false'})
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full'],'is_inherited'=>'true'})
 
-      expect(left.same? right).to be_false
+      expect(left.same? right).to be false
     end
   end
 
@@ -426,7 +426,7 @@ describe "Ace" do
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']})
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']})
 
-      expect(left.eql? right).to be_true
+      expect(left.eql? right).to be true
     end
 
     it "should be an alias of .==" do
@@ -440,14 +440,14 @@ describe "Ace" do
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']})
       right = Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']})
 
-      expect(left.equal? right).to be_false
+      expect(left.equal? right).to be false
     end
 
     it "should be equal for two aces that are the same object" do
       left = Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']})
       right = left
 
-      expect(left.equal? right).to be_true
+      expect(left.equal? right).to be true
     end
 
     it "should not be an alias of .==" do
