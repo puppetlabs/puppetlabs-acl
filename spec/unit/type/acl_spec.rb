@@ -18,7 +18,7 @@ describe Puppet::Type.type(:acl) do
 
   context "parameter :name" do
     it "should be the name var" do
-      resource.parameters[:name].isnamevar?.should be_true
+      resource.parameters[:name].isnamevar?.should be_truthy
     end
 
     it "should not allow nil" do
