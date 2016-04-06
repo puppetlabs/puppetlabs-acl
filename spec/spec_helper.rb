@@ -26,6 +26,10 @@ RSpec.configure do |config|
     config.formatters.each { |f| f.instance_variable_set(:@output, $stdout) }
   end
 
+  config.expect_with :rspec do |c|
+    c.syntax = [:should, :expect]
+  end
+  
   #config.before :each do
   #  # Disabling garbage collection inside each test, and only running it at
   #  # the end of each block, gives us an ~ 15 percent speedup, and more on
