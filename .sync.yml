@@ -17,3 +17,11 @@ appveyor.yml:
   test_script:
     - "'bundle exec puppet apply -e \"user {''Administrator'': ensure=>present, password => ''Th!s1sS#cur3@@@2129021'', groups=>[''Administrators''],}\" && exit 0'"
     - 'bundle exec rspec spec/unit spec/integration -fd -b'
+MAINTAINERS.md:
+  maintainers:
+    - "Puppet Windows Team `windows |at| puppet |dot| com`"
+NOTICE:
+  copyright_holders:
+    - name: 'Puppet, Inc.'
+      begin: 2013
+      end: 'latest'
