@@ -6,7 +6,7 @@
 # and view a log of events) or by fully applying the test in a virtual environment
 # (to compare the resulting system state to the desired state).
 #
-# Learn more about module testing here: http://docs.puppetlabs.com/guides/tests_smoke.html
+# Learn more about module testing here: http://docs.puppet.com/guides/tests_smoke.html
 #
 include acl
 

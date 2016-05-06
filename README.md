@@ -449,7 +449,7 @@ To ensure that a specific set of permissions are absent from the ACL, set `purge
 
  * When using SIDs for identities, autorequire tries to match to users with fully qualified names (e.g., User[BUILTIN\Administrators]) in addition to SIDs (User[S-1-5-32-544]). However, it can't match against 'User[Administrators]', because that could cause issues if domain accounts and local accounts share the same name e.g., 'Domain\Bob' and 'LOCAL\Bob'.
 
-Please log tickets and issues at our [Module Issue Tracker](https://tickets.puppetlabs.com/browse/MODULES).
+Please log tickets and issues at our [Module Issue Tracker](https://tickets.puppet.com/browse/MODULES).
 
 ##Development
 
@@ -457,7 +457,7 @@ Puppet Labs modules on the Puppet Forge are open projects, and community contrib
 
 We want to keep it as easy as possible to contribute changes so that our modules work in your environment. There are a few guidelines that we need contributors to follow so that we can have a chance of keeping on top of things.
 
-For more information, see our [module contribution guide.](https://docs.puppetlabs.com/forge/contributing.html)
+For more information, see our [module contribution guide.](https://docs.puppet.com/forge/contributing.html)
 
 ###Contributors
 

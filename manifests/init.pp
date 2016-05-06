@@ -190,9 +190,9 @@
 #
 # === Authors
 #
-# Josh Cooper <josh@puppetlabs.com>
-# Rob Reynolds <rob@puppetlabs.com>
-# Ethan Brown <ethan@puppetlabs.com>
+# Josh Cooper <josh@puppet.com>
+# Rob Reynolds <rob@puppet.com>
+# Ethan Brown <ethan@puppet.com>
 #
 # === Copyright
 #
