@@ -128,9 +128,9 @@ if Puppet::Util::Platform.windows?
   end
 
   require 'puppet/util/windows/security'
-  # PUP-2100 - https://tickets.puppetlabs.com/browse/PUP-2100
+  # PUP-2100 - https://tickets.puppet.com/browse/PUP-2100
   # backporting that fix to earlier versions of Puppet.
-  # PUP-1987 - https://tickets.puppetlabs.com/browse/PUP-1987
+  # PUP-1987 - https://tickets.puppet.com/browse/PUP-1987
   if Puppet.version < '3.6.0'
 
     module Puppet::Util::Windows::Security

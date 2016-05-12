@@ -190,13 +190,13 @@
 #
 # === Authors
 #
-# Josh Cooper <josh@puppetlabs.com>
-# Rob Reynolds <rob@puppetlabs.com>
-# Ethan Brown <ethan@puppetlabs.com>
+# Josh Cooper <josh@puppet.com>
+# Rob Reynolds <rob@puppet.com>
+# Ethan Brown <ethan@puppet.com>
 #
 # === Copyright
 #
-# Copyright 2013-Present Puppet Labs, unless otherwise noted.
+# Copyright 2013-Present Puppet, Inc, unless otherwise noted.
 #
 class acl {
 }
