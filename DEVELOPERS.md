@@ -5,7 +5,7 @@
 
 ## Example Manifests
 
-To run the example manifests you need to either specify this as part of the modules path (--modulepath on the command line, see [ModulePath](http://docs.puppetlabs.com/references/3.stable/configuration.html#modulepath)), or you can create a symlink to the code directory and not have to specify.
+To run the example manifests you need to either specify this as part of the modules path (--modulepath on the command line, see [ModulePath](http://docs.puppet.com/references/3.stable/configuration.html#modulepath)), or you can create a symlink to the code directory and not have to specify.
 
 ### Creating Symlink
 
