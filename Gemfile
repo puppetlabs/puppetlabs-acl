@@ -42,14 +42,14 @@ supports_windows = true
 
 group :development do
   gem 'puppet-lint',                        :require => false
-  gem 'metadata-json-lint',                 :require => false if ! supports_windows || Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('2.3.1')
+  gem 'metadata-json-lint',                 :require => false, :platforms => 'ruby'
   gem 'puppet_facts',                       :require => false
   gem 'puppet-blacksmith', '>= 3.4.0',      :require => false, :platforms => 'ruby'
   gem 'puppetlabs_spec_helper', '>= 1.2.1', :require => false
   gem 'rspec-puppet', '>= 2.3.2',           :require => false
-  gem 'rspec-puppet-facts',                 :require => false
+  gem 'rspec-puppet-facts',                 :require => false, :platforms => 'ruby'
   gem 'mocha', '< 1.2.0',                   :require => false
-  gem 'simplecov',                          :require => false
+  gem 'simplecov',                          :require => false, :platforms => 'ruby'
   gem 'parallel_tests', '< 2.10.0',         :require => false if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new('2.0.0')
   gem 'parallel_tests',                     :require => false if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('2.0.0')
   gem 'rubocop', '0.41.2',                  :require => false if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new('2.0.0')
