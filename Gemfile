@@ -161,5 +161,3 @@ end
 if File.exists?(File.join(Dir.home, '.gemfile'))
   eval(File.read(File.join(Dir.home, '.gemfile')), binding)
 end
-
-# vim:ft=ruby
