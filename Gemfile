@@ -87,7 +87,7 @@ gem 'hiera', *location_for(ENV['HIERA_GEM_VERSION']) if ENV['HIERA_GEM_VERSION']
 explicitly_require_windows_gems = false
 puppet_gem_location = gem_type(ENV['PUPPET_GEM_VERSION'])
 # This is not a perfect answer to the version check
-if puppet_gem_location != :gem || (Gem::Version.correct?(ENV['PUPPET_GEM_VERSION']) && Gem::Requirement.new('< 3.5.0').satisfied_by?(Gem::Version.new(ENV['PUPPET_GEM_VERSION'].dup)))
+if puppet_gem_location != :gem || (ENV['PUPPET_GEM_VERSION'] && Gem::Version.correct?(ENV['PUPPET_GEM_VERSION']) && Gem::Requirement.new('< 3.5.0').satisfied_by?(Gem::Version.new(ENV['PUPPET_GEM_VERSION'].dup)))
   if Gem::Platform.local.os == 'mingw32'
     explicitly_require_windows_gems = true
   end
