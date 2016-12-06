@@ -8,7 +8,7 @@ $acls = hiera_hash('acls', {})
 notify { $acls: }
 create_resources(acl, $acls)
 
-$tempAcl = Acl['tempdir']
+$_temp_acl = Acl['tempdir']
 
 file {'c:/temp':
   ensure => 'directory',
@@ -19,13 +19,13 @@ file {'c:/temp':
 #}
 
 acl { 'c:\temp':
-  permissions => [
+  permissions                => [
     {
       identity => 'Administrators',
       rights   => [full]
     }
   ],
-  owner       => 'Administrators',
+  owner                      => 'Administrators',
   inherit_parent_permissions => true
 }
 
@@ -59,7 +59,7 @@ acl { 'temp_dir_module2_name':
   ],
 }
 
-$tempAcl2 = Acl['c:/temp']
+$_temp_acl2 = Acl['c:/temp']
 
 #pry()
 #$foo = inline_template("<% require 'pry';binding.pry %>")
