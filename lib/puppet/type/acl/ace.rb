@@ -330,5 +330,24 @@ class Puppet::Type::Acl
     end
 
     alias_method :to_s, :inspect
+
+    # added to support Ruby 2.3 which serializes Hashes differently when
+    # writing YAML than previous Ruby versions, which can break the last
+    # run report or corrective changes reports due to attempts to
+    # serialize the attached provider
+    def encode_with(coder)
+      # produce a set of plain key / value pairs by removing the "tag"
+      # by setting it to nil, producing YAML serialization like
+      # "---\nidentity: Administrators\nrights:\n- full\n"
+      # with the tag set to its default value, serialization appears like
+      # "--- !ruby/object:Puppet::Type::Acl::Ace\nidentity: Administrators\nrights:\n- full\n"
+      coder.represent_map nil, to_hash
+
+      # without this method implemented, serialization varies based on Ruby version like:
+      # Ruby 2.3
+      # "--- !ruby/hash-with-ivars:Puppet::Type::Acl::Ace\nelements: {}\nivars:\n  :@provider: \n  :@identity: Administrators\n  :@hash: \n  :@id: S-32-12-0\n  :@mask: '2023422'\n  :@rights:\n  - :full\n  :@perm_type: :allow\n  :@child_types: :all\n  :@affects: :all\n  :@is_inherited: false\n"
+      # Ruby 2.1.9
+      # "--- !ruby/hash:Puppet::Type::Acl::Ace {}\n"
+    end
   end
 end

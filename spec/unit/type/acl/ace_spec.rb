@@ -2,6 +2,7 @@
 require 'spec_helper'
 require 'puppet/type'
 require 'puppet/type/acl'
+require 'yaml'
 
 describe "Ace" do
   context ".hash" do
@@ -453,6 +454,47 @@ describe "Ace" do
     it "should not be an alias of .==" do
       type = Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']})
       expect(type.method(:==)).to_not eq type.method(:equal?)
+    end
+  end
+
+  context "when serializing" do
+    it "should not include a key named 'provider'" do
+      # non-nil provider instance - doesn't need to do anything but can't be anonymous
+      provider = Object.new()
+      ace = Puppet::Type::Acl::Ace.new({'identity' => 'Administrators', 'rights' => ['full']}, provider)
+
+      round_tripped_ace = YAML.load(YAML.dump(ace))
+
+      expect(round_tripped_ace.instance_variables).to_not include(:@provider)
+      expect(round_tripped_ace.keys).to_not include('provider')
+    end
+
+    it "should include the same set of keys as .to_hash" do
+      # NOTE: id, mask and affects don't appear in to_hash
+      ace = Puppet::Type::Acl::Ace.new({
+        'identity' => 'Administrators',
+        'rights' => ['full'],
+        'id' => 'S-32-12-0',
+        'mask' => '2023422',
+        'perm_type'=>'deny',
+        'child_types' => 'objects',
+        'affects' => 'all',
+        'is_inherited' => 'true'
+      })
+
+      ace_hash = ace.to_hash
+      ace_from_yaml = YAML.load(YAML.dump(ace))
+
+      expect(ace_hash.keys).to eq(ace_from_yaml.keys)
+      expect(ace_hash.instance_variables).to eq(ace_from_yaml.instance_variables)
+    end
+
+    it "should deserialize as a plain Ruby Hash object" do
+      ace = Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']})
+
+      ace_from_yaml = YAML.load(YAML.dump(ace))
+
+      expect(ace_from_yaml.class).to be(Hash)
     end
   end
 end
