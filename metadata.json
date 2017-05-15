@@ -1,6 +1,6 @@
 {
   "name": "puppetlabs-acl",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "author": "Puppet Inc",
   "summary": "This module provides the ability to manage ACLs on nodes",
   "license": "Apache-2.0",
@@ -26,14 +26,13 @@
     {
       "operatingsystem": "Windows",
       "operatingsystemrelease": [
-        "Server 2003",
-        "Server 2003 R2",
         "Server 2008",
         "Server 2008 R2",
         "Server 2012",
         "Server 2012 R2",
         "7",
-        "8"
+        "8",
+        "10"
       ]
     }
   ],
