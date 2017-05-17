@@ -1,9 +1,8 @@
 acl
 ==============
 
-####Table of Contents
+#### Table of Contents
 
-1. [Overview - What is the acl module?](#overview)
 2. [Module Description - What does the module do?](#module-description)
 3. [Setup - The basics of getting started with acl](#setup)
     * [Beginning with acl - Installation](#beginning-with-acl)
@@ -26,18 +25,15 @@ acl
 6. [Limitations - Known issues in acl](#limitations)
 7. [Development - Guide for contributing to the module](#development)
 
-##Overview
+## Module Description
 
 The acl module lets you use Puppet to manage Access Control Lists (ACLs) on Windows.
 
-##Module Description
-
 Windows uses Access Control Lists (ACLs) to store permissions information. An ACL is typically made up of a series of Access Control Entries (ACEs), representing individual permissions. The acl module adds a type and provider to let you manage all that information through Puppet.
 
-##Setup
+## Setup
 
 Install this module with the following command:
-
 
 ~~~puppet
 $ puppet module install [--modulepath <path>] puppetlabs/acl
@@ -45,7 +41,7 @@ $ puppet module install [--modulepath <path>] puppetlabs/acl
 
 The above command also includes the optional argument to specify your Puppet master's `modulepath` as the location to install the module.
 
-###Beginning with acl
+### Beginning with acl
 
 For a basic implementation of the acl module, provide a target ACL and at least one permission:
 
@@ -59,7 +55,7 @@ acl { 'c:/tempperms':
 }
 ~~~
 
-##Usage
+## Usage
 
 
 A typical ACL is made up of access control entries (ACEs), which represent individual permissions. Each ACE comprises a defined trustee (an identity, representing a user, group, or system process), a set of rights, an inheritance and propagation strategy, and an allowed/denied status.
@@ -74,7 +70,7 @@ The `acl` type does not enforce the above order, and applies the ACEs based on o
 
 **Note:** You cannot specify inherited ACEs in a manifest; you can only specify whether to allow upstream inheritance to flow into the managed ACL.
 
-###Manage a basic ACL with all parameters expressed
+### Manage a basic ACL with all parameters expressed
 
 The fully expressed ACL in the sample below produces the same settings as the [minimal sample](beginning-with-acl) in the Setup section, without relying on defaults.
 
@@ -93,7 +89,7 @@ acl { 'c:/tempperms':
 ~~~
 
 
-###Manage multiple permissions at once
+### Manage multiple permissions at once
 
 The `permissions` parameter is passed as an array, allowing it to accept multiple ACEs in the form of hashes.
 
@@ -138,7 +134,7 @@ acl { 'c:/tempperms':
 
 For more detail, see the Reference section on [`permissions`](#permissions).
 
-###Identify users and groups with SID or FQDN
+### Identify users and groups with SID or FQDN
 
 You can identify a user or group using a [security identifier](http://support.microsoft.com/kb/243330) (SID) or a fully qualified domain name (FQDN).
 
@@ -173,7 +169,7 @@ acl { 'tempperms_Users':
 }
 ~~~
 
-####Protect a target from inherited permissions
+#### Protect a target from inherited permissions
 
 Removing upstream inheritance is known as "protecting" the target. When an item is protected without `purge => true`, the inherited ACEs are copied into the target as unmanaged ACEs.
 
@@ -187,7 +183,7 @@ acl { 'c:/tempperms':
 }
 ~~~
 
-####Purge unmanaged explicit permissions
+#### Purge unmanaged explicit permissions
 
 You cannot purge inherited permissions; you can only purge explicit permissions. To lock down a folder to managed explicit ACEs, set `purge => true`. This only removes other explicit ACEs from the folder that are unmanaged by this resource. All inherited ACEs remain (see next example).
 
@@ -201,7 +197,7 @@ acl { 'c:/tempperms':
 }
 ~~~
 
-####Protect a target and purge all unmanaged permissions
+#### Protect a target and purge all unmanaged permissions
 
 To fully restrict a target's permissions to the ones specified in your manifest, protect it as above and set `purge => 'true'`.
 
@@ -218,7 +214,7 @@ acl { 'c:/tempperms':
 }
 ~~~
 
-####Set ACE mask_specific rights
+#### Set ACE mask_specific rights
 
 If none of the standard `rights` values meets your specific needs, you can specify more granular rights by setting `rights => ['mask_specific']` and supplying a 'mask' element with an integer representing a [permissions mask](http://msdn.microsoft.com/en-us/library/aa394063(v=vs.85).aspx). You can't combine the mask with other values, such as read permissions.
 
@@ -244,7 +240,7 @@ acl { 'c:/tempperms':
  * Access Mask Format: http://msdn.microsoft.com/en-us/library/windows/desktop/aa374896(v=vs.85).aspx
 
 
-####Explicitly deny permissions
+#### Explicitly deny permissions
 
 By default, each ACE grants the described permissions to the target. However, you can reverse that by setting `perm_type => 'deny'`, which explicitly removes the described permissions. List your 'deny' ACEs first, before your 'allow' ACEs.
 
@@ -257,7 +253,7 @@ acl { 'c:/tempperms':
 }
 ~~~
 
-####Set ACE inheritance
+#### Set ACE inheritance
 
 The inheritance structure of ACEs is controlled by [`child_types`](#permissions), which determine how files and sub-folders inherit each ACE.
 
@@ -274,7 +270,7 @@ acl { 'c:/tempperms':
 }
 ~~~
 
-####Set ACE propagation
+#### Set ACE propagation
 
 ACEs have propagation rules which guide how they apply permissions to containers, objects, children, and grandchildren. Propagation is determined by [`affects`](#permissions), which can take the value of: 'all', 'self_only', 'children_only', 'direct_children_only', and 'self_and_direct_children_only'. Microsoft has a [good matrix](http://msdn.microsoft.com/en-us/library/ms229747.aspx) that outlines when and why you might use each of these values.
 
@@ -292,7 +288,7 @@ acl { 'c:/tempperms':
 }
 ~~~
 
-####Remove ACE permissions
+#### Remove ACE permissions
 
 To remove permissions, set `purge => listed_permissions`. This removes explicit permissions from the ACL based on their `identity`, `perm_type`, `child_types` and `affects` attributes. The example below ensures that 'Administrator' and 'Authenticated Users' are not on the ACL.
 
@@ -323,7 +319,7 @@ acl { 'remove_tempperms/remove':
 }
 ~~~
 
-####Same identity, multiple ACEs
+#### Same identity, multiple ACEs
 
 With Windows, you can specify the same `identity` with different inheritance and propagation. Each of the resulting items is managed as a separate ACE.
 
@@ -350,18 +346,17 @@ acl { 'c:/tempperms':
 ~~~
 
 
-##Reference
+## Reference
 
-###Define: acl
+### Defined type: acl
 
 The main type of the module, responsible for all its functionality.
 
-####Parameters
-
+#### Parameters
 
 All of the below parameters are optional, unless otherwise noted.
 
-#####`group`
+##### `group`
 
 Specifies whose permissions to manage. This identity is also known as a trustee or principal. If the identity doesn't exist on a node, Puppet creates it. Valid options: a string containing a valid identity (see below). Default: if left undefined, Puppet leaves the group as currently configured.
 
@@ -373,25 +368,25 @@ Valid identity formats:
 
 **NOTE**: On Windows the CREATOR GROUP inherited ACE must be set for the creator's primary group for it to be set as an ACE automatically. Group is not always widely used. By default, the group also needs to be specifically set as an explicitly managed ACE. See [Microsoft's page](http://support.microsoft.com/kb/126629) for instructions on enabling CREATOR GROUP.
 
-#####`inherit_parent_permissions`
+##### `inherit_parent_permissions`
 
 Specifies whether to inherit permissions from parent ACLs. Valid options: 'true' and 'false'. Default: 'true'.
 
-#####`name`
+##### `name`
 
 Provides a name for the ACL resource; also becomes the target, if `target` is not set. Valid options: a string. Default: the title of your declared resource.
 
-#####`owner`
+##### `owner`
 
 The identity that owns the ACL. If the identity doesn't exist on a node, Puppet creates it. This identity is also known as a trustee or principal. Valid options: a string containing a valid identity (see below). Default: if left undefined, Puppet leaves the owner as currently configured.
 
 Valid identity formats:
 
- * User: e.g., 'Bob' or 'TheNet\Bob'
- * Group: e.g., 'Administrators' or 'BUILTIN\Administrators'
- * SID (Security ID): e.g., 'S-1-5-18'
+ * User: for example, 'Bob' or 'TheNet\Bob'
+ * Group: for example, 'Administrators' or 'BUILTIN\Administrators'
+ * SID (Security ID): for example, 'S-1-5-18'
 
-#####`permissions`
+##### `permissions`
 
 *Required.* Specifies one or more Access Control Entries (ACEs). Valid options: an ordered array of hashes, each containing at least the `identity` and `rights` elements, and any number of additional elements from the list below.
 
@@ -401,8 +396,7 @@ Valid identity formats:
 
  * `child_types`: *Optional.* Determines how an ACE is inherited downstream from the target. Valid options: 'all', 'objects', 'containers' and 'none'. Default: 'all'.
 
-
- * `identity`: *Required.* Determines whose permissions to manage. If the specified identity doesn't exist on a node, Puppet creates it. Valid options: a user (e.g., 'Bob' or 'TheNet\Bob'), group (e.g., 'Administrators' or 'BUILTIN\Administrators'), or security ID (e.g., 'S-1-5-18').
+ * `identity`: *Required.* Determines whose permissions to manage. If the specified identity doesn't exist on a node, Puppet creates it. Valid options: a user (e.g., 'Bob' or 'TheNet\Bob'), group (e.g., 'Administrators' or 'BUILTIN\Administrators'), or security ID (for example, 'S-1-5-18').
 
 
  * `mask`: *Required if `rights => 'mask_specific'` is set.* Indicates rights granted or denied to the trustee. If the `rights` element isn't set to 'mask_specific', the `mask` element has no effect. Valid options: an integer representing a [permissions mask](http://msdn.microsoft.com/en-us/library/aa394063(v=vs.85).aspx).
@@ -423,7 +417,7 @@ Valid identity formats:
     * If you specify 'full' or 'modify' along with other rights, e.g., `rights => ['full','read']`, the `acl` type issues a warning and removes the other items.
     * If you specify 'mask_specific', you must also specify the `mask` element in the `permissions` hash with an integer representing a [permissions mask](http://msdn.microsoft.com/en-us/library/aa394063(v=vs.85).aspx).
 
-#####`purge`
+##### `purge`
 
 Specifies whether to remove any explicit permissions not specified in the `permissions` property. Valid options: 'true', 'false', and 'listed_permissions'. Default: 'false'.
 
@@ -433,11 +427,11 @@ To ensure that a specific set of permissions are absent from the ACL, set `purge
 
 **Warning:** When removing permissions, make sure the user running Puppet always has FULL rights on the target. If Puppet loses its permission to manage a resource, you'll need to restore it manually at the node level.
 
-#####`target`
+##### `target`
 
 *Optional.* The location of the ACL resource. Defaults to `name` value. Valid options: a string containing an absolute path. Default: title of your declared resource.
 
-##Limitations
+## Limitations
 
  * The Windows Provider does not follow Symlinks. Please explicitly manage the permissions of the target.
 
@@ -453,12 +447,12 @@ Please log tickets and issues at our [Module Issue Tracker](https://tickets.pupp
 
 ##Development
 
-Puppet Inc modules on the Puppet Forge are open projects, and community contributions are essential for keeping them great. We can’t access the huge number of platforms and myriad of hardware, software, and deployment configurations that Puppet is intended to serve.
+Puppet modules on the Puppet Forge are open projects, and community contributions are essential for keeping them great. We can’t access the huge number of platforms and myriad of hardware, software, and deployment configurations that Puppet is intended to serve.
 
 We want to keep it as easy as possible to contribute changes so that our modules work in your environment. There are a few guidelines that we need contributors to follow so that we can have a chance of keeping on top of things.
 
 For more information, see our [module contribution guide.](https://docs.puppet.com/forge/contributing.html)
 
-###Contributors
+### Contributors
 
 To see who's already involved, see the [list of contributors.](https://github.com/puppetlabs/puppetlabs-acl/graphs/contributors)
