@@ -1,8 +1,8 @@
-## 2017-05-19 - Supported Release 1.2.0
+## 2017-05-19 - Supported Release 2.0.0
 
 ### Summary
 
-Small release for support of newer PE versions and fix for a future Puppet Agent release.
+Major release which removes support for older versions of Puppet-Agent.  Also adds support of newer PE versions and fix for a future Puppet Agent release.
 
 #### Features
 
