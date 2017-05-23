@@ -18,7 +18,7 @@
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 3.4.0 < 5.0.0"
+      "version_requirement": ">= 4.7.0 < 5.0.0"
     }
   ],
   "description": "This module provides the ability to manage ACLs on nodes. Currently the only operating system supported is Windows",
