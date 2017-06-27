@@ -40,8 +40,8 @@ test_script:
   ruby -ropenssl -e 'puts \"OpenSSL Version - #{OpenSSL::OPENSSL_VERSION}\"; puts \"OpenSSL Library Version - #{OpenSSL::OPENSSL_LIBRARY_VERSION}\"'
   bundle exec puppet -V
   ruby -v
-- 'bundle exec puppet apply -e "user {''Administrator'': ensure=>present, password => ''Th!s1sS#cur3@@@2129021'', groups=>[''Administrators''],}" && exit 0'
-- bundle exec rspec spec/unit spec/integration -fd -b
+ 'bundle exec puppet apply -e "user {''Administrator'': ensure=>present, password => ''Th!s1sS#cur3@@@2129021'', groups=>[''Administrators''],}" && exit 0'
+  bundle exec rspec spec/unit spec/integration -fd -b
 notifications:
 - provider: Email
   to:
