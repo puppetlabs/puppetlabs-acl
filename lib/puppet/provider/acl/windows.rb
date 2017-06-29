@@ -113,8 +113,10 @@ Puppet::Type.type(:acl).provide :windows do
     perms = permissions.select { |p| !p.is_inherited}
 
     unless perms.nil?
-      perms.each do |perm|
-        perm.identity = get_account_name(perm.identity)
+      perms = perms.map do |perm|
+        perm_hash = perm.to_hash
+        perm_hash['identity'] = get_account_name(perm.identity)
+        perm_hash
       end
     end
 

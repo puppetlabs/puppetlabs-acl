@@ -443,6 +443,11 @@ To ensure that a specific set of permissions are absent from the ACL, set `purge
 
  * When using SIDs for identities, autorequire tries to match to users with fully qualified names (e.g., User[BUILTIN\Administrators]) in addition to SIDs (User[S-1-5-32-544]). However, it can't match against 'User[Administrators]', because that could cause issues if domain accounts and local accounts share the same name e.g., 'Domain\Bob' and 'LOCAL\Bob'.
 
+ * When referring to accounts in the `APPLICATION PACKAGE AUTHORITY`, use either their SID values or their unqualified names. The Windows API has well documented bugs preventing the fully qualifed account names from being used.
+
+    * `S-1-15-2-1` or `ALL APPLICATION PACKAGES`, but *not* `APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES`. This account may only be referenced on Windows 2012R2 (kernel 6.3) or newer.
+    * `S-1-15-2-2` or `ALL RESTRICTED APPLICATION PACKAGES`, but *not* `APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APPLICATION PACKAGES`. This account may only be referenced on Windows 2016 (kernel 10.0) or newer.
+
 Please log tickets and issues at our [Module Issue Tracker](https://tickets.puppet.com/browse/MODULES).
 
 ## Development
