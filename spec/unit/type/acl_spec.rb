@@ -507,12 +507,22 @@ describe Puppet::Type.type(:acl) do
     end
 
     context "formatting" do
-      it "when called from puppet resource should format like a hash and ASCIIbetical order properties when displaying" do
+      it "when called from puppet resource should format like a hash and ASCIIbetical order properties when displaying on Puppet 4 and older", :if => Gem::Version.new(Puppet.version) < Gem::Version.new('5.0.0') do
         # properties are out of order here
         resource[:permissions] = [{'rights'=>['full'], 'child_types' => 'containers', 'identity'=> 'bob'},{'rights'=>['full'], 'identity'=> 'tim'}]
 
         # ordered asciibetically
         expected = "[{'child_types' => 'containers', 'identity' => 'bob', 'rights' => ['full']}, {'identity' => 'tim', 'rights' => ['full']}]"
+
+        Puppet::Parameter.format_value_for_display(resource[:permissions]).should == expected
+      end
+
+      it "when called from puppet resource should format like a hash and ASCIIbetical order properties when displaying on Puppet 5 and newer", :if => Gem::Version.new(Puppet.version) >= Gem::Version.new('5.0.0') do
+        # properties are out of order here
+        resource[:permissions] = [{'rights'=>['full'], 'child_types' => 'containers', 'identity'=> 'bob'},{'rights'=>['full'], 'identity'=> 'tim'}]
+
+        # ordered asciibetically
+        expected = "[\n" + "  {'identity' => 'bob', 'rights' => ['full'], 'child_types' => 'containers'},\n" + "  {'identity' => 'tim', 'rights' => ['full']}]"
 
         Puppet::Parameter.format_value_for_display(resource[:permissions]).should == expected
       end
