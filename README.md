@@ -148,7 +148,7 @@ acl { 'c:/tempperms':
 }
 ~~~
 
-####Use multiple resources to manage the same target
+#### Use multiple resources to manage the same target
 
 You can manage the same target across multiple ACL resources, as long as each resource has a unique title.
 
@@ -293,7 +293,7 @@ acl { 'c:/tempperms':
 To remove permissions, set `purge => listed_permissions`. This removes explicit permissions from the ACL based on their `identity`, `perm_type`, `child_types` and `affects` attributes. The example below ensures that 'Administrator' and 'Authenticated Users' are not on the ACL.
 
 ~~~puppet
-#set permissions
+# set permissions
 acl { 'c:/tempperms/remove':
   purge                      => true,
   permissions                => [
@@ -306,7 +306,7 @@ acl { 'c:/tempperms/remove':
   inherit_parent_permissions => false,
 }
 
-#now remove some permissions
+# now remove some permissions
 acl { 'remove_tempperms/remove':
   target                     => 'c:/tempperms/remove',
   purge                      => 'listed_permissions',
@@ -437,7 +437,7 @@ To ensure that a specific set of permissions are absent from the ACL, set `purge
 
  * The 8.3 short filename format used in some versions of Windows is not supported.
 
- * We don't recommend using the acl module with Cywin, because it can yield inconsistent results --- especially when using Cygwin SSHD with public key authentication. For example, the 'Administrator' identity might work normally on Windows 2012, but on Windows 2008 it might be translated to 'cyg_server' (or vice-versa).
+ * We don't recommend using the acl module with Cygwin, because it can yield inconsistent results --- especially when using Cygwin SSHD with public key authentication. For example, the 'Administrator' identity might work normally on Windows 2012, but on Windows 2008 it might be translated to 'cyg_server' (or vice-versa).
 
  * Unicode encoding isn't supported in the `identity`, `group`, or `owner` parameters.
 
@@ -445,7 +445,7 @@ To ensure that a specific set of permissions are absent from the ACL, set `purge
 
 Please log tickets and issues at our [Module Issue Tracker](https://tickets.puppet.com/browse/MODULES).
 
-##Development
+## Development
 
 Puppet modules on the Puppet Forge are open projects, and community contributions are essential for keeping them great. We can’t access the huge number of platforms and myriad of hardware, software, and deployment configurations that Puppet is intended to serve.
 
