@@ -1,3 +1,13 @@
+## 2017-07-31 - Supported Release 2.0.1
+
+### Summary
+
+Minor bugfix release
+
+#### Bug Fixes
+
+- Fixed issue with using ALL APPLICATION PACKAGES or ALL RESTRICTED APPLICATION PACKAGES accounts as the identity in a manifest ([MODULES-5152](https://tickets.puppetlabs.com/browse/MODULES-5227)).
+
 ## 2017-05-19 - Supported Release 2.0.0
 
 ### Summary
