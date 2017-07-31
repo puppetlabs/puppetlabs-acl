@@ -292,6 +292,24 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         set_perms(permissions).must == permissions
       end
 
+      [
+        # 2012R2 (kernel 6.3) required for ALL APPLICATION PACKAGES
+        { :min_kernel => 6.3, :identity => 'ALL APPLICATION PACKAGES' },
+        { :min_kernel => 6.3, :identity => 'S-1-15-2-1' },
+        # 2016 (kernel 10.0) required for ALL RESTRICTED APPLICATION PACKAGES
+        { :min_kernel => 10.0, :identity => 'ALL RESTRICTED APPLICATION PACKAGES' },
+        { :min_kernel => 10.0, :identity => 'S-1-15-2-2' },
+      ].each do |account|
+        it "should not error when referencing special account #{account[:identity]}",
+          :if => Puppet.features.microsoft_windows? && (Facter[:kernelmajversion].value.to_f >= account[:min_kernel]) do
+
+          permissions = [Puppet::Type::Acl::Ace.new({'identity' => account[:identity], 'rights' => ['full']}, provider)]
+          set_perms(permissions).must == permissions
+          # permissions = get_permissions_for_path(resource[:target]).select { |p| !p.is_inherited? }
+          # set_perms(removing_perms).must == (permissions - removing_perms)
+        end
+      end
+
       it "should handle multiple users" do
         permissions = [
             Puppet::Type::Acl::Ace.new({'identity' => 'Everyone','rights' => ['full']}, provider),
