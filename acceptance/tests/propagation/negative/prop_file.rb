@@ -18,7 +18,7 @@ user_id = 'bob'
 verify_content_command = "cat /cygdrive/c/#{parent_name}/#{target_name}"
 file_content_regex = /\A#{file_content}\z/
 
-verify_manifest = /\{ identity => '.*\\bob', rights => \["full"\], affects => 'self_only' \}/
+verify_manifest = /\{ affects => 'self_only', identity => '.*\\bob', rights => \['full'\s+\] \}/
 verify_acl_command = "icacls #{target}"
 acl_regex = /.*\\bob:\(F\)/
 
