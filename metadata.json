@@ -1,6 +1,6 @@
 {
   "name": "puppetlabs-acl",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "author": "Puppet Inc",
   "summary": "This module provides the ability to manage ACLs on nodes",
   "license": "Apache-2.0",
