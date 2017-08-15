@@ -18,7 +18,14 @@ user_id = 'bob'
 verify_content_command = "cat /cygdrive/c/#{parent_name}/#{target_name}"
 file_content_regex = /\A#{file_content}\z/
 
-verify_manifest = /\{ affects => 'self_only', identity => '.*\\bob', rights => \['full'\s+\] \}/
+# 4c734680aca3b3781ae9fb211759a5610c6679a8 changed how permissions are emitted
+# during a `puppet agent` / `puppet apply` (but not `puppet resource`), so that
+# instead of emitting a [Puppet::Type::Acl::Ace] for rendering to the console
+# a [Hash] is emitted in the permissions_to_s method
+# Puppet 4 and 5 have different behavior for rendering this data structure
+verify_manifest_pup4 = /\{ affects => 'self_only', identity => '.*\\bob', rights => \['full'\s+\] \}/
+verify_manifest_pup5 = /\{"identity"=>".*\\bob", "rights"=>\["full"\], "affects"=>:self_only\}/
+
 verify_acl_command = "icacls #{target}"
 acl_regex = /.*\\bob:\(F\)/
 
@@ -61,8 +68,16 @@ MANIFEST
 
 #Tests
 agents.each do |agent|
+  step "Detect Agent Version"
+  agent_version_response = on(agent, puppet('--version')).stdout.chomp
+  agent_version = Gem::Version.new(agent_version_response)
+
   step "Execute Apply Manifest"
   on(agent, puppet('apply', '--debug'), :stdin => acl_manifest) do |result|
+    verify_manifest = (agent_version >= Gem::Version.new('5.0.0')) ?
+      verify_manifest_pup5 :
+      verify_manifest_pup4
+
     assert_match(verify_manifest, result.stdout, 'Expected ACL change event not detected!')
   end
 
