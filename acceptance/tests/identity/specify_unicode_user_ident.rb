@@ -1,7 +1,5 @@
 test_name 'Windows ACL Module - Specify User Name Containing Unicode for Identity'
 
-skip_test("This test requires QENG-449 to be resolved")
-
 confine(:to, :platform => 'windows')
 
 #Globals
