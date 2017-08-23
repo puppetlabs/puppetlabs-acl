@@ -1,16 +1,15 @@
 test_name 'Windows ACL Module - Add Permissions to a Unicode Directory'
 
-skip_test("This test requires QENG-449 to be resolved")
-
 confine(:to, :platform => 'windows')
 
 #Globals
 target_parent = 'c:/temp'
-target = "c:/temp/unicode_dir_\u3140\u3145\u3176\u3145\u3172\u3142\u3144\u3149\u3151\u3167\u3169\u3159\u3158"
+dirname = "unicode_dir_\u3140\u3145\u3176\u3145\u3172\u3142\u3144\u3149\u3151\u3167\u3169\u3159\u3158"
+target = "c:/temp/#{dirname}"
 user_id = 'bob'
 
-verify_acl_command = "icacls #{target}"
-acl_regex = /.*\\bob:\(OI\)\(CI\)\(F\)/
+# ensure bob has Full rights with object and container inherit set
+verify_acl_command = "powershell.exe -command \"Get-Acl C:\\temp\\unicode_dir_* | ? { \\$_.Access | ? { \\$_.IdentityReference -match '\\\\\\bob' -and \\$_.FileSystemRights -eq 'FullControl' -and \\$_.InheritanceFlags -eq 'ContainerInherit, ObjectInherit' } } | Select -ExpandProperty PSChildName\""
 
 #Manifest
 acl_manifest = <<-MANIFEST
@@ -46,6 +45,6 @@ agents.each do |agent|
 
   step "Verify that ACL Rights are Correct"
   on(agent, verify_acl_command) do |result|
-    assert_match(acl_regex, result.stdout, 'Expected ACL was not present!')
+    assert_match(/^#{dirname}$/, result.stdout, 'Expected ACL was not present!')
   end
 end

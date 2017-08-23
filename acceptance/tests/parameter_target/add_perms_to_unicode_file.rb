@@ -1,20 +1,19 @@
 test_name 'Windows ACL Module - Add Permissions to a Unicode File'
 
-skip_test("This test requires QENG-449 to be resolved")
-
 confine(:to, :platform => 'windows')
 
 #Globals
 target_parent = 'c:/temp'
-target = "c:/temp/unicode_file_\u3140\u3145\u3176\u3145\u3172\u3142\u3144\u3149\u3151\u3167\u3169\u3159\u3158.txt"
+filename = "unicode_file_\u3140\u3145\u3176\u3145\u3172\u3142\u3144\u3149\u3151\u3167\u3169\u3159\u3158.txt"
+target = "c:/temp/#{filename}"
 user_id = 'bob'
 
 file_content = 'Puppets and Muppets! Cats on the Interwebs!'
-verify_content_command = "cat /cygdrive/c/temp/unicode_file_\u3140\u3145\u3176\u3145\u3172\u3142\u3144\u3149\u3151\u3167\u3169\u3159\u3158.txt"
-file_content_regex = /\A#{file_content}\z/
+verify_content_command = 'powershell.exe -command "Get-ChildItem c:\\temp\\* -File | % { \\$_.PSChildName, (Get-Content \\$_) }"'
+file_content_regex = /^#{filename}\n#{file_content}$/m
 
-verify_acl_command = "icacls #{target}"
-acl_regex = /.*\\bob:\(F\)/
+# ensure bob has Full rights
+verify_acl_command = "powershell.exe -command \"Get-Acl C:\\temp\\*.* | ? { \\$_.Access | ? { \\$_.IdentityReference -match '\\\\\\#{user_id}' -and \\$_.FileSystemRights -eq 'FullControl' } } | Select -ExpandProperty PSChildName\""
 
 #Manifest
 acl_manifest = <<-MANIFEST
@@ -51,7 +50,7 @@ agents.each do |agent|
 
   step "Verify that ACL Rights are Correct"
   on(agent, verify_acl_command) do |result|
-    assert_match(acl_regex, result.stdout, 'Expected ACL was not present!')
+    assert_match(/^#{filename}$/, result.stdout, 'Expected ACL was not present!')
   end
 
   step "Verify File Data Integrity"

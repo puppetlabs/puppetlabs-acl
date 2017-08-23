@@ -1,7 +1,5 @@
 test_name 'Windows ACL Module - Change Owner to Local Unicode Group'
 
-skip_test("This test requires QENG-449 to be resolved")
-
 confine(:to, :platform => 'windows')
 
 #Globals
@@ -20,7 +18,8 @@ verify_content_command = "cat /cygdrive/c/#{parent_name}/#{target_name}"
 file_content_regex = /\A#{file_content}\z/
 
 dosify_target = "c:\\#{parent_name}\\#{target_name}"
-verify_owner_command = "cmd /c \"dir /q #{dosify_target}\""
+verify_owner_command = "powershell.exe -command \"Get-Acl #{dosify_target} | Select -ExpandProperty Owner\""
+
 owner_regex = /.*\\䎈含㴼罍率䎁叴秀㪲軞/
 
 #Manifests
