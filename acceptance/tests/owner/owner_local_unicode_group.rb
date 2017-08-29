@@ -18,7 +18,7 @@ verify_content_command = "cat /cygdrive/c/#{parent_name}/#{target_name}"
 file_content_regex = /\A#{file_content}\z/
 
 dosify_target = "c:\\#{parent_name}\\#{target_name}"
-verify_owner_command = "powershell.exe -command \"Get-Acl #{dosify_target} | Select -ExpandProperty Owner\""
+verify_owner_command = "\"Get-Acl #{dosify_target} | Select -ExpandProperty Owner\""
 
 owner_regex = /.*\\䎈含㴼罍率䎁叴秀㪲軞/
 
@@ -63,7 +63,7 @@ agents.each do |agent|
   end
 
   step "Verify that ACL Rights are Correct"
-  on(agent, verify_owner_command) do |result|
+  on(agent, powershell(verify_owner_command)) do |result|
     assert_match(owner_regex, result.stdout, 'Expected ACL was not present!')
   end
 

@@ -9,7 +9,7 @@ target = "c:/temp/#{dirname}"
 user_id = 'bob'
 
 # ensure bob has Full rights with object and container inherit set
-verify_acl_command = "powershell.exe -command \"Get-Acl C:\\temp\\unicode_dir_* | ? { \\$_.Access | ? { \\$_.IdentityReference -match '\\\\\\bob' -and \\$_.FileSystemRights -eq 'FullControl' -and \\$_.InheritanceFlags -eq 'ContainerInherit, ObjectInherit' } } | Select -ExpandProperty PSChildName\""
+verify_acl_command = "\"Get-Acl C:\\temp\\unicode_dir_* | ? { \\$_.Access | ? { \\$_.IdentityReference -match '\\\\\\bob' -and \\$_.FileSystemRights -eq 'FullControl' -and \\$_.InheritanceFlags -eq 'ContainerInherit, ObjectInherit' } } | Select -ExpandProperty PSChildName\""
 
 #Manifest
 acl_manifest = <<-MANIFEST
@@ -44,7 +44,7 @@ agents.each do |agent|
   end
 
   step "Verify that ACL Rights are Correct"
-  on(agent, verify_acl_command) do |result|
+  on(agent, powershell(verify_acl_command)) do |result|
     assert_match(/^#{dirname}$/, result.stdout, 'Expected ACL was not present!')
   end
 end
