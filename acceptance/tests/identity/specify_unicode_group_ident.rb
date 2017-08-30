@@ -4,15 +4,13 @@ confine(:to, :platform => 'windows')
 
 #Globals
 target_parent = 'c:/temp'
-target = 'c:/temp/specify_unicode_group_ident.txt'
-group_id = "group_렝딴슫있처"
+prefix = SecureRandom.uuid.to_s
+target = "c:/temp/#{prefix}.txt"
+raw_group_id = 'group_\uB81D\uB534\uC2AB\uC788\uCC98'
+group_id =     "group_\uB81D\uB534\uC2AB\uC788\uCC98" # 렝딴슫있처
 
 file_content = 'Garbage bag full of money.'
-verify_content_command = "cat /cygdrive/c/temp/specify_unicode_group_ident.txt"
-file_content_regex = /\A#{file_content}\z/
-
-verify_acl_command = "icacls #{target}"
-acl_regex = /.*\\group_렝딴슫있처:\(F\)/
+verify_acl_command = "(Get-ACL '#{target}' | ForEach-Object { $_.Access } | Where-Object { $_.IdentityReference -match ('\\\\' + [regex]::Unescape(\"#{raw_group_id}\")) -and $_.FileSystemRights -eq 'FullControl' } | Measure-Object).Count"
 
 #Manifest
 acl_manifest = <<-MANIFEST
@@ -40,17 +38,12 @@ MANIFEST
 #Tests
 agents.each do |agent|
   step "Execute Manifest"
-  on(agent, puppet('apply', '--debug'), :stdin => acl_manifest) do |result|
+  apply_manifest_on(agent, acl_manifest, {:debug => true}) do |result|
     assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
   end
 
   step "Verify that ACL Rights are Correct"
-  on(agent, verify_acl_command) do |result|
-    assert_match(acl_regex, result.stdout, 'Expected ACL was not present!')
-  end
-
-  step "Verify File Data Integrity"
-  on(agent, verify_content_command) do |result|
-    assert_match(file_content_regex, result.stdout, 'Expected file content is invalid!')
+  on(agent, powershell(verify_acl_command, {'EncodedCommand' => true})) do |result|
+    assert_match(/^1$/, result.stdout, 'Expected ACL was not present!')
   end
 end
