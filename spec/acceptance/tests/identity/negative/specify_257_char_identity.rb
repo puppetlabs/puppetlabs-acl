@@ -1,7 +1,5 @@
 test_name 'Windows ACL Module - Negative - Specify 257 Character String for Identity'
 
-confine(:to, :platform => 'windows')
-
 #Globals
 target_parent = 'c:/temp'
 target = 'c:/temp/specify_257_char_ident.txt'
@@ -31,7 +29,7 @@ acl { '#{target}':
 MANIFEST
 
 #Tests
-agents.each do |agent|
+windows_agents.each do |agent|
   step "Execute Manifest"
   on(agent, puppet('apply', '--debug'), :stdin => acl_manifest) do |result|
     assert_match(/Error: Failed to set permissions for /, result.stderr, 'Expected error was not detected!')
