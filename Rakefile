@@ -19,7 +19,7 @@ task_exists = Rake.application.tasks.any? { |t| t.name == 'beaker' }
 Rake::Task['beaker'].clear if task_exists
 desc 'Run acceptance testing shim'
 task :beaker do |t, args|
-  beaker_cmd = "beaker --options-file acceptance/.beaker-pe.cfg --hosts #{ENV['BEAKER_setfile']} --tests acceptance/tests --keyfile #{ENV['BEAKER_keyfile']}"
+  beaker_cmd = "beaker --options-file spec/acceptance/.beaker-pe.cfg --hosts #{ENV['BEAKER_setfile']} --tests spec/acceptance/tests --keyfile #{ENV['BEAKER_keyfile']}"
   Kernel.system( beaker_cmd )
 end
 
@@ -50,7 +50,7 @@ end
 def build_command(args)
   cmd_parts = []
   cmd_parts << "beaker"
-  cmd_parts << "--options-file ./acceptance/.beaker-#{args[:type]}.cfg"
+  cmd_parts << "--options-file ./spec/acceptance/.beaker-#{args[:type]}.cfg"
   cmd_parts << "--hosts #{args[:hosts]}" if !args.hosts.empty?
   cmd_parts << "--tests #{args.tests}" if !args.tests.empty?
   cmd_parts.flatten.join(" ")
