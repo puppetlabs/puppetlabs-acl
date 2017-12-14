@@ -50,14 +50,14 @@ describe 'Purge' do
   context 'Negative- Only Purge Explicit Permissions from File with Inheritance' do
     target = "#{target_parent}/purge_exp_inherit.txt"
     user_id_1 = 'bob'
-    user_id_2 = 'jerry'
+    user_id_2 = generate_random_username
 
     file_content = 'Surge Purge Merge'
     verify_content_command = "cat /cygdrive/c/temp/purge_exp_inherit.txt"
 
     verify_acl_command = "icacls #{target}"
     acl_regex_user_id_1 = /.*\\bob:\(F\)/
-    acl_regex_user_id_2 = /.*\\jerry:\(F\)/
+    acl_regex_user_id_2 = /.*\\#{user_id_2}:\(F\)/
 
     windows_agents.each do |agent|
       context "on #{agent}" do

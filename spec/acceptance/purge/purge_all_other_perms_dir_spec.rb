@@ -54,11 +54,11 @@ describe 'Purge' do
 
     target = "#{target_parent}/purge_all_other_no_inherit"
     user_id_1 = 'bob'
-    user_id_2 = 'jerry'
+    user_id_2 = generate_random_username
 
     verify_acl_command = "icacls #{target}"
     acl_regex_user_id_1 = /.*\\bob:\(OI\)\(CI\)\(F\)/
-    acl_regex_user_id_2 = /\Ac:\/temp\/purge_all_other_no_inherit.*\\jerry:\(OI\)\(CI\)\(F\)\n\nSuccessfully/
+    acl_regex_user_id_2 = /\Ac:\/temp\/purge_all_other_no_inherit.*\\#{user_id_2}:\(OI\)\(CI\)\(F\)\n\nSuccessfully/
     acl_regex_win_2003 = /c:\/temp\/purge_all_other_no_inherit: Access is denied\./
 
     windows_agents.each do |agent|

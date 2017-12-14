@@ -130,7 +130,7 @@ describe 'Use Cases' do
     group_2 = 'cool_peeps'
 
     user_id_1 = 'bob'
-    user_id_2 = 'jerry'
+    user_id_2 = generate_random_username
 
     verify_acl_grand_child_command = "icacls #{target_grand_child}"
 
@@ -138,7 +138,7 @@ describe 'Use Cases' do
     target_grand_child_second_ace_regex = /.*\\bob:\(I\)\(DENY\)\(M\)/
     target_grand_child_third_ace_regex = /.*\\Administrators:\(I\)\(F\)/
     target_grand_child_fourth_ace_regex = /.*\\bob:\(I\)\(R\)/
-    target_grand_child_fifth_ace_regex = /.*\\jerry:\(I\)\(DENY\)\(RX\)/
+    target_grand_child_fifth_ace_regex = /.*\\#{user_id_2}:\(I\)\(DENY\)\(RX\)/
     target_grand_child_sixth_ace_regex = /.*\\cool_peeps:\(I\)\(R\)/
 
     windows_agents.each do |agent|

@@ -51,7 +51,7 @@ describe 'Purge' do
   context 'Purge All Other Permissions from File without Inheritance' do
     target = "#{target_parent}/purge_all_other_no_inherit.txt"
     user_id_1 = 'bob'
-    user_id_2 = 'jerry'
+    user_id_2 = generate_random_username
 
     file_content = 'All your base are belong to us.'
 

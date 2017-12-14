@@ -111,8 +111,8 @@ describe 'Group' do
   context 'Change Group to Local User' do
     user_type = 'local_user'
     file_content = 'cat-man-doo!'
-    group_id = 'jerry'
-    group_regex = /.*\\jerry:\(M\)/
+    group_id = generate_random_username
+    group_regex = /.*\\#{group_id}:\(M\)/
 
     windows_agents.each do |agent|
       apply_manifest_and_verify(agent, file_content, group_id, group_regex, user_type)

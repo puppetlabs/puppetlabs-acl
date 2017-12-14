@@ -89,7 +89,7 @@ describe 'Use Cases' do
     group_2 = 'cool_peeps'
 
     user_id_1 = 'bob'
-    user_id_2 = 'jerry'
+    user_id_2 = generate_random_username
 
     verify_acl_command = "icacls #{target}"
     verify_acl_child_command = "icacls #{target_child}"
@@ -98,17 +98,17 @@ describe 'Use Cases' do
     target_group_1_ace_regex = /.*\\jerks:(\(I\))?\(OI\)\(CI\)\(R\)/
     target_group_2_ace_regex = /.*\\cool_peeps:(\(I\))?\(OI\)\(CI\)\(R\)/
     target_user_id_1_ace_regex = /.*\\bob:(\(I\))?\(OI\)\(CI\)\(R\)/
-    target_user_id_2_ace_regex = /.*\\jerry:(\(I\))?\(OI\)\(CI\)\(DENY\)\(RX\)/
+    target_user_id_2_ace_regex = /.*\\#{user_id_2}:(\(I\))?\(OI\)\(CI\)\(DENY\)\(RX\)/
 
     target_child_group_1_ace_regex = /.*\\jerks:(\(I\))?\(OI\)\(CI\)\(Rc,S,X,RA\)/
     target_child_group_2_ace_regex = /.*\\cool_peeps:(\(I\))?\(OI\)\(CI\)\(Rc,S,X,RA\)/
     target_child_user_id_1_ace_regex = /.*\\bob:(\(I\))?\(OI\)\(CI\)\(W,Rc\)/
-    target_child_user_id_2_ace_regex = /.*\\jerry:(\(I\))?\(OI\)\(CI\)\(DENY\)\(W,Rc\)/
+    target_child_user_id_2_ace_regex = /.*\\#{user_id_2}:(\(I\))?\(OI\)\(CI\)\(DENY\)\(W,Rc\)/
 
     target_grand_child_group_1_ace_regex = /.*\\jerks:\(OI\)\(CI\)\(F\)/
     target_grand_child_group_2_ace_regex = /.*\\cool_peeps:\(OI\)\(CI\)\(F\)/
     target_grand_child_user_id_1_ace_regex = /.*\\bob:\(OI\)\(CI\)\(N\)/
-    target_grand_child_user_id_2_ace_regex = /.*\\jerry:\(OI\)\(CI\)\(N\)/
+    target_grand_child_user_id_2_ace_regex = /.*\\#{user_id_2}:\(OI\)\(CI\)\(N\)/
 
     windows_agents.each do |agent|
       it 'Execute ACL Manifest' do

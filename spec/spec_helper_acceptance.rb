@@ -19,6 +19,11 @@ def user_id
   'bob'
 end
 
+def generate_random_username
+  charset = Array('A'..'Z') + Array('a'..'z')
+  return Array.new(5) { charset.sample }.join
+end
+
 def file_content_regex(file_content)
   /\A#{file_content}\z/
 end

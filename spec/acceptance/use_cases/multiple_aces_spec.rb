@@ -76,7 +76,7 @@ describe 'Use Cases' do
     target = "#{target_parent}/#{target_name}"
 
     user_id_1 = 'bob'
-    user_id_2 = 'jerry'
+    user_id_2 = generate_random_username
     user_id_3 = 'billy'
     user_id_4 = 'sarah'
     user_id_5 = 'sally'
@@ -86,7 +86,7 @@ describe 'Use Cases' do
 
     verify_acl_command = "icacls #{target}"
     user_id_1_ace_regex = /.*\\bob:\(F\)/
-    user_id_2_ace_regex = /.*\\jerry:\(DENY\)\(M\)/
+    user_id_2_ace_regex = /.*\\#{user_id_2}:\(DENY\)\(M\)/
     user_id_3_ace_regex = /.*\\billy:\(R\)/
     user_id_4_ace_regex = /.*\\sarah:\(DENY\)\(RX\)/
     user_id_5_ace_regex = /.*\\sally:\(W,Rc,X,RA\)/

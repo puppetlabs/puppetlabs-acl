@@ -49,11 +49,11 @@ describe 'Purge' do
   context 'Only Purge Explicit Permissions from Directory with Inheritance' do
     target = 'c:/temp/purge_exp_inherit'
     user_id_1 = 'bob'
-    user_id_2 = 'jerry'
+    user_id_2 = generate_random_username
 
     verify_acl_command = "icacls #{target}"
     acl_regex_user_id_1 = /.*\\bob:\(OI\)\(CI\)\(F\)/
-    acl_regex_user_id_2 = /.*\\jerry:\(OI\)\(CI\)\(F\)/
+    acl_regex_user_id_2 = /.*\\#{user_id_2}:\(OI\)\(CI\)\(F\)/
 
     windows_agents.each do |agent|
       context "on #{agent}" do
