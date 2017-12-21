@@ -10,19 +10,6 @@ end
 
 task :default => [:test]
 
-# The acceptance tests for ACL are written in standard beaker format however
-# the preferred method is using beaker-rspec.  This rake task overrides the 
-# default `beaker` task, which would normally use beaker-rspec, and instead
-# invokes beaker directly.  This is only need while the module tests are migrated
-# to the newer rspec-beaker format
-task_exists = Rake.application.tasks.any? { |t| t.name == 'beaker' }
-Rake::Task['beaker'].clear if task_exists
-desc 'Run acceptance testing shim'
-task :beaker do |t, args|
-  beaker_cmd = "beaker --options-file acceptance/.beaker-pe.cfg --hosts #{ENV['BEAKER_setfile']} --tests acceptance/tests --keyfile #{ENV['BEAKER_keyfile']}"
-  Kernel.system( beaker_cmd )
-end
-
 desc 'Run RSpec'
 RSpec::Core::RakeTask.new(:test) do |t|
   t.pattern = 'spec/{unit}/**/*.rb'
@@ -50,7 +37,7 @@ end
 def build_command(args)
   cmd_parts = []
   cmd_parts << "beaker"
-  cmd_parts << "--options-file ./acceptance/.beaker-#{args[:type]}.cfg"
+  cmd_parts << "--options-file ./spec/acceptance/.beaker-#{args[:type]}.cfg"
   cmd_parts << "--hosts #{args[:hosts]}" if !args.hosts.empty?
   cmd_parts << "--tests #{args.tests}" if !args.tests.empty?
   cmd_parts.flatten.join(" ")
