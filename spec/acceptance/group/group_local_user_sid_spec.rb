@@ -1,26 +1,25 @@
 require 'spec_helper_acceptance'
 
 describe 'Group - SID' do
-
   def setup_manifest(target_parent, target, file_content, user_id, group_id)
-    return <<-MANIFEST
+    <<-MANIFEST
       file { "#{target_parent}":
         ensure => directory
       }
-      
+
       file { "#{target}":
         ensure  => file,
         content => '#{file_content}',
         require => File['#{target_parent}']
       }
-      
+
       user { "#{user_id}":
         ensure     => present,
         groups     => 'Users',
         managehome => true,
         password   => "L0v3Pupp3t!"
       }
-      
+
       user { "#{group_id}":
         ensure     => present,
         groups     => 'Users',
@@ -30,8 +29,8 @@ describe 'Group - SID' do
     MANIFEST
   end
 
-  def acl_manifest (target, user_id, sid)
-    return <<-MANIFEST
+  def acl_manifest(target, user_id, sid)
+    <<-MANIFEST
         acl { "#{target}":
           purge           => 'true',
           permissions     => [
@@ -55,7 +54,7 @@ describe 'Group - SID' do
 
   context 'Change Group to Local User SID' do
     os_check_command = 'cmd /c ver'
-    os_check_regex = /Version 5/
+    os_check_regex = %r{Version 5}
 
     user_type = 'local_user_sid'
     file_content = 'Hot eyes in your sand!'
@@ -69,16 +68,16 @@ describe 'Group - SID' do
     group_id = 'tom'
 
     get_group_sid_command = <<-GETSID
-cmd /c "wmic useraccount where name='#{group_id}' get sid"
+    cmd /c "wmic useraccount where name='#{group_id}' get sid"
     GETSID
 
-    sid_regex = /^(S-.+)$/
+    sid_regex = %r{^(S-.+)$}
 
     verify_content_command = "cat /cygdrive/c/#{parent_name}/#{target_name}"
-    file_content_regex = /\A#{file_content}\z/
+    file_content_regex = %r{\A#{file_content}\z}
 
     verify_group_command = "icacls #{target}"
-    group_regex = /.*\\tom:\(M\)/
+    group_regex = %r{.*\\tom:\(M\)}
     sid = ''
 
     windows_agents.each do |agent|
@@ -92,8 +91,8 @@ cmd /c "wmic useraccount where name='#{group_id}' get sid"
         end
 
         it 'Execute Setup Manifest' do
-          on(agent, puppet('apply', '--debug'), :stdin => setup_manifest(target_parent, target, file_content, user_id, group_id)) do |result|
-            assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+          on(agent, puppet('apply', '--debug'), stdin: setup_manifest(target_parent, target, file_content, user_id, group_id)) do |result|
+            assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end
 
@@ -104,8 +103,8 @@ cmd /c "wmic useraccount where name='#{group_id}' get sid"
         end
 
         it 'Execute ACL Manifest' do
-          on(agent, puppet('apply', '--debug'), :stdin => acl_manifest(target, user_id, sid)) do |result|
-            assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+          on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target, user_id, sid)) do |result|
+            assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end
 

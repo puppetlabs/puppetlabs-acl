@@ -1,10 +1,11 @@
 require 'spec_helper_acceptance'
 
+# rubocop:disable RSpec/EmptyExampleGroup
 def apply_manifest_and_verify(agent, file_content, user_id, target_file)
   context "on #{agent}" do
     it 'Execute Manifest' do
-      on(agent, puppet('apply', '--debug'), :stdin => acl_manifest(file_content, user_id, target_file)) do |result|
-        assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+      on(agent, puppet('apply', '--debug'), stdin: acl_manifest(file_content, user_id, target_file)) do |result|
+        assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
       end
     end
     it 'Verify that ACL Rights are Correct' do
@@ -22,26 +23,25 @@ def apply_manifest_and_verify(agent, file_content, user_id, target_file)
 end
 
 describe 'Identity - User' do
-
   def acl_manifest(file_content, user_id, target_file)
     <<-MANIFEST
       file { '#{target_parent}':
         ensure => directory
       }
-      
+
       file { '#{target_parent}/#{target_file}':
         ensure  => file,
         content => '#{file_content}',
         require => File['#{target_parent}']
       }
-      
+
       user { '#{user_id}':
         ensure     => present,
         groups     => 'Users',
         managehome => true,
         password   => "L0v3Pupp3t!"
       }
-      
+
       acl { '#{target_parent}/#{target_file}':
         permissions  => [
           { identity => '#{user_id}', rights => ['full'] },
@@ -59,7 +59,7 @@ describe 'Identity - User' do
   end
 
   def acl_regex(user_id)
-    /.*\\#{user_id}:\(F\)/
+    %r{.*\\#{user_id}:\(F\)}
   end
 
   context 'Specify User with Long Name for Identity' do
@@ -72,3 +72,4 @@ describe 'Identity - User' do
     end
   end
 end
+# rubocop:enable RSpec/EmptyExampleGroup

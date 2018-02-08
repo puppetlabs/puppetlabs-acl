@@ -1,5 +1,6 @@
 require 'spec_helper_acceptance'
 
+# rubocop:disable RSpec/EmptyExampleGroup
 def apply_manifest_and_verify(perm_type, asset_type, child_inherit_type, acl_child_regex, file_content, agent)
   rights = 'full'
   user_id_child = 'roberto'
@@ -9,8 +10,8 @@ def apply_manifest_and_verify(perm_type, asset_type, child_inherit_type, acl_chi
 
   context "on #{agent}" do
     it 'Execute Apply Manifest' do
-      on(agent, puppet('apply', '--debug'), :stdin => acl_manifest(target_name, target_child, file_content, user_id_child, rights, perm_type, child_inherit_type)) do |result|
-        assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+      on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target_name, target_child, file_content, user_id_child, rights, perm_type, child_inherit_type)) do |result|
+        assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
       end
     end
 
@@ -29,38 +30,37 @@ def apply_manifest_and_verify(perm_type, asset_type, child_inherit_type, acl_chi
 end
 
 describe 'Inheritance' do
-
   def acl_manifest(target_name, target_child, file_content, user_id_child, rights, perm_type, child_inherit_type)
-    return <<-MANIFEST
+    <<-MANIFEST
       file { "#{target_parent}":
         ensure => directory
       }
-      
+
       file { "#{target_parent}/#{target_name}":
         ensure  => directory,
         require => File['#{target_parent}']
       }
-      
+
       file { "#{target_child}":
         ensure  => file,
         content => '#{file_content}',
         require => File['#{target_parent}/#{target_name}']
       }
-      
+
       user { "#{user_id}":
         ensure     => present,
         groups     => 'Users',
         managehome => true,
         password   => "L0v3Pupp3t!"
       }
-      
+
       user { "#{user_id_child}":
         ensure     => present,
         groups     => 'Users',
         managehome => true,
         password   => "L0v3Pupp3t!"
       }
-      
+
       acl { "#{target_parent}/#{target_name}":
         purge        => 'true',
         permissions  => [
@@ -100,7 +100,7 @@ describe 'Inheritance' do
     asset_type = 'file'
     child_inherit_type = 'true'
     file_content = 'Car repair is expensive'
-    acl_child_regex = /.*\\bob:\(I\)\(F\)/
+    acl_child_regex = %r{.*\\bob:\(I\)\(F\)}
 
     windows_agents.each do |agent|
       apply_manifest_and_verify(perm_type, asset_type, child_inherit_type, acl_child_regex, file_content, agent)
@@ -112,7 +112,7 @@ describe 'Inheritance' do
     asset_type = 'file'
     child_inherit_type = 'true'
     file_content = 'Exploding pants on sale for half off.'
-    acl_child_regex = /.*\\bob:\(I\)\(N\)/
+    acl_child_regex = %r{.*\\bob:\(I\)\(N\)}
 
     windows_agents.each do |agent|
       apply_manifest_and_verify(perm_type, asset_type, child_inherit_type, acl_child_regex, file_content, agent)
@@ -124,7 +124,7 @@ describe 'Inheritance' do
     asset_type = 'file'
     child_inherit_type = 'false'
     file_content = 'Smell-o-vision: brought to you by the makers of Taste-o-vision!'
-    acl_child_regex = /.*\\bob:\(F\)/
+    acl_child_regex = %r{.*\\bob:\(F\)}
 
     windows_agents.each do |agent|
       apply_manifest_and_verify(perm_type, asset_type, child_inherit_type, acl_child_regex, file_content, agent)
@@ -136,10 +136,11 @@ describe 'Inheritance' do
     asset_type = 'file'
     child_inherit_type = 'false'
     file_content = 'She smirked as he disdainfully choked down her tasteless humor.'
-    acl_child_regex = /.*\\bob:\(N\)/
+    acl_child_regex = %r{.*\\bob:\(N\)}
 
     windows_agents.each do |agent|
       apply_manifest_and_verify(perm_type, asset_type, child_inherit_type, acl_child_regex, file_content, agent)
     end
   end
 end
+# rubocop:enable RSpec/EmptyExampleGroup

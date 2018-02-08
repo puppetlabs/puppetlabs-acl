@@ -1,19 +1,18 @@
 require 'spec_helper_acceptance'
 
 describe 'Module - Identity' do
-
   def setup_manifest(target_file, file_content)
-    return <<-MANIFEST
+    <<-MANIFEST
       file { '#{target_parent}':
         ensure => directory
       }
-      
+
       file { '#{target_parent}/#{target_file}':
         ensure  => file,
         content => '#{file_content}',
         require => File['#{target_parent}']
       }
-      
+
       user { '#{user_id}':
         ensure     => present,
         groups     => 'Users',
@@ -24,7 +23,7 @@ describe 'Module - Identity' do
   end
 
   def acl_manifest(target_file, sid)
-    return <<-MANIFEST
+    <<-MANIFEST
       acl { '#{target_parent}/#{target_file}':
         permissions => [
           { identity => '#{sid}', rights => ['full'] },
@@ -35,18 +34,18 @@ describe 'Module - Identity' do
 
   context 'Specify SID Identity' do
     os_check_command = 'cmd /c ver'
-    os_check_regex = /Version 5/
+    os_check_regex = %r{Version 5}
     target_file = 'specify_sid_ident.txt'
     file_content = 'Magic unicorn rainbow madness!'
     verify_content_command = "cat /cygdrive/c/temp/#{target_file}"
     get_user_sid_command = <<-GETSID
-cmd /c "wmic useraccount where name='#{user_id}' get sid"
+    cmd /c "wmic useraccount where name='#{user_id}' get sid"
     GETSID
 
-    sid_regex = /^(S-.+)$/
+    sid_regex = %r{^(S-.+)$}
 
     verify_acl_command = "icacls #{target_parent}/#{target_file}"
-    acl_regex = /.*\\bob:\(F\)/
+    acl_regex = %r{.*\\bob:\(F\)}
     sid = ''
 
     windows_agents.each do |agent|
@@ -54,14 +53,14 @@ cmd /c "wmic useraccount where name='#{user_id}' get sid"
         it 'Determine OS Type' do
           on(agent, os_check_command) do |result|
             if os_check_regex =~ result.stdout
-              skip_test("This test cannot run on a Windows 2003 system!")
+              skip_test('This test cannot run on a Windows 2003 system!')
             end
           end
         end
 
         it 'Execute Setup Manifest' do
-          on(agent, puppet('apply', '--debug'), :stdin => setup_manifest(target_file, file_content)) do |result|
-            assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+          on(agent, puppet('apply', '--debug'), stdin: setup_manifest(target_file, file_content)) do |result|
+            assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end
 
@@ -72,8 +71,8 @@ cmd /c "wmic useraccount where name='#{user_id}' get sid"
         end
 
         it 'Execute ACL Manifest' do
-          on(agent, puppet('apply', '--debug'), :stdin => acl_manifest(target_file, sid)) do |result|
-            assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+          on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target_file, sid)) do |result|
+            assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end
 

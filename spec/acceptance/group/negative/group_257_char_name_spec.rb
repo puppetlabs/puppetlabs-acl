@@ -1,7 +1,6 @@
 require 'spec_helper_acceptance'
 
 describe 'Group - Negative' do
-
   user_type = '257_char_name'
   file_content = 'Organized chaos party.'
 
@@ -10,30 +9,30 @@ describe 'Group - Negative' do
 
   target_parent = "c:/#{parent_name}"
   target = "#{target_parent}/#{target_name}"
-  group_id = 'jadsqddweruwqiouroaysfyuasudyfaisoyfqoiuwyefiaysdiyfzixycivzixyvciqywifyiasdiufyasdygfasirfwerqiuwyeriatsdtfastdfqwyitfastdfawerfytasdytfasydgtaisdytfiasydfiosayghiayhidfhygiasftawyegyfhgaysgfuyasgdyugfasuiyfguaqyfgausydgfaywgfuasgdfuaisydgfausasdfuygsadfyg'
+  group_id = 'jadsqddweruwqiouroaysfyuasudyfaisoyfqoiuwyefiaysdiyfzixycivzixyvciqywifyiasdiufyasdygfasirfwerqiuwyeriatsdtfastdfqwyitfastdfawerfytasdytfasydgtaisdytfiasydfiosayghiayhidfhygiasftawyegyfhgaysgfuyasgdyugfasuiyfguaqyfgausydgfaywgfuasgdfuaisydgfausasdfuygsadfyg' # rubocop:disable Metrics/LineLength
 
-  expected_error = /Error:.*Group does not exist./
+  expected_error = %r{Error:.*Group does not exist.}
   verify_content_command = "cat /cygdrive/c/#{parent_name}/#{target_name}"
-  file_content_regex = /\A#{file_content}\z/
+  file_content_regex = %r{\A#{file_content}\z}
 
   acl_manifest = <<-MANIFEST
     file { "#{target_parent}":
       ensure => directory
     }
-    
+
     file { "#{target}":
       ensure  => file,
       content => '#{file_content}',
       require => File['#{target_parent}']
     }
-    
+
     user { "#{user_id}":
       ensure     => present,
       groups     => 'Users',
       managehome => true,
       password   => "L0v3Pupp3t!"
     }
-    
+
     acl { "#{target}":
       purge           => 'true',
       permissions     => [
@@ -57,7 +56,7 @@ describe 'Group - Negative' do
   windows_agents.each do |agent|
     context "On Windows Agent Change Group to Local Group with Long Name on #{agent}" do
       it 'Attempt to Execute ACL Manifest' do
-        on(agent, puppet('apply', '--debug'), :stdin => acl_manifest) do |result|
+        on(agent, puppet('apply', '--debug'), stdin: acl_manifest) do |result|
           assert_match(expected_error, result.stderr, 'Expected error was not detected!')
         end
 

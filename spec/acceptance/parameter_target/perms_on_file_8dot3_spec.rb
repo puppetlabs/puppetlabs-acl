@@ -1,13 +1,14 @@
 require 'spec_helper_acceptance'
 
+# rubocop:disable RSpec/EmptyExampleGroup, RSpec/RepeatedDescription
 def apply_manifest_and_verify(file_name, target8dot3, file_content, agent, remove = nil)
-  acl_regex = /.*\\bob:\(F\)/
+  acl_regex = %r{.*\\bob:\(F\)}
   verify_acl_command = "icacls #{target_parent}/#{file_name}"
   verify_content_command = "cat /cygdrive/c/temp/#{file_name}"
   context "on #{agent}" do
     it 'Execute Manifest' do
-      on(agent, puppet('apply', '--debug'), :stdin => acl_manifest(file_name, target8dot3, file_content)) do |result|
-        assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+      on(agent, puppet('apply', '--debug'), stdin: acl_manifest(file_name, target8dot3, file_content)) do |result|
+        assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
       end
     end
 
@@ -19,8 +20,8 @@ def apply_manifest_and_verify(file_name, target8dot3, file_content, agent, remov
 
     if remove
       it 'Execute Remove Manifest' do
-        on(agent, puppet('apply', '--debug'), :stdin => acl_manifest_remove(target8dot3)) do |result|
-          assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+        on(agent, puppet('apply', '--debug'), stdin: acl_manifest_remove(target8dot3)) do |result|
+          assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
         end
       end
 
@@ -40,26 +41,25 @@ def apply_manifest_and_verify(file_name, target8dot3, file_content, agent, remov
 end
 
 describe 'Permissions - File - 8.3' do
-
   def acl_manifest(file_name, target8dot3, file_content)
-    return <<-MANIFEST
+    <<-MANIFEST
       file { '#{target_parent}':
         ensure => directory
       }
-      
+
       file { '#{target_parent}/#{file_name}':
         ensure  => file,
         content => '#{file_content}',
         require => File['#{target_parent}']
       }
-      
+
       user { '#{user_id}':
         ensure     => present,
         groups     => 'Users',
         managehome => true,
         password   => "L0v3Pupp3t!"
       }
-      
+
       acl { '#{target8dot3}':
         permissions => [
           { identity => '#{user_id}', rights => ['full'] },
@@ -69,7 +69,7 @@ describe 'Permissions - File - 8.3' do
   end
 
   def acl_manifest_remove(target8dot3)
-    return <<-MANIFEST
+    <<-MANIFEST
       acl { '#{target8dot3}':
         purge => 'listed_permissions',
         permissions => [
@@ -99,3 +99,4 @@ describe 'Permissions - File - 8.3' do
     end
   end
 end
+# rubocop:enable RSpec/EmptyExampleGroup, RSpec/RepeatedDescription

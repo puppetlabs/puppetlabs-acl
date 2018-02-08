@@ -1,33 +1,32 @@
 require 'spec_helper_acceptance'
 
 describe 'Group - Unicode' do
-
   def acl_manifest(prefix, file_content, group_id)
-    return <<-MANIFEST
+    <<-MANIFEST
       file { "#{target_parent}":
         ensure => directory
       }
-      
+
       file { "c:/temp/#{prefix}.txt":
         ensure  => file,
         content => '#{file_content}',
         require => File['#{target_parent}']
       }
-      
+
       user { "#{user_id}":
         ensure     => present,
         groups     => 'Users',
         managehome => true,
         password   => "L0v3Pupp3t!"
       }
-      
+
       user { "#{group_id}":
         ensure     => present,
         groups     => 'Users',
         managehome => true,
         password   => "L0v3Pupp3t!"
       }
-      
+
       acl { "c:/temp/#{prefix}.txt":
         purge           => 'true',
         permissions     => [
@@ -62,14 +61,14 @@ describe 'Group - Unicode' do
     windows_agents.each do |agent|
       context "on #{agent}" do
         it 'Execute ACL Manifest' do
-          apply_manifest_on(agent, acl_manifest(prefix, file_content, group_id), {:debug => true}) do |result|
-            assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+          apply_manifest_on(agent, acl_manifest(prefix, file_content, group_id), debug: true) do |result|
+            assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end
 
         it 'Verify that ACL Rights are Correct' do
-          on(agent, powershell(verify_group_command(prefix, raw_group_id), {'EncodedCommand' => true})) do |result|
-            assert_match(/^1$/, result.stdout, 'Expected ACL was not present!')
+          on(agent, powershell(verify_group_command(prefix, raw_group_id), 'EncodedCommand' => true)) do |result|
+            assert_match(%r{^1$}, result.stdout, 'Expected ACL was not present!')
           end
         end
       end

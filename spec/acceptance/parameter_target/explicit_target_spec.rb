@@ -1,41 +1,40 @@
 require 'spec_helper_acceptance'
 
 describe 'Windows ACL Module - Explicit Use of "target" Parameter' do
-
   target = 'c:/temp/explicit_target'
   verify_acl_command = "icacls #{target}"
-  acl_regex = /.*\\bob:\(OI\)\(CI\)\(F\)/
+  acl_regex = %r{.*\\bob:\(OI\)\(CI\)\(F\)}
 
   acl_manifest = <<-MANIFEST
-file { '#{target_parent}':
-  ensure => directory
-}
+    file { '#{target_parent}':
+      ensure => directory
+    }
 
-file { '#{target}':
-  ensure  => directory,
-  require => File['#{target_parent}']
-}
+    file { '#{target}':
+      ensure  => directory,
+      require => File['#{target_parent}']
+    }
 
-user { '#{user_id}':
-  ensure     => present,
-  groups     => 'Users',
-  managehome => true,
-  password   => "L0v3Pupp3t!"
-}
+    user { '#{user_id}':
+      ensure     => present,
+      groups     => 'Users',
+      managehome => true,
+      password   => "L0v3Pupp3t!"
+    }
 
-acl { 'explicit_target':
-  target => '#{target}',
-  permissions => [
-    { identity => '#{user_id}', rights => ['full'] },
-  ],
-}
-  MANIFEST
+    acl { 'explicit_target':
+      target => '#{target}',
+      permissions => [
+        { identity => '#{user_id}', rights => ['full'] },
+      ],
+    }
+    MANIFEST
 
   windows_agents.each do |agent|
     context "on #{agent}" do
       it 'Execute Manifest' do
-        on(agent, puppet('apply', '--debug'), :stdin => acl_manifest) do |result|
-          assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+        on(agent, puppet('apply', '--debug'), stdin: acl_manifest) do |result|
+          assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
         end
       end
 
