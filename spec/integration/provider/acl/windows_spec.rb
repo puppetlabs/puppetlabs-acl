@@ -3,14 +3,14 @@ require 'spec_helper'
 require 'puppet/type'
 require 'puppet/provider/acl/windows'
 
-if Puppet.features.microsoft_windows?
+if Puppet::Util::Platform.windows?
   class WindowsSecurityTester
     require 'puppet/util/windows/security'
     include Puppet::Util::Windows::Security
   end
 end
 
-describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.microsoft_windows? do
+describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet::Util::Platform.windows? do
   let (:resource) { Puppet::Type.type(:acl).new(:provider => :windows, :name => "windows_acl") }
   let (:provider) { resource.provider }
   let (:top_level_path) do
@@ -65,7 +65,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     end
 
     it "should not allow permissions to be set on directory symlinks (PUP-2338)",
-        :if => Puppet.features.manages_symlinks? && Puppet.features.microsoft_windows? do
+        :if => Puppet.features.manages_symlinks? && Puppet::Util::Platform.windows? do
       target_path = set_path('symlink_target')
       resource[:target] = File.expand_path("fake",resource[:target])
       Puppet::Util::Windows::File.symlink(target_path,resource[:target])
@@ -76,7 +76,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
     end
 
     it "should not allow permissions to be set on file symlinks (PUP-2338)",
-        :if => Puppet.features.manages_symlinks? && Puppet.features.microsoft_windows? do
+        :if => Puppet.features.manages_symlinks? && Puppet::Util::Platform.windows? do
       target_path = set_path('symlink_target')
       file_path = File.join(target_path,"file.txt")
       FileUtils.touch(file_path)
@@ -301,7 +301,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
         { :min_kernel => 10.0, :identity => 'S-1-15-2-2' },
       ].each do |account|
         it "should not error when referencing special account #{account[:identity]}",
-          :if => Puppet.features.microsoft_windows? && (Facter[:kernelmajversion].value.to_f >= account[:min_kernel]) do
+          :if => Puppet::Util::Platform.windows? && (Facter[:kernelmajversion].value.to_f >= account[:min_kernel]) do
 
           permissions = [Puppet::Type::Acl::Ace.new({'identity' => account[:identity], 'rights' => ['full']}, provider)]
           set_perms(permissions).must == permissions
@@ -603,7 +603,7 @@ describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.micr
 
       context "when removing non-existing users" do
         begin
-          require 'puppet/util/windows/adsi' if Puppet.features.microsoft_windows?
+          require 'puppet/util/windows/adsi' if Puppet::Util::Platform.windows?
         rescue LoadError
           require 'puppet/util/adsi'
         end
