@@ -3,7 +3,7 @@ require 'spec_helper'
 require 'puppet/type'
 require 'puppet/provider/acl/windows'
 
-describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet.features.microsoft_windows? do
+describe Puppet::Type.type(:acl).provider(:windows), :if => Puppet::Util::Platform.windows? do
 
   let (:resource) { Puppet::Type.type(:acl).new(:provider => :windows, :name => "windows_acl") }
   let (:provider) { resource.provider }

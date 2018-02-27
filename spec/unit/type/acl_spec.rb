@@ -243,7 +243,7 @@ describe Puppet::Type.type(:acl) do
     end
 
     # :as_platform => :windows - doesn't exist outside of puppet?
-    context "when :target_type => :file", :if => Puppet.features.microsoft_windows? do
+    context "when :target_type => :file", :if => Puppet::Util::Platform.windows? do
       def test_should_set_autorequired_file(resource_path,file_path)
         resource[:target] = resource_path
         dir = Puppet::Type.type(:file).new(:path => file_path)
