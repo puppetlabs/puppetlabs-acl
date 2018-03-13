@@ -1,5 +1,6 @@
 require 'spec_helper_acceptance'
 
+# rubocop:disable RSpec/EmptyExampleGroup
 def apply_manifest_and_verify(agent, target_name, file_content, owner_id, owner_regex)
   context "on #{agent}" do
     verify_content_command = "cat /cygdrive/c/temp/#{target_name}"
@@ -7,8 +8,8 @@ def apply_manifest_and_verify(agent, target_name, file_content, owner_id, owner_
     verify_owner_command = "cmd /c \"dir /q #{dosify_target}\""
 
     it 'Execute ACL Manifest' do
-      on(agent, puppet('apply', '--debug'), :stdin => acl_manifest(target_name, file_content, owner_id)) do |result|
-        assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+      on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target_name, file_content, owner_id)) do |result|
+        assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
       end
     end
 
@@ -27,30 +28,29 @@ def apply_manifest_and_verify(agent, target_name, file_content, owner_id, owner_
 end
 
 describe 'Owner - Local Group' do
-
   def acl_manifest(target_name, file_content, owner_id)
-    return <<-MANIFEST
+    <<-MANIFEST
       file { "#{target_parent}":
         ensure => directory
       }
-      
+
       file { "#{target_parent}/#{target_name}":
         ensure  => file,
         content => '#{file_content}',
         require => File['#{target_parent}']
       }
-      
+
       group { "#{owner_id}":
         ensure     => present
       }
-      
+
       user { "#{user_id}":
         ensure     => present,
         groups     => 'Users',
         managehome => true,
         password   => "L0v3Pupp3t!"
       }
-      
+
       acl { "#{target_parent}/#{target_name}":
         permissions  => [
           { identity => '#{user_id}',
@@ -66,7 +66,7 @@ describe 'Owner - Local Group' do
     file_content = 'Spearhead was a great MOHAA game.'
     target_name = 'owner_local_group.txt'
     owner_id = 'jerks'
-    owner_regex = /.*\\jerks/
+    owner_regex = %r{.*\\jerks}
 
     windows_agents.each do |agent|
       apply_manifest_and_verify(agent, target_name, file_content, owner_id, owner_regex)
@@ -76,8 +76,8 @@ describe 'Owner - Local Group' do
   context 'Change Owner to Local Group with Long Name' do
     file_content = 'Cow are animals with mooing capabilities.'
     target_name = 'owner_local_long_group_name.txt'
-    owner_id = 'jasqddweruwqiouroaysfyuasudyfaisoyfqoiuwyefiaysdiyfzixycivzixyvciqywifyiasdiufyasdygfasirfwerqiuwyeriatsdtfastdfqwyitfastdfawerfytasdytfasydgtaisdytfiasydfiosayghiayhidfhygiasftawyegyfhgaysgfuyasgdyugfasuiyfguaqyfgausydgfaywgfuasgdfuaisydgfausasdfuygsadfyg'
-    owner_regex = /.*\\jasq/
+    owner_id = 'jasqddweruwqiouroaysfyuasudyfaisoyfqoiuwyefiaysdiyfzixycivzixyvciqywifyiasdiufyasdygfasirfwerqiuwyeriatsdtfastdfqwyitfastdfawerfytasdytfasydgtaisdytfiasydfiosayghiayhidfhygiasftawyegyfhgaysgfuyasgdyugfasuiyfguaqyfgausydgfaywgfuasgdfuaisydgfausasdfuygsadfyg' # rubocop:disable Metrics/LineLength
+    owner_regex = %r{.*\\jasq}
 
     windows_agents.each do |agent|
       apply_manifest_and_verify(agent, target_name, file_content, owner_id, owner_regex)
@@ -95,17 +95,18 @@ describe 'Owner - Local Group' do
     windows_agents.each do |agent|
       context "on #{agent}" do
         it 'Execute ACL Manifest' do
-          apply_manifest_on(agent, acl_manifest(target_name, file_content, owner_id), {:debug => true}) do |result|
-            assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+          apply_manifest_on(agent, acl_manifest(target_name, file_content, owner_id), debug: true) do |result|
+            assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end
 
         it 'Verify that ACL Rights are Correct' do
-          on(agent, powershell(verify_owner_command, {'EncodedCommand' => true})) do |result|
-            assert_match(/^1$/, result.stdout, 'Expected ACL was not present!')
+          on(agent, powershell(verify_owner_command, 'EncodedCommand' => true)) do |result|
+            assert_match(%r{^1$}, result.stdout, 'Expected ACL was not present!')
           end
         end
       end
     end
   end
 end
+# rubocop:enable RSpec/EmptyExampleGroup

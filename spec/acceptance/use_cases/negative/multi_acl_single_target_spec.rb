@@ -1,26 +1,25 @@
 require 'spec_helper_acceptance'
 
 describe 'Use Cases' do
-
   def acl_manifest(target, file_content)
-    return <<-MANIFEST
+    <<-MANIFEST
       file { "#{target_parent}":
         ensure => directory
       }
-      
+
       file { "#{target}":
         ensure  => file,
         content => '#{file_content}',
         require => File['#{target_parent}']
       }
-      
+
       acl { "first_acl":
         target       => '#{target}',
         permissions  => [
           { identity => '#{user_id}',perm_type => 'deny', rights => ['full'] }
         ],
       }
-      
+
       acl { "second_acl":
         target       => '#{target}',
         permissions  => [
@@ -39,13 +38,13 @@ describe 'Use Cases' do
     verify_content_command = "cat /cygdrive/c/temp/#{target_name}"
 
     verify_acl_command = "icacls #{target}"
-    target_first_ace_regex = /.*\\bob:\(F\)/
-    target_second_ace_regex = /.*\\bob:\(N\)/
+    target_first_ace_regex = %r{.*\\bob:\(F\)}
+    target_second_ace_regex = %r{.*\\bob:\(N\)}
 
     windows_agents.each do |agent|
       it 'Execute ACL Manifest' do
-        on(agent, puppet('apply', '--debug'), :stdin => acl_manifest(target, file_content)) do |result|
-          assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+        on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target, file_content)) do |result|
+          assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
         end
       end
 

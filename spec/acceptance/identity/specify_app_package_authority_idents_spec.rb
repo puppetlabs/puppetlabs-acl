@@ -2,24 +2,20 @@ require 'spec_helper_acceptance'
 
 describe 'Identity' do
   [
-      {:id => 'S-1-15-2-1',
-       :acl_regex => /.*APPLICATION PACKAGE AUTHORITY\\ALL APPLICATION PACKAGES:\(OI\)\(CI\)\(F\)/,
-       :minimum_kernel => 6.3,
-      },
-      # NOTE: 'APPLICATION PACKAGE AUTHORITY\\ALL APPLICATION PACKAGES' doesn't work due to Windows API
-      {:id => 'ALL APPLICATION PACKAGES',
-       :acl_regex => /.*APPLICATION PACKAGE AUTHORITY\\ALL APPLICATION PACKAGES:\(OI\)\(CI\)\(F\)/,
-       :minimum_kernel => 6.3,
-      },
-      {:id => 'S-1-15-2-2',
-       :acl_regex => /.*APPLICATION PACKAGE AUTHORITY\\ALL RESTRICTED APPLICATION PACKAGES:\(OI\)\(CI\)\(F\)/,
-       :minimum_kernel => 10.0,
-      },
-      # NOTE: 'APPLICATION PACKAGE AUTHORITY\\ALL RESTRICTED APPLICATION PACKAGES' doesn't work due to Windows API
-      {:id => 'ALL RESTRICTED APPLICATION PACKAGES',
-       :acl_regex => /.*APPLICATION PACKAGE AUTHORITY\\ALL RESTRICTED APPLICATION PACKAGES:\(OI\)\(CI\)\(F\)/,
-       :minimum_kernel => 10.0,
-      },
+    { id: 'S-1-15-2-1',
+      acl_regex: %r{.*APPLICATION PACKAGE AUTHORITY\\ALL APPLICATION PACKAGES:\(OI\)\(CI\)\(F\)},
+      minimum_kernel: 6.3 },
+    # NOTE: 'APPLICATION PACKAGE AUTHORITY\\ALL APPLICATION PACKAGES' doesn't work due to Windows API
+    { id: 'ALL APPLICATION PACKAGES',
+      acl_regex: %r{.*APPLICATION PACKAGE AUTHORITY\\ALL APPLICATION PACKAGES:\(OI\)\(CI\)\(F\)},
+      minimum_kernel: 6.3 },
+    { id: 'S-1-15-2-2',
+      acl_regex: %r{.*APPLICATION PACKAGE AUTHORITY\\ALL RESTRICTED APPLICATION PACKAGES:\(OI\)\(CI\)\(F\)},
+      minimum_kernel: 10.0 },
+    # NOTE: 'APPLICATION PACKAGE AUTHORITY\\ALL RESTRICTED APPLICATION PACKAGES' doesn't work due to Windows API
+    { id: 'ALL RESTRICTED APPLICATION PACKAGES',
+      acl_regex: %r{.*APPLICATION PACKAGE AUTHORITY\\ALL RESTRICTED APPLICATION PACKAGES:\(OI\)\(CI\)\(F\)},
+      minimum_kernel: 10.0 },
   ].each do |account|
 
     target = "c:/#{SecureRandom.uuid}"
@@ -33,12 +29,12 @@ describe 'Identity' do
           if kernelmajversion < account[:minimum_kernel]
             warn("This test requires Windows kernel #{account[:minimum_kernel]} but this host only has #{kernelmajversion}")
             skip
-            
+
             acl_manifest = <<-MANIFEST
               file { '#{target}':
                 ensure => directory
               }
-          
+
               acl { '#{target}':
                 permissions => [
                   { identity => '#{account[:id]}', rights => ['full'] },
@@ -49,8 +45,8 @@ describe 'Identity' do
 
             it 'Execute ACL Manifest' do
               # exit code 2: The run succeeded, and some resources were changed.
-              on(agent, puppet('apply', '--detailed-exitcodes'), :stdin => acl_manifest, :acceptable_exit_codes => [2]) do |result|
-                assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+              on(agent, puppet('apply', '--detailed-exitcodes'), stdin: acl_manifest, acceptable_exit_codes: [2]) do |result|
+                assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
               end
             end
 
@@ -63,8 +59,8 @@ describe 'Identity' do
             end
 
             it 'Execute ACL Manifest again' do
-              on(agent, puppet('apply'), :stdin => acl_manifest, :acceptable_exit_codes => [0]) do |result|
-                assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+              on(agent, puppet('apply'), stdin: acl_manifest, acceptable_exit_codes: [0]) do |result|
+                assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
               end
             end
 
@@ -80,4 +76,3 @@ describe 'Identity' do
     end
   end
 end
-

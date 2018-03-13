@@ -1,10 +1,11 @@
 require 'spec_helper_acceptance'
 
+# rubocop:disable RSpec/EmptyExampleGroup
 def apply_manifest_and_verify(acl_regex, agent, file_content, rights, target)
   context "on #{agent}" do
     it 'Execute Manifest' do
-      on(agent, puppet('apply', '--debug'), :stdin => acl_manifest(target, rights, file_content)) do |result|
-        assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+      on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target, rights, file_content)) do |result|
+        assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
       end
     end
 
@@ -23,26 +24,25 @@ def apply_manifest_and_verify(acl_regex, agent, file_content, rights, target)
 end
 
 describe 'File - Deny' do
-
-  def acl_manifest (target, rights, file_content)
-    return <<-MANIFEST
+  def acl_manifest(target, rights, file_content)
+    <<-MANIFEST
       file { '#{target_parent}':
         ensure => directory
       }
-      
+
       file { '#{target}':
         ensure  => file,
         content => '#{file_content}',
         require => File['#{target_parent}']
       }
-      
+
       user { '#{user_id}':
         ensure     => present,
         groups     => 'Users',
         managehome => true,
         password   => "L0v3Pupp3t!"
       }
-      
+
       acl { '#{target}':
         permissions  => [
           { identity => '#{user_id}', perm_type => 'deny', rights => ['#{rights}'] },
@@ -51,8 +51,8 @@ describe 'File - Deny' do
     MANIFEST
   end
 
-  def verify_content_command (target)
-    target = target[3..-1]  # remove the leading 'c:/' from the target
+  def verify_content_command(target)
+    target = target[3..-1] # remove the leading 'c:/' from the target
     "cat /cygdrive/c/#{target}"
   end
 
@@ -64,7 +64,7 @@ describe 'File - Deny' do
     rights = 'execute'
     file_content = 'Smells like teen spirit or body odor.'
     target = "c:/temp/deny_#{rights}_rights_file.txt"
-    acl_regex = /.*\\bob:\(DENY\)\(Rc,S,X,RA\)/
+    acl_regex = %r{.*\\bob:\(DENY\)\(Rc,S,X,RA\)}
 
     windows_agents.each do |agent|
       apply_manifest_and_verify(acl_regex, agent, file_content, rights, target)
@@ -75,7 +75,7 @@ describe 'File - Deny' do
     rights = 'full'
     target = "c:/temp/deny_#{rights}_rights_file.txt"
     file_content = 'You have to fight for your right to party.'
-    acl_regex = /.*\\bob:\(N\)/
+    acl_regex = %r{.*\\bob:\(N\)}
 
     windows_agents.each do |agent|
       apply_manifest_and_verify(acl_regex, agent, file_content, rights, target)
@@ -86,7 +86,7 @@ describe 'File - Deny' do
     rights = 'modify'
     target = "c:/temp/deny_#{rights}_rights_file.txt"
     file_content = 'Giant flying space pigs with lasers.'
-    acl_regex = /.*\\bob:\(DENY\)\(M\)/
+    acl_regex = %r{.*\\bob:\(DENY\)\(M\)}
 
     windows_agents.each do |agent|
       apply_manifest_and_verify(acl_regex, agent, file_content, rights, target)
@@ -97,7 +97,7 @@ describe 'File - Deny' do
     rights = "read','execute"
     target = 'c:/temp/deny_re_rights_file.txt'
     file_content = 'Your forcefield is good, but my teleporting is better.'
-    acl_regex = /.*\\bob:\(DENY\)\(RX\)/
+    acl_regex = %r{.*\\bob:\(DENY\)\(RX\)}
 
     windows_agents.each do |agent|
       apply_manifest_and_verify(acl_regex, agent, file_content, rights, target)
@@ -108,7 +108,7 @@ describe 'File - Deny' do
     rights = 'read'
     target = "c:/temp/deny_#{rights}_rights_file.txt"
     file_content = 'Elvis is king of rock and roll.'
-    acl_regex = /.*\\bob:\(DENY\)\(R\)/
+    acl_regex = %r{.*\\bob:\(DENY\)\(R\)}
 
     windows_agents.each do |agent|
       apply_manifest_and_verify(acl_regex, agent, file_content, rights, target)
@@ -119,7 +119,7 @@ describe 'File - Deny' do
     rights = "write','execute"
     target = 'c:/temp/deny_we_rights_file.txt'
     file_content = 'Now time for some rocket fuel.'
-    acl_regex = /.*\\bob:\(DENY\)\(W,Rc,X,RA\)/
+    acl_regex = %r{.*\\bob:\(DENY\)\(W,Rc,X,RA\)}
 
     windows_agents.each do |agent|
       apply_manifest_and_verify(acl_regex, agent, file_content, rights, target)
@@ -130,7 +130,7 @@ describe 'File - Deny' do
     rights = "write','read"
     target = 'c:/temp/deny_wr_rights_file.txt'
     file_content = 'I live in a garbage can.'
-    acl_regex = /.*\\bob:\(DENY\)\(R,W\)/
+    acl_regex = %r{.*\\bob:\(DENY\)\(R,W\)}
 
     windows_agents.each do |agent|
       apply_manifest_and_verify(acl_regex, agent, file_content, rights, target)
@@ -141,7 +141,7 @@ describe 'File - Deny' do
     rights = "write','read','execute"
     target = 'c:/temp/deny_wre_rights_file.txt'
     file_content = 'Flying rats.'
-    acl_regex = /.*\\bob:\(DENY\)\(RX,W\)/
+    acl_regex = %r{.*\\bob:\(DENY\)\(RX,W\)}
 
     windows_agents.each do |agent|
       apply_manifest_and_verify(acl_regex, agent, file_content, rights, target)
@@ -152,10 +152,11 @@ describe 'File - Deny' do
     rights = 'write'
     target = "c:/temp/deny_#{rights}_rights_file.txt"
     file_content = 'Marxist cat wants some of your food.'
-    acl_regex = /.*\\bob:\(DENY\)\(W,Rc\)/
+    acl_regex = %r{.*\\bob:\(DENY\)\(W,Rc\)}
 
     windows_agents.each do |agent|
       apply_manifest_and_verify(acl_regex, agent, file_content, rights, target)
     end
   end
 end
+# rubocop:enable RSpec/EmptyExampleGroup

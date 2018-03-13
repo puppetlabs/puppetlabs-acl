@@ -1,24 +1,23 @@
 require 'spec_helper_acceptance'
 
 describe 'Use Cases' do
-
   def acl_manifest(target, target_child, file_content, group, user_id)
-    return <<-MANIFEST
+    <<-MANIFEST
       file { "#{target_parent}":
         ensure => directory
       }
-      
+
       file { "#{target}":
         ensure => directory,
         require => File['#{target_parent}']
       }
-      
+
       file { "#{target_child}":
         ensure  => file,
         content => '#{file_content}',
         require => File['#{target}']
       }
-      
+
       acl { "#{target}":
         permissions  => [
           { identity => '#{group}',type => 'allow', rights => ['full'] },
@@ -34,7 +33,7 @@ describe 'Use Cases' do
   end
 
   def update_manifest(target_child)
-    return <<-MANIFEST
+    <<-MANIFEST
       file { "#{target_child}":
         ensure  => file,
         content => 'Better Content'
@@ -53,14 +52,14 @@ describe 'Use Cases' do
     group = 'Administrators'
     user_id = 'Administrator'
     verify_acl_child_command = "icacls #{target_child}"
-    target_child_first_ace_regex = /.*\\Administrators:\(I\)\(F\)/
-    target_child_second_ace_regex = /.*\\Administrator:\(N\)/
+    target_child_first_ace_regex = %r{.*\\Administrators:\(I\)\(F\)}
+    target_child_second_ace_regex = %r{.*\\Administrator:\(N\)}
 
     windows_agents.each do |agent|
       context "on #{agent}" do
         it 'Execute ACL Manifest' do
-          on(agent, puppet('apply', '--debug'), :stdin => acl_manifest(target, target_child, file_content, group, user_id)) do |result|
-            assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+          on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target, target_child, file_content, group, user_id)) do |result|
+            assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end
 
@@ -72,8 +71,8 @@ describe 'Use Cases' do
         end
 
         it 'Attempt to Update File' do
-          on(agent, puppet('apply', '--debug'), :stdin => update_manifest(target_child)) do |result|
-            assert_match(/Error:/, result.stderr, 'Expected error was not detected!')
+          on(agent, puppet('apply', '--debug'), stdin: update_manifest(target_child)) do |result|
+            assert_match(%r{Error:}, result.stderr, 'Expected error was not detected!')
           end
         end
 

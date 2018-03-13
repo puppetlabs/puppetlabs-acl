@@ -1,19 +1,18 @@
 require 'spec_helper_acceptance'
 
 describe 'Use Cases' do
-
   def acl_manifest(target, file_content)
-    return <<-MANIFEST
+    <<-MANIFEST
       file { "#{target_parent}":
         ensure => directory
       }
-      
+
       file { "#{target}":
         ensure  => file,
         content => '#{file_content}',
         require => File['#{target_parent}']
       }
-      
+
       acl { "#{target}":
         purge        => 'true',
         permissions  => [
@@ -25,7 +24,7 @@ describe 'Use Cases' do
   end
 
   def update_manifest(target)
-    return <<-MANIFEST
+    <<-MANIFEST
       file { "#{target}":
         ensure  => file,
         content => 'New Content'
@@ -42,14 +41,14 @@ describe 'Use Cases' do
     windows_agents.each do |agent|
       context "on #{agent}" do
         it 'Execute ACL Manifest' do
-          on(agent, puppet('apply', '--debug'), :stdin => acl_manifest(target, file_content)) do |result|
-            assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+          on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target, file_content)) do |result|
+            assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end
 
         it 'Attempt to Update File' do
-          on(agent, puppet('apply', '--debug'), :stdin => update_manifest(target)) do |result|
-            assert_match(/Error:.*Permission denied/, result.stderr, 'Expected error was not detected!')
+          on(agent, puppet('apply', '--debug'), stdin: update_manifest(target)) do |result|
+            assert_match(%r{Error:.*Permission denied}, result.stderr, 'Expected error was not detected!')
           end
         end
       end

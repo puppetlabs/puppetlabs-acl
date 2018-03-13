@@ -1,26 +1,25 @@
 require 'spec_helper_acceptance'
 
 describe 'Owner - SID' do
-
   def setup_manifest(target_name, file_content, owner_id)
     <<-MANIFEST
       file { "#{target_parent}":
         ensure => directory
       }
-      
+
       file { "#{target_parent}/#{target_name}":
         ensure  => file,
         content => '#{file_content}',
         require => File['#{target_parent}']
       }
-      
+
       user { "#{owner_id}":
         ensure     => present,
         groups     => 'Users',
         managehome => true,
         password   => "L0v3Pupp3t!"
       }
-      
+
       user { "#{user_id}":
         ensure     => present,
         groups     => 'Users',
@@ -44,24 +43,24 @@ describe 'Owner - SID' do
   end
 
   context 'Change Owner to Local User SID' do
-    os_check_command = "cmd /c ver"
-    os_check_regex = /Version 5/
+    os_check_command = 'cmd /c ver'
+    os_check_regex = %r{Version 5}
     file_content = 'Rocket ship to the moon!'
-    target_name = "owner_local_user_sid.txt"
+    target_name = 'owner_local_user_sid.txt'
     owner_id = 'geraldo'
 
     get_owner_sid_command = <<-GETSID
-cmd /c "wmic useraccount where name='#{owner_id}' get sid"
+    cmd /c "wmic useraccount where name='#{owner_id}' get sid"
     GETSID
 
-    sid_regex = /^(S-.+)$/
+    sid_regex = %r{^(S-.+)$}
 
     verify_content_command = "cat /cygdrive/c/temp/#{target_name}"
-    file_content_regex = /\A#{file_content}\z/
+    file_content_regex = %r{\A#{file_content}\z}
 
     dosify_target = "c:\\temp\\#{target_name}"
     verify_owner_command = "cmd /c \"dir /q #{dosify_target}\""
-    owner_regex = /.*\\#{owner_id}/
+    owner_regex = %r{.*\\#{owner_id}}
 
     windows_agents.each do |agent|
       context "on #{agent}" do
@@ -75,8 +74,8 @@ cmd /c "wmic useraccount where name='#{owner_id}' get sid"
         end
 
         it 'Execute Setup Manifest' do
-          on(agent, puppet('apply', '--debug'), :stdin => setup_manifest(target_name, file_content, owner_id)) do |result|
-            assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+          on(agent, puppet('apply', '--debug'), stdin: setup_manifest(target_name, file_content, owner_id)) do |result|
+            assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end
 
@@ -87,8 +86,8 @@ cmd /c "wmic useraccount where name='#{owner_id}' get sid"
         end
 
         it 'Execute ACL Manifest' do
-          on(agent, puppet('apply', '--debug'), :stdin => acl_manifest(target_name, sid)) do |result|
-            assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+          on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target_name, sid)) do |result|
+            assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end
 

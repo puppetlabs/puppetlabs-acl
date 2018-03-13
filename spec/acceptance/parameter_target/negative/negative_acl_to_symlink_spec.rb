@@ -1,9 +1,8 @@
 require 'spec_helper_acceptance'
 
 describe 'Negative - Specify Symlink as Target' do
-
   os_check_command = 'cmd /c ver'
-  os_check_regex = /Version 5/
+  os_check_regex = %r{Version 5}
 
   target = 'c:/temp/sym_target_file.txt'
   target_symlink = 'c:/temp/symlink'
@@ -11,24 +10,24 @@ describe 'Negative - Specify Symlink as Target' do
   file_content = 'A link to the past.'
   verify_content_command = 'cat /cygdrive/c/temp/sym_target_file.txt'
 
-  win_target = "c:\\temp\\sym_target_file.txt"
-  win_target_symlink = "c:\\temp\\symlink"
+  win_target = 'c:\\temp\\sym_target_file.txt'
+  win_target_symlink = 'c:\\temp\\symlink'
   mklink_command = "c:\\windows\\system32\\cmd.exe /c mklink #{win_target_symlink} #{win_target}"
 
   verify_acl_command = "icacls #{target_symlink}"
-  acl_regex = /.*\\bob:\(F\)/
+  acl_regex = %r{.*\\bob:\(F\)}
 
   acl_manifest = <<-MANIFEST
     file { "#{target_parent}":
       ensure => directory
     }
-    
+
     file { '#{target}':
       ensure  => file,
       content => '#{file_content}',
       require => File['#{target_parent}']
     }
-    
+
     user { "#{user_id}":
       ensure     => present,
       groups     => 'Users',
@@ -36,14 +35,14 @@ describe 'Negative - Specify Symlink as Target' do
       password   => "L0v3Pupp3t!",
       require => File['#{target}']
     }
-    
+
     exec { 'Create Windows Symlink':
       command => '#{mklink_command}',
       creates => '#{target_symlink}',
       cwd     => '#{target_parent}',
       require => User['#{user_id}']
     }
-    
+
     acl { "#{target_symlink}":
       permissions  => [
         { identity => '#{user_id}', rights => ['full'] },
@@ -54,8 +53,8 @@ describe 'Negative - Specify Symlink as Target' do
 
   windows_agents.each do |agent|
     context "on #{agent}" do
-      #Determine if running on Windows 2003.
-      #Skip if 2003 since MKLINK is not available.
+      # Determine if running on Windows 2003.
+      # Skip if 2003 since MKLINK is not available.
       it 'Determine OS Type' do
         on(agent, os_check_command) do |result|
           if os_check_regex =~ result.stdout
@@ -65,8 +64,8 @@ describe 'Negative - Specify Symlink as Target' do
       end
 
       it 'Execute Manifest' do
-        on(agent, puppet('apply', '--debug'), :stdin => acl_manifest) do |result|
-          assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+        on(agent, puppet('apply', '--debug'), stdin: acl_manifest) do |result|
+          assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
         end
       end
 

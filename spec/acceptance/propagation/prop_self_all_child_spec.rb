@@ -11,8 +11,8 @@ def apply_manifest_and_verify(acl_regex, agent, prop_type, affects_child_type)
     verify_child_acl_command = "icacls #{target_child}"
 
     it 'Execute Apply Manifest' do
-      on(agent, puppet('apply', '--debug'), :stdin => acl_manifest(target_name, rights, prop_type, target_child, affects_child_type)) do |result|
-        assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+      on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target_name, rights, prop_type, target_child, affects_child_type)) do |result|
+        assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
       end
     end
 
@@ -30,26 +30,26 @@ def apply_manifest_and_verify(acl_regex, agent, prop_type, affects_child_type)
   end
 end
 
+# rubocop:disable RSpec/EmptyExampleGroup
 describe 'Propagate' do
-
   def acl_manifest(target_name, rights, prop_type, target_child, affects_child_type)
-    return <<-MANIFEST
+    <<-MANIFEST
       file { "#{target_parent}":
         ensure => directory
       }
-      
+
       file { "#{target_parent}/#{target_name}":
         ensure  => directory,
         require => File['#{target_parent}']
       }
-      
+
       user { "#{user_id}":
         ensure     => present,
         groups     => 'Users',
         managehome => true,
         password   => "L0v3Pupp3t!",
       }
-      
+
       acl { "#{target_parent}/#{target_name}":
         purge           => 'true',
         permissions     => [
@@ -76,9 +76,10 @@ describe 'Propagate' do
   context 'Negative - Propagate "self_only" to "all" Child Types' do
     prop_type = 'self_only'
     affects_child_type = 'all'
-    acl_regex = /.*\\bob:\(F\)/
+    acl_regex = %r{.*\\bob:\(F\)}
     windows_agents.each do |agent|
       apply_manifest_and_verify(acl_regex, agent, prop_type, affects_child_type)
     end
   end
 end
+# rubocop:enable RSpec/EmptyExampleGroup

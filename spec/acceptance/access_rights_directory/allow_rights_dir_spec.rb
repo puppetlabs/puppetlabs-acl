@@ -1,10 +1,11 @@
 require 'spec_helper_acceptance'
 
+# rubocop:disable RSpec/EmptyExampleGroup
 def apply_manifest_with_rights(acl_regex, agent, rights, target)
   context "on #{agent}" do
     it 'Execute Manifest' do
-      on(agent, puppet('apply', '--debug'), :stdin => acl_manifest(target, rights)) do |result|
-        assert_no_match(/Error:/, result.stderr, 'Unexpected error was detected!')
+      on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target, rights)) do |result|
+        assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
       end
     end
 
@@ -17,25 +18,24 @@ def apply_manifest_with_rights(acl_regex, agent, rights, target)
 end
 
 describe 'Directory - Allow' do
-
-  def acl_manifest (target, rights)
-    return <<-MANIFEST
+  def acl_manifest(target, rights)
+    <<-MANIFEST
       file { '#{target_parent}':
         ensure => directory
       }
-      
+
       file { '#{target}':
         ensure  => directory,
         require => File['#{target_parent}']
       }
-      
+
       user { '#{user_id}':
         ensure     => present,
         groups     => 'Users',
         managehome => true,
         password   => "L0v3Pupp3t!"
       }
-      
+
       acl { '#{target}':
         permissions  => [
           { identity => '#{user_id}', perm_type => 'allow', rights => ['#{rights}'] },
@@ -51,7 +51,7 @@ describe 'Directory - Allow' do
   context '"execute" Rights for Identity on Directory' do
     rights = 'execute'
     target = "c:/temp/allow_#{rights}_rights_dir"
-    acl_regex = /.*\\bob:\(OI\)\(CI\)\(Rc,S,X,RA\)/
+    acl_regex = %r{.*\\bob:\(OI\)\(CI\)\(Rc,S,X,RA\)}
 
     windows_agents.each do |agent|
       apply_manifest_with_rights(acl_regex, agent, rights, target)
@@ -61,7 +61,7 @@ describe 'Directory - Allow' do
   context '"modify" Rights for Identity on Directory' do
     rights = 'modify'
     target = "c:/temp/allow_#{rights}_rights_dir"
-    acl_regex = /.*\\bob:\(OI\)\(CI\)\(M\)/
+    acl_regex = %r{.*\\bob:\(OI\)\(CI\)\(M\)}
 
     windows_agents.each do |agent|
       apply_manifest_with_rights(acl_regex, agent, rights, target)
@@ -71,7 +71,7 @@ describe 'Directory - Allow' do
   context '"read, execute" Rights for Identity on Directory' do
     rights = "read', 'execute"
     target = 'c:/temp/allow_re_rights_dir'
-    acl_regex = /.*\\bob:\(OI\)\(CI\)\(RX\)/
+    acl_regex = %r{.*\\bob:\(OI\)\(CI\)\(RX\)}
 
     windows_agents.each do |agent|
       apply_manifest_with_rights(acl_regex, agent, rights, target)
@@ -81,7 +81,7 @@ describe 'Directory - Allow' do
   context '"read" Rights for Identity on Directory' do
     rights = 'read'
     target = "c:/temp/allow_#{rights}_rights_dir"
-    acl_regex = /.*\\bob:\(OI\)\(CI\)\(R\)/
+    acl_regex = %r{.*\\bob:\(OI\)\(CI\)\(R\)}
 
     windows_agents.each do |agent|
       apply_manifest_with_rights(acl_regex, agent, rights, target)
@@ -91,7 +91,7 @@ describe 'Directory - Allow' do
   context '"write, execute" Rights for Identity on Directory' do
     rights = "write','execute"
     target = 'c:/temp/allow_we_rights_dir'
-    acl_regex = /.*\\bob:\(OI\)\(CI\)\(W,Rc,X,RA\)/
+    acl_regex = %r{.*\\bob:\(OI\)\(CI\)\(W,Rc,X,RA\)}
 
     windows_agents.each do |agent|
       apply_manifest_with_rights(acl_regex, agent, rights, target)
@@ -101,7 +101,7 @@ describe 'Directory - Allow' do
   context '"write, read" Rights for Identity on Directory' do
     rights = "write','read"
     target = 'c:/temp/allow_wr_rights_dir'
-    acl_regex = /.*\\bob:\(OI\)\(CI\)\(R,W\)/
+    acl_regex = %r{.*\\bob:\(OI\)\(CI\)\(R,W\)}
 
     windows_agents.each do |agent|
       apply_manifest_with_rights(acl_regex, agent, rights, target)
@@ -111,7 +111,7 @@ describe 'Directory - Allow' do
   context '"write, read, execute" Rights for Identity on Directory' do
     rights = "write','read','execute"
     target = 'c:/temp/allow_wre_rights_dir'
-    acl_regex = /.*\\bob:\(OI\)\(CI\)\(RX,W\)/
+    acl_regex = %r{.*\\bob:\(OI\)\(CI\)\(RX,W\)}
 
     windows_agents.each do |agent|
       apply_manifest_with_rights(acl_regex, agent, rights, target)
@@ -121,11 +121,11 @@ describe 'Directory - Allow' do
   context '"write" Rights for Identity on Directory' do
     rights = 'write'
     target = "c:/temp/allow_#{rights}_rights_dir"
-    acl_regex = /.*\\bob:\(OI\)\(CI\)\(W,Rc\)/
+    acl_regex = %r{.*\\bob:\(OI\)\(CI\)\(W,Rc\)}
 
     windows_agents.each do |agent|
       apply_manifest_with_rights(acl_regex, agent, rights, target)
     end
   end
 end
-
+# rubocop:enable RSpec/EmptyExampleGroup
