@@ -1,7 +1,6 @@
 module Puppet::Util::MonkeyPatches
 end
 
-
 if Puppet::Util::Platform.windows?
 
   require 'win32/security'
@@ -11,19 +10,19 @@ if Puppet::Util::Platform.windows?
   # we only want to path pre-FFI versions, and we have the luxury of knowing that
   # we will be skipping from 0.1.4 straight to the latest FFI-ed, fixed version
   # see https://github.com/djberg96/win32-security/issues/3
-  if Gem.loaded_specs["win32-security"].version < Gem::Version.new('0.2.0')
+  if Gem.loaded_specs['win32-security'].version < Gem::Version.new('0.2.0')
     # monkey patch that bad boy
     Win32::Security::SID.class_eval do
       # Error class typically raised if any of the SID methods fail
       class Error < StandardError; end
 
-      def initialize(account=nil, host=Socket.gethostname)
+      def initialize(account = nil, host = Socket.gethostname)
         if account.nil?
           htoken = [0].pack('L')
           bool   = OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, 1, htoken)
           errno  = GetLastError()
 
-          if !bool
+          unless bool
             if errno == ERROR_NO_TOKEN
               unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, htoken)
                 raise get_last_error
@@ -38,11 +37,11 @@ if Puppet::Util::Platform.windows?
           token_info = 0.chr * 36
 
           bool = GetTokenInformation(
-              htoken,
-              TokenOwner,
-              token_info,
-              token_info.size,
-              cbti
+            htoken,
+            TokenOwner,
+            token_info,
+            token_info.size,
+            cbti,
           )
 
           unless bool
@@ -66,37 +65,37 @@ if Puppet::Util::Platform.windows?
           ordinal_val = nil
         end
 
-        if ordinal_val.nil?
-          bool = LookupAccountSid(
-              nil,
-              token_info.unpack('L')[0],
-              sid,
-              sid_cb,
-              domain_buf,
-              domain_cch,
-              sid_name_use
-          )
-        elsif ordinal_val < 10 # Assume it's a binary SID.
-          bool = LookupAccountSid(
-              host,
-              [account].pack('p*').unpack('L')[0],
-              sid,
-              sid_cb,
-              domain_buf,
-              domain_cch,
-              sid_name_use
-          )
-        else
-          bool = LookupAccountName(
-              host,
-              account,
-              sid,
-              sid_cb,
-              domain_buf,
-              domain_cch,
-              sid_name_use
-          )
-        end
+        bool = if ordinal_val.nil?
+                 LookupAccountSid(
+                   nil,
+                   token_info.unpack('L')[0],
+                   sid,
+                   sid_cb,
+                   domain_buf,
+                   domain_cch,
+                   sid_name_use,
+                 )
+               elsif ordinal_val < 10 # Assume it's a binary SID.
+                 LookupAccountSid(
+                   host,
+                   [account].pack('p*').unpack('L')[0],
+                   sid,
+                   sid_cb,
+                   domain_buf,
+                   domain_cch,
+                   sid_name_use,
+                 )
+               else
+                 LookupAccountName(
+                   host,
+                   account,
+                   sid,
+                   sid_cb,
+                   domain_buf,
+                   domain_cch,
+                   sid_name_use,
+                 )
+               end
 
         unless bool
           raise Error, get_last_error
@@ -115,7 +114,7 @@ if Puppet::Util::Platform.windows?
         else
           # all that necessary just for these two lines
           length = GetLengthSid(sid)
-          @sid = sid[0,length]
+          @sid = sid[0, length]
           @account = account
         end
 
@@ -134,30 +133,29 @@ if Puppet::Util::Platform.windows?
   if Puppet.version < '3.6.0'
 
     module Puppet::Util::Windows::Security
-
       def add_access_denied_ace(acl, mask, sid, inherit = nil)
         inherit ||= NO_INHERITANCE
 
         string_to_sid_ptr(sid) do |sid_ptr|
-          raise Puppet::Util::Windows::Error.new("Invalid SID") unless IsValidSid(sid_ptr)
+          raise Puppet::Util::Windows::Error, 'Invalid SID' unless IsValidSid(sid_ptr)
 
           unless AddAccessDeniedAceEx(acl, ACL_REVISION, inherit, mask, sid_ptr)
-            raise Puppet::Util::Windows::Error.new("Failed to add access control entry")
+            raise Puppet::Util::Windows::Error, 'Failed to add access control entry'
           end
         end
       end
 
-      #need to bring this in as well so it can all add_access_denied_ace properly
+      # need to bring this in as well so it can all add_access_denied_ace properly
       # setting DACL requires both READ_CONTROL and WRITE_DACL access rights,
       # and their respective privileges, SE_BACKUP_NAME and SE_RESTORE_NAME.
       def set_security_descriptor(path, sd)
         # REMIND: FFI
         acl = 0.chr * 1024 # This can be increased later as neede
         unless InitializeAcl(acl, acl.size, ACL_REVISION)
-          raise Puppet::Util::Windows::Error.new("Failed to initialize ACL")
+          raise Puppet::Util::Windows::Error, 'Failed to initialize ACL'
         end
 
-        raise Puppet::Util::Windows::Error.new("Invalid DACL") unless IsValidAcl(acl)
+        raise Puppet::Util::Windows::Error, 'Invalid DACL' unless IsValidAcl(acl)
 
         with_privilege(SE_BACKUP_NAME) do
           with_privilege(SE_RESTORE_NAME) do
@@ -166,15 +164,15 @@ if Puppet::Util::Platform.windows?
                 string_to_sid_ptr(sd.group) do |groupsid|
                   sd.dacl.each do |ace|
                     case ace.type
-                      when ACCESS_ALLOWED_ACE_TYPE
-                        #puts "ace: allow, sid #{sid_to_name(ace.sid)}, mask 0x#{ace.mask.to_s(16)}"
-                        add_access_allowed_ace(acl, ace.mask, ace.sid, ace.flags)
-                      when ACCESS_DENIED_ACE_TYPE
-                        #puts "ace: deny, sid #{sid_to_name(ace.sid)}, mask 0x#{ace.mask.to_s(16)}"
-                        add_access_denied_ace(acl, ace.mask, ace.sid, ace.flags)
-                      else
-                        raise "We should never get here"
-                        # this should have been a warning in an earlier commit
+                    when ACCESS_ALLOWED_ACE_TYPE
+                      # puts "ace: allow, sid #{sid_to_name(ace.sid)}, mask 0x#{ace.mask.to_s(16)}"
+                      add_access_allowed_ace(acl, ace.mask, ace.sid, ace.flags)
+                    when ACCESS_DENIED_ACE_TYPE
+                      # puts "ace: deny, sid #{sid_to_name(ace.sid)}, mask 0x#{ace.mask.to_s(16)}"
+                      add_access_denied_ace(acl, ace.mask, ace.sid, ace.flags)
+                    else
+                      raise 'We should never get here'
+                      # this should have been a warning in an earlier commit
                     end
                   end
 
@@ -189,7 +187,7 @@ if Puppet::Util::Platform.windows?
                                        groupsid,
                                        acl,
                                        nil)
-                  raise Puppet::Util::Windows::Error.new("Failed to set security information") unless rv == ERROR_SUCCESS
+                  raise Puppet::Util::Windows::Error, 'Failed to set security information' unless rv == ERROR_SUCCESS
                 end
               end
             end

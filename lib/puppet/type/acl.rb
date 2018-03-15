@@ -108,16 +108,14 @@ Puppet::Type.newtype(:acl) do
 
   EOT
 
-  feature :ace_order_required, "The provider determines if the order of access control entries (ACE) is required."
-  feature :can_inherit_parent_permissions, "The provider can inherit permissions from the parent."
+  feature :ace_order_required, 'The provider determines if the order of access control entries (ACE) is required.'
+  feature :can_inherit_parent_permissions, 'The provider can inherit permissions from the parent.'
 
   def initialize(*args)
     super
 
     # if target is unset, use the title
-    if self[:target].nil? then
-      self[:target] = self[:name]
-    end
+    self[:target] = self[:name] if self[:target].nil?
   end
 
   newparam(:name) do
@@ -125,8 +123,8 @@ Puppet::Type.newtype(:acl) do
       the target to this value if target is unset."
 
     validate do |value|
-      if value.nil? or value.empty?
-        raise ArgumentError, "A non-empty name must be specified."
+      if value.nil? || value.empty?
+        raise ArgumentError, 'A non-empty name must be specified.'
       end
     end
 
@@ -139,8 +137,8 @@ Puppet::Type.newtype(:acl) do
       The default is the name."
 
     validate do |value|
-      if value.nil? or value.empty?
-        raise ArgumentError, "A non-empty target must be specified."
+      if value.nil? || value.empty?
+        raise ArgumentError, 'A non-empty target must be specified.'
       end
     end
   end
@@ -166,7 +164,7 @@ Puppet::Type.newtype(:acl) do
     defaultto(:false)
   end
 
-  newproperty(:permissions, :array_matching => :all) do
+  newproperty(:permissions, array_matching: :all) do
     desc "Permissions is an array containing Access Control Entries
       (ACEs). Certain Operating Systems require these ACEs to be in
       explicit order (Windows). Every element in the array is a hash
@@ -216,15 +214,15 @@ Puppet::Type.newtype(:acl) do
 
     validate do |value|
       if value.nil? || value.empty?
-        raise ArgumentError, "A non-empty permissions must be specified."
+        raise ArgumentError, 'A non-empty permissions must be specified.'
       end
       if value['is_inherited']
         raise ArgumentError,
-         "Puppet can not manage inherited ACEs.
-         If you used puppet resource acl to build your manifest, please remove
-         any is_inherited => true entries in permissions when adding the resource
-         to the manifest.
-         Reference: #{value.inspect}"
+              "Puppet can not manage inherited ACEs.
+              If you used puppet resource acl to build your manifest, please remove
+              any is_inherited => true entries in permissions when adding the resource
+              to the manifest.
+              Reference: #{value.inspect}"
       end
     end
 
@@ -240,7 +238,7 @@ Puppet::Type.newtype(:acl) do
       super(current)
     end
 
-    def is_to_s(currentvalue)
+    def is_to_s(currentvalue) # rubocop:disable Style/PredicateName  False positive; this is an accepted puppet method name
       if provider.respond_to?(:permissions_to_s)
         return provider.permissions_to_s(currentvalue)
       end
@@ -249,25 +247,22 @@ Puppet::Type.newtype(:acl) do
     end
 
     def should_to_s(shouldvalue)
-      if provider.respond_to?(:permissions_should_to_s)
-        return provider.permissions_should_to_s(shouldvalue)
-      elsif provider.respond_to?(:permissions_to_s)
-        return provider.permissions_to_s(shouldvalue)
-      end
+      return provider.permissions_should_to_s(shouldvalue) if provider.respond_to?(:permissions_should_to_s)
+      return provider.permissions_to_s(shouldvalue) if provider.respond_to?(:permissions_to_s)
 
       super(shouldvalue)
     end
 
     def self.format_value_for_display(value)
       if value.is_a? Array
-        formatted_values = value.collect {|value| format_value_for_display(value)}.join(', ')
+        formatted_values = value.map { |item| format_value_for_display(item) }.join(', ')
         "[#{formatted_values}\n]"
       elsif value.is_a? Puppet::Type::Acl::Ace
-        "#{value.inspect}"
+        value.inspect.to_s
       elsif value.is_a? Hash
-        hash = value.keys.sort {|a,b| a.to_s <=> b.to_s}.collect do |k|
+        hash = value.keys.sort_by(&:to_s).map { |k|
           "#{k} => #{format_value_for_display(value[k])}"
-        end.join(', ')
+        }.join(', ')
 
         "\n { #{hash} }"
       else
@@ -292,7 +287,7 @@ Puppet::Type.newtype(:acl) do
 
     validate do |value|
       if value.nil? || value.empty?
-        raise ArgumentError, "A non-empty owner must be specified."
+        raise ArgumentError, 'A non-empty owner must be specified.'
       end
     end
 
@@ -306,14 +301,14 @@ Puppet::Type.newtype(:acl) do
       super(current)
     end
 
-    def is_to_s(currentvalue)
+    def is_to_s(currentvalue) # rubocop:disable Style/PredicateName  False positive; this is an accepted puppet method name
       if provider.respond_to?(:owner_to_s)
         return provider.owner_to_s(currentvalue)
       end
 
       super(currentvalue)
     end
-    alias :should_to_s :is_to_s
+    alias_method :should_to_s, :is_to_s
   end
 
   newproperty(:group) do
@@ -332,7 +327,7 @@ Puppet::Type.newtype(:acl) do
 
     validate do |value|
       if value.nil? || value.empty?
-        raise ArgumentError, "A non-empty group must be specified."
+        raise ArgumentError, 'A non-empty group must be specified.'
       end
     end
 
@@ -346,20 +341,20 @@ Puppet::Type.newtype(:acl) do
       super(current)
     end
 
-    def is_to_s(currentvalue)
+    def is_to_s(currentvalue) # rubocop:disable Style/PredicateName  False positive; this is an accepted puppet method name
       if provider.respond_to?(:group_to_s)
         return provider.group_to_s(currentvalue)
       end
 
       super(currentvalue)
     end
-    alias :should_to_s :is_to_s
+    alias_method :should_to_s, :is_to_s
   end
 
-  newproperty(:inherit_parent_permissions, :boolean => true, :required_features=> :can_inherit_parent_permissions) do
+  newproperty(:inherit_parent_permissions, boolean: true, required_features: :can_inherit_parent_permissions) do
     desc "Inherit Parent Permissions specifies whether to inherit
       permissions from parent ACLs or not. The default is `true`."
-    newvalues(:true,:false)
+    newvalues(:true, :false)
     defaultto(true)
 
     def insync?(current)
@@ -369,7 +364,7 @@ Puppet::Type.newtype(:acl) do
 
   validate do
     if self[:permissions] == []
-      raise ArgumentError, "Value for permissions should be an array with at least one element specified."
+      raise ArgumentError, 'Value for permissions should be an array with at least one element specified.'
     end
 
     if provider.respond_to?(:validate)
@@ -391,37 +386,37 @@ Puppet::Type.newtype(:acl) do
   autorequire(:user) do
     required_users = []
 
-    if provider.respond_to?(:get_account_name)
-      has_account_name_method = true
-    else
-      has_account_name_method = false
-    end
+    has_account_name_method = if provider.respond_to?(:get_account_name)
+                                true
+                              else
+                                false
+                              end
 
     if self[:owner]
       if has_account_name_method
-        required_users << "#{provider.get_account_name(self[:owner])}"
+        required_users << provider.get_account_name(self[:owner]).to_s
       end
 
       # add the unqualified item whether qualified is found or not
-      required_users << "#{self[:owner]}"
+      required_users << (self[:owner]).to_s
     end
 
     if self[:group]
       if has_account_name_method
-        required_users << "#{provider.get_account_name(self[:group])}"
+        required_users << provider.get_account_name(self[:group]).to_s
       end
 
       # add the unqualified item whether qualified is found or not
-      required_users << "#{self[:group]}"
+      required_users << (self[:group]).to_s
     end
 
     permissions = self[:permissions]
     unless permissions.nil?
       permissions.each do |permission|
         if has_account_name_method
-          required_users << "#{provider.get_account_name(permission.identity)}"
+          required_users << provider.get_account_name(permission.identity).to_s
         end
-        required_users << "#{permission.identity}"
+        required_users << permission.identity.to_s
       end
     end
 
@@ -431,37 +426,37 @@ Puppet::Type.newtype(:acl) do
   autorequire(:group) do
     required_groups = []
 
-    if provider.respond_to?(:get_group_name)
-      has_account_group_method = true
-    else
-      has_account_group_method = false
-    end
+    has_account_group_method = if provider.respond_to?(:get_group_name)
+                                 true
+                               else
+                                 false
+                               end
 
     if self[:owner]
       if has_account_group_method
-        required_groups << "#{provider.get_group_name(self[:owner])}"
+        required_groups << provider.get_group_name(self[:owner]).to_s
       end
 
       # add the unqualified item whether qualified is found or not
-      required_groups << "#{self[:owner]}"
+      required_groups << (self[:owner]).to_s
     end
 
     if self[:group]
       if has_account_group_method
-        required_groups << "#{provider.get_group_name(self[:group])}"
+        required_groups << provider.get_group_name(self[:group]).to_s
       end
 
       # add the unqualified item whether qualified is found or not
-      required_groups << "#{self[:group]}"
+      required_groups << (self[:group]).to_s
     end
 
     permissions = self[:permissions]
     unless permissions.nil?
       permissions.each do |permission|
         if has_account_group_method
-          required_groups << "#{provider.get_group_name(permission.identity)}"
+          required_groups << provider.get_group_name(permission.identity).to_s
         end
-        required_groups << "#{permission.identity}"
+        required_groups << permission.identity.to_s
       end
     end
 
@@ -470,12 +465,12 @@ Puppet::Type.newtype(:acl) do
 
   def munge_boolean(value)
     case value
-      when true, "true", :true
-        :true
-      when false, "false", :false
-        :false
-      else
-        fail("munge_boolean only takes booleans")
+    when true, 'true', :true
+      :true
+    when false, 'false', :false
+      :false
+    else
+      raise('munge_boolean only takes booleans')
     end
   end
 end

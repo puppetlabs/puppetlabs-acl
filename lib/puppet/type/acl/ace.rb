@@ -51,22 +51,22 @@ class Puppet::Type::Acl
       value
     end
 
-    def is_inherited?
-      return is_inherited
+    def inherited?
+      is_inherited
     end
 
     def convert_to_symbol(value)
-      return nil if (value.nil? || value.empty?)
+      return nil if value.nil? || value.empty?
       return value if value.is_a?(Symbol)
 
       value.downcase.to_sym
     end
 
     def validate_non_empty(name, value)
-      if value.nil? or value == ''
+      if value.nil? || value == ''
         raise ArgumentError, "A non-empty #{name} must be specified."
       end
-      if value.kind_of?(Array) and value.count == 0
+      if value.is_a?(Array) && value.count.zero?
         raise ArgumentError, "Value for #{name} should have least one element in the array."
       end
 
@@ -74,7 +74,7 @@ class Puppet::Type::Acl
     end
 
     def validate_array(name, values)
-      raise ArgumentError, "Value for #{name} should be an array. Perhaps try ['#{values}']?" unless values.kind_of?(Array)
+      raise ArgumentError, "Value for #{name} should be an array. Perhaps try ['#{values}']?" unless values.is_a?(Array)
 
       values
     end
@@ -111,27 +111,27 @@ class Puppet::Type::Acl
 
     def ensure_rights_values_compatible
       if @rights.include?(:mask_specific) && rights.count != 1
-        raise ArgumentError, "In each ace, when specifying rights, if you include 'mask_specific', it should be without anything else e.g. rights => ['mask_specific']. Please decide whether 'mask_specific' or predetermined rights and correct the manifest. Reference: #{self.inspect}"
+        raise ArgumentError, "In each ace, when specifying rights, if you include 'mask_specific', it should be without anything else e.g. rights => ['mask_specific']. Please decide whether 'mask_specific' or predetermined rights and correct the manifest. Reference: #{inspect}" # rubocop:disable Metrics/LineLength
       end
 
       if @rights.include?(:full) && rights.count != 1
-        Puppet.warning("In each ace, when specifying rights, if you include 'full', it should be without anything else e.g. rights => ['full']. Please remove the extraneous rights from the manifest to remove this warning. Reference: #{self.inspect}")
+        Puppet.warning("In each ace, when specifying rights, if you include 'full', it should be without anything else e.g. rights => ['full']. Please remove the extraneous rights from the manifest to remove this warning. Reference: #{inspect}") # rubocop:disable Metrics/LineLength
         @rights = [:full]
       end
-      if @rights.include?(:modify) && rights.count != 1
-        Puppet.warning("In each ace, when specifying rights, if you include 'modify', it should be without anything else e.g. rights => ['modify']. Please remove the extraneous rights from the manifest to remove this warning. Reference: #{self.inspect}")
+      if @rights.include?(:modify) && rights.count != 1 # rubocop:disable Style/GuardClause  Changing this to a guard clause makes the line long and unreadable
+        Puppet.warning("In each ace, when specifying rights, if you include 'modify', it should be without anything else e.g. rights => ['modify']. Please remove the extraneous rights from the manifest to remove this warning. Reference: #{inspect}") # rubocop:disable Metrics/LineLength
         @rights = [:modify]
       end
     end
 
     def ensure_mask_when_mask_specific
-      if @rights.include?(:mask_specific) && (@mask.nil? || @mask.empty?)
-        raise ArgumentError, "If you specify rights => ['mask_specific'], you must also include mask => 'value'. Reference: #{self.inspect}"
+      if @rights.include?(:mask_specific) && (@mask.nil? || @mask.empty?) # rubocop:disable Style/GuardClause  Changing this to a guard clause makes the line long and unreadable
+        raise ArgumentError, "If you specify rights => ['mask_specific'], you must also include mask => 'value'. Reference: #{inspect}"
       end
     end
 
     def ensure_unique_values(values)
-      if values.kind_of?(Array)
+      if values.is_a?(Array)
         return values.uniq
       end
 
@@ -139,17 +139,17 @@ class Puppet::Type::Acl
     end
 
     def ensure_none_or_self_only_sync
-      return if @child_types.nil? ||@affects.nil?
+      return if @child_types.nil? || @affects.nil?
       return if @child_types == :none && @affects == :self_only
       return unless @child_types == :none || @affects == :self_only
 
       if @child_types == :none && (@affects != :all && @affects != :self_only)
-        Puppet.warning("If child_types => 'none', affects => value will be ignored. Please remove affects or set affects => 'self_only' to remove this warning. Reference: #{self.inspect}")
+        Puppet.warning("If child_types => 'none', affects => value will be ignored. Please remove affects or set affects => 'self_only' to remove this warning. Reference: #{inspect}")
       end
       @affects = :self_only if @child_types == :none
 
       if @affects == :self_only && (@child_types != :all && @child_types != :none)
-        Puppet.warning("If affects => 'self_only', child_types => value will be ignored. Please remove child_types or set child_types => 'none' to remove this warning. Reference: #{self.inspect}")
+        Puppet.warning("If affects => 'self_only', child_types => value will be ignored. Please remove child_types or set child_types => 'none' to remove this warning. Reference: #{inspect}")
       end
       @child_types = :none if @affects == :self_only
     end
@@ -176,13 +176,16 @@ class Puppet::Type::Acl
 
     def rights=(value)
       @rights = ensure_unique_values(
-          convert_to_symbols(
-              validate_individual_values(
-                  validate_array(
-                      'rights',
-                      validate_non_empty('rights', value)
-                  ),
-                  :full, :modify, :write, :read, :execute, :mask_specific)))
+        convert_to_symbols(
+          validate_individual_values(
+            validate_array(
+              'rights',
+              validate_non_empty('rights', value),
+            ),
+            :full, :modify, :write, :read, :execute, :mask_specific
+          ),
+        ),
+      )
       ensure_rights_order
       ensure_rights_values_compatible
       ensure_mask_when_mask_specific if @rights.include?(:mask_specific)
@@ -222,19 +225,17 @@ class Puppet::Type::Acl
         other_id_has_value = true unless other.id.nil? || other.id.empty?
       end
 
-      id_has_value = true unless self.id.nil? || self.id.empty?
+      id_has_value = true unless id.nil? || id.empty?
 
       if id_has_value && (ignore_other || other_id_has_value)
         id = self.id
         other_id = other.id unless ignore_other
+      elsif @provider && @provider.respond_to?(:get_account_name)
+        id = @provider.get_account_name(@identity)
+        other_id = @provider.get_account_name(other.identity) unless ignore_other
       else
-        if @provider && @provider.respond_to?(:get_account_name)
-          id = @provider.get_account_name(@identity)
-          other_id = @provider.get_account_name(other.identity) unless ignore_other
-        else
-          id = @identity
-          other_id = other.identity unless ignore_other
-        end
+        id = @identity
+        other_id = other.identity unless ignore_other
       end
 
       [id, other_id]
@@ -252,11 +253,11 @@ class Puppet::Type::Acl
 
       account_ids = get_comparison_ids(other)
 
-      return account_ids[0] == account_ids[1] &&
-          @child_types == other.child_types &&
-          @affects == other.affects &&
-          @is_inherited == other.is_inherited &&
-          @perm_type == other.perm_type
+      account_ids[0] == account_ids[1] &&
+        @child_types == other.child_types &&
+        @affects == other.affects &&
+        @is_inherited == other.is_inherited &&
+        @perm_type == other.perm_type
     end
 
     # This ensures we are looking at the same ace with the same
@@ -268,31 +269,31 @@ class Puppet::Type::Acl
     def ==(other)
       return false unless other.is_a?(Ace)
 
-      return same?(other) &&
-          @rights == other.rights
+      same?(other) &&
+        @rights == other.rights
     end
 
-    alias_method :eql?, :==
+    alias eql? ==
 
     def hash
-      return get_comparison_ids[0].hash ^
-          @rights.hash ^
-          @perm_type.hash ^
-          @child_types.hash ^
-          @affects.hash ^
-          @is_inherited.hash
+      get_comparison_ids[0].hash ^
+        @rights.hash ^
+        @perm_type.hash ^
+        @child_types.hash ^
+        @affects.hash ^
+        @is_inherited.hash
     end
 
     def to_hash
       return @hash if @hash
 
-      ace_hash = Hash.new
+      ace_hash = {}
       ace_hash['identity'] = identity
       ace_hash['rights'] = convert_from_symbols(rights)
-      ace_hash['mask'] = mask if (rights == [:mask_specific] && !mask.nil?)
-      ace_hash['perm_type'] = perm_type unless (perm_type == :allow || perm_type.nil?)
-      ace_hash['child_types'] = child_types unless (child_types == :all || child_types == :none || child_types.nil?)
-      ace_hash['affects'] = affects unless (affects == :all || affects.nil?)
+      ace_hash['mask'] = mask if rights == [:mask_specific] && !mask.nil?
+      ace_hash['perm_type'] = perm_type unless perm_type == :allow || perm_type.nil?
+      ace_hash['child_types'] = child_types unless child_types == :all || child_types == :none || child_types.nil?
+      ace_hash['affects'] = affects unless affects == :all || affects.nil?
       ace_hash['is_inherited'] = is_inherited if is_inherited
 
       @hash = ace_hash
@@ -317,19 +318,19 @@ class Puppet::Type::Acl
 
     def inspect
       hash = to_hash
-      return_value = hash.keys.collect do |key|
+      return_value = hash.keys.map { |key|
         key_value = hash[key]
         if key_value.is_a? Array
           "#{key} => #{key_value}"
         else
           "#{key} => '#{key_value}'"
         end
-      end.join(', ')
+      }.join(', ')
 
       "\n { #{return_value} }"
     end
 
-    alias_method :to_s, :inspect
+    alias to_s inspect
 
     # added to support Ruby 2.3 which serializes Hashes differently when
     # writing YAML than previous Ruby versions, which can break the last
@@ -343,11 +344,13 @@ class Puppet::Type::Acl
       # "--- !ruby/object:Puppet::Type::Acl::Ace\nidentity: Administrators\nrights:\n- full\n"
       coder.represent_map nil, to_hash
 
+      # rubocop:disable Metrics/LineLength
       # without this method implemented, serialization varies based on Ruby version like:
       # Ruby 2.3
       # "--- !ruby/hash-with-ivars:Puppet::Type::Acl::Ace\nelements: {}\nivars:\n  :@provider: \n  :@identity: Administrators\n  :@hash: \n  :@id: S-32-12-0\n  :@mask: '2023422'\n  :@rights:\n  - :full\n  :@perm_type: :allow\n  :@child_types: :all\n  :@affects: :all\n  :@is_inherited: false\n"
       # Ruby 2.1.9
       # "--- !ruby/hash:Puppet::Type::Acl::Ace {}\n"
+      # rubocop:enable Metrics/LineLength
     end
   end
 end
