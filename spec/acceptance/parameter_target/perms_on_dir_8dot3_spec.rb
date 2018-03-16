@@ -5,7 +5,7 @@ def apply_manifest_and_verify(agent, target, target8dot3, verify_acl_command, re
   context "on #{agent}" do
     acl_regex = %r{.*\\bob:\(OI\)\(CI\)\(F\)}
     it 'Execute Manifest' do
-      on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target, target8dot3)) do |result|
+      execute_manifest_on(agent, acl_manifest(target, target8dot3), { :debug => true }) do |result|
         assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
       end
     end
@@ -17,7 +17,7 @@ def apply_manifest_and_verify(agent, target, target8dot3, verify_acl_command, re
     end
     if remove
       it 'Execute Remove Manifest' do
-        on(agent, puppet('apply', '--debug'), stdin: acl_manifest_remove(target8dot3)) do |result|
+        execute_manifest_on(agent, acl_manifest_remove(target8dot3), { :debug => true }) do |result|
           assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
         end
       end

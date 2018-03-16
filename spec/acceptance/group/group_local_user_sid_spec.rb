@@ -91,7 +91,7 @@ describe 'Group - SID' do
         end
 
         it 'Execute Setup Manifest' do
-          on(agent, puppet('apply', '--debug'), stdin: setup_manifest(target_parent, target, file_content, user_id, group_id)) do |result|
+          execute_manifest_on(agent, setup_manifest(target_parent, target, file_content, user_id, group_id), { :debug => true }) do |result|
             assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end
@@ -103,7 +103,7 @@ describe 'Group - SID' do
         end
 
         it 'Execute ACL Manifest' do
-          on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target, user_id, sid)) do |result|
+          execute_manifest_on(agent, acl_manifest(target, user_id, sid), { :debug => true }) do |result|
             assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end

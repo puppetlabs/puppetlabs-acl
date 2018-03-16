@@ -33,7 +33,7 @@ describe 'Identity - Negative' do
     windows_agents.each do |agent|
       context "on #{agent}" do
         it 'Execute Manifest' do
-          on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target_file, file_content, group_id)) do |result|
+          execute_manifest_on(agent, acl_manifest(target_file, file_content, group_id), { :debug => true }) do |result|
             assert_match(%r{Error: Failed to set permissions for }, result.stderr, 'Expected error was not detected!')
           end
         end
@@ -55,7 +55,7 @@ describe 'Identity - Negative' do
     windows_agents.each do |agent|
       context "on #{agent}" do
         it 'Execute Manifest' do
-          on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target_file, file_content, user_id)) do |result|
+          execute_manifest_on(agent, acl_manifest(target_file, file_content, user_id), { :debug => true }) do |result|
             assert_match(%r{Error: Failed to set permissions for 'user_not_here'}, result.stderr, 'Expected error was not detected!')
           end
         end

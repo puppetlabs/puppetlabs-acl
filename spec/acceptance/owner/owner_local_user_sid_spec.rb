@@ -74,7 +74,7 @@ describe 'Owner - SID' do
         end
 
         it 'Execute Setup Manifest' do
-          on(agent, puppet('apply', '--debug'), stdin: setup_manifest(target_name, file_content, owner_id)) do |result|
+          execute_manifest_on(agent, setup_manifest(target_name, file_content, owner_id), { :debug => true }) do |result|
             assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end
@@ -86,7 +86,7 @@ describe 'Owner - SID' do
         end
 
         it 'Execute ACL Manifest' do
-          on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target_name, sid)) do |result|
+          execute_manifest_on(agent, acl_manifest(target_name, sid), { :debug => true }) do |result|
             assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end
