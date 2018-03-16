@@ -32,7 +32,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
     if include_inherited
       provider.permissions
     else
-      provider.permissions.reject { |p| p.is_inherited? }
+      provider.permissions.reject { |p| p.inherited? }
     end
   end
 
@@ -247,7 +247,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
     it 'contains aces that are inherited' do
       at_least_one = false
       provider.permissions.each do |ace|
-        if ace.is_inherited?
+        if ace.inherited?
           at_least_one = true
           break
         end
@@ -305,7 +305,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
 
           permissions = [Puppet::Type::Acl::Ace.new({ 'identity' => account[:identity], 'rights' => ['full'] }, provider)]
           set_perms(permissions).must == permissions
-          # permissions = get_permissions_for_path(resource[:target]).select { |p| !p.is_inherited? }
+          # permissions = get_permissions_for_path(resource[:target]).select { |p| !p.inherited? }
           # set_perms(removing_perms).must == (permissions - removing_perms)
         end
       end
@@ -331,7 +331,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
         all_perms = get_permissions_for_path(resource[:target])
         all_perms.each do |perm|
           perms_not_empty = true
-          expect(perm.is_inherited?).to eq(false)
+          expect(perm.inherited?).to eq(false)
         end
 
         expect(perms_not_empty).to eq(true)
@@ -638,7 +638,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
             Puppet::Type::Acl::Ace.new({ 'identity' => sid, 'rights' => ['modify'] }, provider),
           ]
 
-          permissions = get_permissions_for_path(resource[:target]).reject { |p| p.is_inherited? }
+          permissions = get_permissions_for_path(resource[:target]).reject { |p| p.inherited? }
           expect(set_perms(removing_perms)).to eq(permissions - removing_perms)
         end
       end
