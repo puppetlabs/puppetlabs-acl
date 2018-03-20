@@ -8,7 +8,7 @@ def apply_manifest_and_verify(agent, file_content, owner_id, target_name, owner_
     verify_owner_command = "cmd /c \"dir /q #{dosify_target}\""
 
     it 'Execute ACL Manifest' do
-      on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target_name, file_content, owner_id)) do |result|
+      execute_manifest_on(agent, acl_manifest(target_name, file_content, owner_id), { :debug => true }) do |result|
         assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
       end
     end
@@ -99,7 +99,7 @@ describe 'Owner - Local User' do
     windows_agents.each do |agent|
       context "on #{agent}" do
         it 'Execute ACL Manifest' do
-          apply_manifest_on(agent, acl_manifest(target_name, file_content, owner_id), debug: true) do |result|
+          execute_manifest_on(agent, acl_manifest(target_name, file_content, owner_id), { :debug => true }) do |result|
             assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end

@@ -6,7 +6,7 @@ def apply_manifest_and_verify(agent, target, remove = false)
     verify_acl_command = "icacls #{target}"
     acl_regex = %r{.*\\bob:\(OI\)\(CI\)\(F\)}
     it 'Execute Manifest' do
-      on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target)) do |result|
+      execute_manifest_on(agent, acl_manifest(target), { :debug => true }) do |result|
         assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
       end
     end
@@ -18,7 +18,7 @@ def apply_manifest_and_verify(agent, target, remove = false)
     end
     if remove
       it 'Execute Remove Manifest' do
-        on(agent, puppet('apply', '--debug'), stdin: acl_manifest_remove(target)) do |result|
+        execute_manifest_on(agent, acl_manifest_remove(target), { :debug => true }) do |result|
           assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
         end
       end
@@ -112,7 +112,7 @@ describe 'Permissions - Directory' do
 
     windows_agents.each do |agent|
       it 'Execute Manifest' do
-        apply_manifest_on(agent, acl_manifest(target), debug: true) do |result|
+        execute_manifest_on(agent, acl_manifest(target), { :debug => true }) do |result|
           assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
         end
       end

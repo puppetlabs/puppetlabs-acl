@@ -7,7 +7,7 @@ def apply_manifest_and_verify(file_name, file_content, agent, remove = nil)
   verify_content_command = "cat /cygdrive/c/temp/#{file_name}"
   context "on #{agent}" do
     it 'Execute Manifest' do
-      on(agent, puppet('apply', '--debug'), stdin: acl_manifest(file_name, file_content)) do |result|
+      execute_manifest_on(agent, acl_manifest(file_name, file_content), { :debug => true }) do |result|
         assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
       end
     end
@@ -20,7 +20,7 @@ def apply_manifest_and_verify(file_name, file_content, agent, remove = nil)
 
     if remove
       it 'Execute Remove Manifest' do
-        on(agent, puppet('apply', '--debug'), stdin: acl_manifest_remove(file_name)) do |result|
+        execute_manifest_on(agent, acl_manifest_remove(file_name), { :debug => true }) do |result|
           assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
         end
       end
@@ -130,7 +130,7 @@ describe 'Permissions - File' do
 
     windows_agents.each do |agent|
       it 'Execute Manifest' do
-        apply_manifest_on(agent, acl_manifest(file_name, file_content), debug: true) do |result|
+        execute_manifest_on(agent, acl_manifest(file_name, file_content), { :debug => true }) do |result|
           assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
         end
       end

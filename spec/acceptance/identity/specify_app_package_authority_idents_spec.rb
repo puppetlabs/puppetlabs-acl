@@ -45,7 +45,7 @@ describe 'Identity' do
 
             it 'Execute ACL Manifest' do
               # exit code 2: The run succeeded, and some resources were changed.
-              on(agent, puppet('apply', '--detailed-exitcodes'), stdin: acl_manifest, acceptable_exit_codes: [2]) do |result|
+              execute_manifest_on(agent, acl_manifest, { :expect_changes => true }) do |result|
                 assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
               end
             end
@@ -59,7 +59,7 @@ describe 'Identity' do
             end
 
             it 'Execute ACL Manifest again' do
-              on(agent, puppet('apply'), stdin: acl_manifest, acceptable_exit_codes: [0]) do |result|
+              execute_manifest_on(agent, acl_manifest, { :catch_changes => true } ) do |result|
                 assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
               end
             end

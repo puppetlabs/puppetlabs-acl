@@ -64,7 +64,7 @@ describe 'Negative - Specify Symlink as Target' do
       end
 
       it 'Execute Manifest' do
-        on(agent, puppet('apply', '--debug'), stdin: acl_manifest) do |result|
+        execute_manifest_on(agent, acl_manifest, { :debug => true }) do |result|
           assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
         end
       end

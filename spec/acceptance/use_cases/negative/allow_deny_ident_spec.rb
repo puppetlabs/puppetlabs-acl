@@ -35,7 +35,7 @@ describe 'Use Cases' do
     windows_agents.each do |agent|
       context "on #{agent}" do
         it 'Execute ACL Manifest' do
-          on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target, file_content)) do |result|
+          execute_manifest_on(agent, acl_manifest(target, file_content), { :debug => true }) do |result|
             assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end

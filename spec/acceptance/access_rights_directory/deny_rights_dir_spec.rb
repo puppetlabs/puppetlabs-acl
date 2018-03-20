@@ -4,7 +4,7 @@ require 'spec_helper_acceptance'
 def apply_manifest_with_rights(acl_regex, agent, rights, target)
   context "on #{agent}" do
     it 'Execute Manifest' do
-      on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target, rights)) do |result|
+      execute_manifest_on(agent, acl_manifest(target, rights), { :debug => true }) do |result|
         assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
       end
     end

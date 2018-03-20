@@ -41,13 +41,13 @@ describe 'Use Cases' do
     windows_agents.each do |agent|
       context "on #{agent}" do
         it 'Execute ACL Manifest' do
-          on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target, file_content)) do |result|
+          execute_manifest_on(agent, acl_manifest(target, file_content), { :debug => true }) do |result|
             assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end
 
         it 'Attempt to Update File' do
-          on(agent, puppet('apply', '--debug'), stdin: update_manifest(target)) do |result|
+          execute_manifest_on(agent, update_manifest(target), { :debug => true }) do |result|
             assert_match(%r{Error:.*Permission denied}, result.stderr, 'Expected error was not detected!')
           end
         end

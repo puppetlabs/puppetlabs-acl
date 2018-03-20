@@ -26,7 +26,7 @@ describe 'Parameter Target - Negative' do
     context "Specify Blank Target on #{agent}" do
       target = ''
       it 'Execute Manifest' do
-        on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target), acceptable_exit_codes: [1]) do |result|
+        execute_manifest_on(agent, acl_manifest(target), { :debug => true, :exepect_failures => true }) do |result|
           assert_match(%r{Error:.*(A non-empty name must be specified|Empty string title at)}, result.stderr, 'Expected error was not detected!')
         end
       end
@@ -37,7 +37,7 @@ describe 'Parameter Target - Negative' do
     context "Specify Target with Invalid Path Characters on #{agent}" do
       target = 'c:/temp/invalid_<:>|?*'
       it 'Execute Manifest' do
-        on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target)) do |result|
+        execute_manifest_on(agent, acl_manifest(target), { :debug => true }) do |result|
           assert_match(%r{Error:.*The filename, directory name, or volume label syntax is incorrect},
                        result.stderr, 'Expected error was not detected!')
         end

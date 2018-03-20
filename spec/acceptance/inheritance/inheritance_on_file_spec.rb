@@ -10,7 +10,7 @@ def apply_manifest_and_verify(perm_type, asset_type, child_inherit_type, acl_chi
 
   context "on #{agent}" do
     it 'Execute Apply Manifest' do
-      on(agent, puppet('apply', '--debug'), stdin: acl_manifest(target_name, target_child, file_content, user_id_child, rights, perm_type, child_inherit_type)) do |result|
+      execute_manifest_on(agent, acl_manifest(target_name, target_child, file_content, user_id_child, rights, perm_type, child_inherit_type), { :debug => true }) do |result|
         assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
       end
     end
