@@ -1,23 +1,42 @@
 ---
-Rakefile:
-  unmanaged: true
 Gemfile:
-  optional:
+  required:
     ':system_tests':
+      - gem: 'puppet-module-posix-system-r#{minor_version}'
+        platforms: ruby
+      - gem: 'puppet-module-win-system-r#{minor_version}'
+        platforms:
+          - mswin
+          - mingw
+          - x64_mingw
+      - gem: beaker
+        version: '~> 3.13'
+        from_env: BEAKER_VERSION
+      - gem: beaker-abs
+        version: '~> 0.1'
+        from_env: BEAKER_ABS_VERSION
+      - gem: beaker-pe
+      - gem: beaker-hostgenerator
+        version: '>= 0.0'
+        from_env: BEAKER_HOSTGENERATOR_VERSION
+      - gem: beaker-rspec
+        version: '>= 0.0'
+        from_env: BEAKER_RSPEC_VERSION
       - gem: beaker-testmode_switcher
         version: '~> 0.4'
       - gem: master_manipulator
-spec/spec_helper.rb:
+      - gem: puppet-blacksmith
+        version: '~> 3.4'
+
+# For the moment don't do any rubocop checks.
+.rubocop.yml:
+  include_todos: true
+  selected_profile: off
+
+spec/default_facts.yml:
   unmanaged: true
+
 appveyor.yml:
-  test_script:
-    - "'bundle exec puppet apply -e \"user {''Administrator'': ensure=>present, password => ''Th!s1sS#cur3@@@2129021'', groups=>[''Administrators''],}\" && exit 0'"
-    - 'bundle exec rspec spec/unit spec/integration -fd -b'
-MAINTAINERS.md:
-  maintainers:
-    - "Puppet Windows Team `windows |at| puppet |dot| com`"
-NOTICE:
-  copyright_holders:
-    - name: 'Puppet, Inc.'
-      begin: 2013
-      end: 'latest'
+  unmanaged: true
+.gitlab-ci.yml:
+  delete: true
