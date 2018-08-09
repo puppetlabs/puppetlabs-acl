@@ -1,54 +1,45 @@
+
 require 'puppetlabs_spec_helper/module_spec_helper'
-require 'pathname'
-require 'tmpdir'
-require 'fileutils'
+require 'rspec-puppet-facts'
 
-if Puppet.features.microsoft_windows?
-  require 'puppet/util/windows/security'
+begin
+  require 'spec_helper_local' if File.file?(File.join(File.dirname(__FILE__), 'spec_helper_local.rb'))
+rescue LoadError => loaderror
+  warn "Could not require spec_helper_local: #{loaderror.message}"
+end
 
-  def take_ownership(path)
-    path = path.tr('/', '\\')
-    output = `takeown.exe /F #{path} /R /A /D Y 2>&1`
-    puts "#{path} got error #{output}" if $CHILD_STATUS != 0 # check if the child process exited cleanly.
+include RspecPuppetFacts
+
+default_facts = {
+  puppetversion: Puppet.version,
+  facterversion: Facter.version,
+}
+
+default_facts_path = File.expand_path(File.join(File.dirname(__FILE__), 'default_facts.yml'))
+default_module_facts_path = File.expand_path(File.join(File.dirname(__FILE__), 'default_module_facts.yml'))
+
+if File.exist?(default_facts_path) && File.readable?(default_facts_path)
+  default_facts.merge!(YAML.safe_load(File.read(default_facts_path)))
+end
+
+if File.exist?(default_module_facts_path) && File.readable?(default_module_facts_path)
+  default_facts.merge!(YAML.safe_load(File.read(default_module_facts_path)))
+end
+
+RSpec.configure do |c|
+  c.default_facts = default_facts
+  c.before :each do
+    # set to strictest setting for testing
+    # by default Puppet runs at warning level
+    Puppet.settings[:strict] = :warning
   end
 end
 
-RSpec.configure do |config|
-  tmpdir = Dir.mktmpdir('rspecrun_acl')
-  oldtmpdir = Dir.tmpdir
-  ENV['TMPDIR'] = tmpdir
-
-  config.expect_with :rspec do |c|
-    c.syntax = [:should, :expect]
-  end
-
-  # config.before :each do
-  #  # Disabling garbage collection inside each test, and only running it at
-  #  # the end of each block, gives us an ~ 15 percent speedup, and more on
-  #  # some platforms *cough* windows *cough* that are a little slower.
-  #  GC.disable
-  # end
-  #
-  # config.after :each do
-  #  # This will perform a GC between tests, but only if actually required.  We
-  #  # experimented with forcing a GC run, and that was less efficient than
-  #  # just letting it run all the time.
-  #  GC.enable
-  # end
-
-  config.after :suite do
-    # return to original tmpdir
-    ENV['TMPDIR'] = oldtmpdir
-    if Puppet::Util::Platform.windows?
-      take_ownership(tmpdir)
-    end
-    FileUtils.rm_rf(tmpdir)
+def ensure_module_defined(module_name)
+  module_name.split('::').reduce(Object) do |last_module, next_module|
+    last_module.const_set(next_module, Module.new) unless last_module.const_defined?(next_module)
+    last_module.const_get(next_module)
   end
 end
 
-# We need this because the RAL uses 'should' as a method.  This
-# allows us the same behaviour but with a different method name.
-class Object
-  alias must should
-  alias must_not should_not
-end
+# 'spec_overrides' from sync.yml will appear below this line
