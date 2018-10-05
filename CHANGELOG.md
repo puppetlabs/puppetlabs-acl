@@ -1,3 +1,23 @@
+## 2018-10-10 - Supported Release 2.1.0
+
+### Summary
+
+Feature release including support for Windows Server 2016 and Puppet 6
+
+#### Features
+
+- Add support for Windows Server 2016
+- Convert module for PDK ([MODULES-6459](https://tickets.puppetlabs.com/browse/MODULES-6459))
+- Add support for Puppet 6 ([MODULES-7832](https://tickets.puppetlabs.com/browse/MODULES-7832))
+
+#### Bug Fixes
+
+- Fixed issue with emitting change messages in Puppet 5 ([MODULES-5364](https://tickets.puppetlabs.com/browse/MODULES-5364))
+- Update tests for Unicode on Windows
+- Convert acceptance tests to rspec format ([MODULES-5978](https://tickets.puppetlabs.com/browse/MODULES-5978))
+- Update module to conform with rubocop ([MODULES-5899](https://tickets.puppetlabs.com/browse/MODULES-5899))
+- Add support for Beaker Testmode Switcher  ([MODULES-6739](https://tickets.puppetlabs.com/browse/MODULES-6739))
+
 ## 2017-07-31 - Supported Release 2.0.1
 
 ### Summary
