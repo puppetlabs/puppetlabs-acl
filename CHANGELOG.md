@@ -12,7 +12,6 @@ Feature release including support for Windows Server 2016 and Puppet 6
 
 #### Bug Fixes
 
-- Fixed issue with emitting change messages in Puppet 5 ([MODULES-5364](https://tickets.puppetlabs.com/browse/MODULES-5364))
 - Update tests for Unicode on Windows
 - Convert acceptance tests to rspec format ([MODULES-5978](https://tickets.puppetlabs.com/browse/MODULES-5978))
 - Update module to conform with rubocop ([MODULES-5899](https://tickets.puppetlabs.com/browse/MODULES-5899))
