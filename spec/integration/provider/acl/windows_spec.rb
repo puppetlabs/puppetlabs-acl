@@ -10,7 +10,7 @@ if Puppet.features.microsoft_windows?
   end
 end
 
-describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microsoft_windows? do
+describe Puppet::Type.type(:acl).provider(:windows) do
   let(:resource) { Puppet::Type.type(:acl).new(provider: :windows, name: 'windows_acl') }
   let(:provider) { resource.provider }
   let(:top_level_path) do
@@ -48,6 +48,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
   end
 
   before :each do
+    skip ('Not on Windows platform') unless Puppet.features.microsoft_windows?
     resource.provider = provider
   end
 
@@ -65,7 +66,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
     end
 
     it 'does not allow permissions to be set on directory symlinks (PUP-2338)',
-       if: Puppet.features.manages_symlinks? && Puppet.features.microsoft_windows? do
+       if: Puppet.features.manages_symlinks? do
       target_path = set_path('symlink_target')
       resource[:target] = File.expand_path('fake', resource[:target])
       Puppet::Util::Windows::File.symlink(target_path, resource[:target])
@@ -76,7 +77,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
     end
 
     it 'does not allow permissions to be set on file symlinks (PUP-2338)',
-       if: Puppet.features.manages_symlinks? && Puppet.features.microsoft_windows? do
+       if: Puppet.features.manages_symlinks? do
       target_path = set_path('symlink_target')
       file_path = File.join(target_path, 'file.txt')
       FileUtils.touch(file_path)
@@ -283,11 +284,13 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
       end
 
       it 'handles minimally specified permissions' do
+        skip ('Not on Windows platform') unless Puppet.features.microsoft_windows?
         permissions = [Puppet::Type::Acl::Ace.new({ 'identity' => 'Everyone', 'rights' => ['full'] }, provider)]
         set_perms(permissions).must == permissions
       end
 
       it 'handles fully specified permissions' do
+        skip ('Not on Windows platform') unless Puppet.features.microsoft_windows?
         permissions = [Puppet::Type::Acl::Ace.new({ 'identity' => 'Everyone', 'rights' => ['full'], 'perm_type' => 'allow', 'child_types' => 'all', 'affects' => 'all' }, provider)]
         set_perms(permissions).must == permissions
       end
@@ -301,7 +304,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
         { min_kernel: 10.0, identity: 'S-1-15-2-2' },
       ].each do |account|
         it "should not error when referencing special account #{account[:identity]}",
-           if: Puppet.features.microsoft_windows? && (Facter[:kernelmajversion].value.to_f >= account[:min_kernel]) do
+           if:(Facter[:kernelmajversion].value.to_f >= account[:min_kernel]) do
 
           permissions = [Puppet::Type::Acl::Ace.new({ 'identity' => account[:identity], 'rights' => ['full'] }, provider)]
           set_perms(permissions).must == permissions
