@@ -43,6 +43,11 @@ class Puppet::Type::Acl
       @hash = nil
     end
 
+    # Checks if a supplied value matches an allowed set of values.
+    #
+    # @param [Object] value
+    # @param [Array] allowed_values
+    # @return [Object] Return supplied value if it matches.
     def validate(value, *allowed_values)
       validator = Puppet::Parameter::ValueCollection.new
       validator.newvalues(*allowed_values)
@@ -51,10 +56,17 @@ class Puppet::Type::Acl
       value
     end
 
+    # Returns value of is_inherited
+    #
+    # @return [Boolean] Value of is_inherited
     def inherited?
       is_inherited
     end
 
+    # Converts a value into a symbol
+    #
+    # @param [Object] value Object to convert
+    # @return [Symbol] Symbol of object
     def convert_to_symbol(value)
       return nil if value.nil? || value.empty?
       return value if value.is_a?(Symbol)
@@ -62,6 +74,11 @@ class Puppet::Type::Acl
       value.downcase.to_sym
     end
 
+    # Checks if a supplied value is non empty
+    #
+    # @param name Name of value used for logging an error
+    # @param [Object] value Value to validate
+    # @return [Object] Supplied value if it is non empty.
     def validate_non_empty(name, value)
       if value.nil? || value == ''
         raise ArgumentError, "A non-empty #{name} must be specified."
@@ -73,12 +90,21 @@ class Puppet::Type::Acl
       value
     end
 
+    # Checks if a supplied value is an array and returns it.
+    #
+    # @param [Object] values Value to validate
+    # @return [Object] Supplied value if it is an array.
     def validate_array(name, values)
       raise ArgumentError, "Value for #{name} should be an array. Perhaps try ['#{values}']?" unless values.is_a?(Array)
 
       values
     end
 
+    # Checks if a supplied set of values matches an allowed set of values.
+    #
+    # @param [Array] values
+    # @param [Array] allowed_values
+    # @return [Array] Returns supplied values if they all match.
     def validate_individual_values(values, *allowed_values)
       values.each do |value|
         validate(value, *allowed_values)
@@ -87,6 +113,10 @@ class Puppet::Type::Acl
       values
     end
 
+    # Converts an array of values to symbols.
+    #
+    # @param [Array] values Array of strings.
+    # @return [Array] Converted symbols `values`.
     def convert_to_symbols(values)
       value_syms = []
       values.each do |value|
@@ -96,6 +126,10 @@ class Puppet::Type::Acl
       value_syms
     end
 
+    # Converts an array of symbols into strings.
+    #
+    # @param [Array] symbols Array of symbols.
+    # @return [Array] Converted strings of `symbols`.
     def convert_from_symbols(symbols)
       values = []
       symbols.each do |value|
@@ -105,10 +139,15 @@ class Puppet::Type::Acl
       values
     end
 
+    # Returns `rights` sorted in reverse order
+    #
+    # @return [Object] Sorted rights
     def ensure_rights_order
       @rights.sort_by! { |r| Puppet::Type::Acl::Rights.new(r).order }
     end
 
+    # Ensures the values of `rights` are valid
+    # An error is raised if a condition is invalid.
     def ensure_rights_values_compatible
       if @rights.include?(:mask_specific) && rights.count != 1
         raise ArgumentError, "In each ace, when specifying rights, if you include 'mask_specific', it should be without anything else e.g. rights => ['mask_specific']. Please decide whether 'mask_specific' or predetermined rights and correct the manifest. Reference: #{inspect}" # rubocop:disable Metrics/LineLength
@@ -124,12 +163,18 @@ class Puppet::Type::Acl
       end
     end
 
+    # Ensures that `mask` is set to `value` when `rights` is set to `mask_specific`.
+    # An error is raised if the condition is not matched.
     def ensure_mask_when_mask_specific
       if @rights.include?(:mask_specific) && (@mask.nil? || @mask.empty?) # rubocop:disable Style/GuardClause  Changing this to a guard clause makes the line long and unreadable
         raise ArgumentError, "If you specify rights => ['mask_specific'], you must also include mask => 'value'. Reference: #{inspect}"
       end
     end
 
+    # Checks that a supplied array of values are unique.
+    #
+    # @param [Array] values
+    # @return [Array] Return `values` with unique values else return `values`.
     def ensure_unique_values(values)
       if values.is_a?(Array)
         return values.uniq
@@ -138,6 +183,8 @@ class Puppet::Type::Acl
       values
     end
 
+    # Ensures valid usage of `child_types` and `affects`.
+    # A `Puppet.warning` is raised if incorrect usage is found.
     def ensure_none_or_self_only_sync
       return if @child_types.nil? || @affects.nil?
       return if @child_types == :none && @affects == :self_only
@@ -154,11 +201,17 @@ class Puppet::Type::Acl
       @child_types = :none if @affects == :self_only
     end
 
+    # Sets value of `identity`.
+    #
+    # @param [Object] value Should be non-empty
     def identity=(value)
       @identity = validate_non_empty('identity', value)
       @hash = nil
     end
 
+    # Retrieves value of `id`
+    #
+    # @return [Object] SID of ACE
     def id
       if @id.nil? || @id.empty?
         if @identity && @provider && @provider.respond_to?(:get_account_id)
@@ -169,11 +222,17 @@ class Puppet::Type::Acl
       @id
     end
 
+    # Sets value of `id`.
+    #
+    # @param [Object] value
     def id=(value)
       @id = value
       @hash = nil
     end
 
+    # Sets value of `rights`.
+    #
+    # @param [Array] value Array of rights
     def rights=(value)
       @rights = ensure_unique_values(
         convert_to_symbols(
@@ -192,28 +251,44 @@ class Puppet::Type::Acl
       @hash = nil
     end
 
+    # Sets value of `mask`.
+    #
+    # @param [Object] value
     def mask=(value)
       @mask = value
       @hash = nil
     end
 
+    # Sets value of `perm_type`.
+    #
+    # @param [Object] value
     def perm_type=(value)
       @perm_type = convert_to_symbol(validate(value || :allow, :allow, :deny))
       @hash = nil
     end
 
+    # Sets value of `child_types`.
+    #
+    # @param [Object] value
     def child_types=(value)
       @child_types = convert_to_symbol(validate(value || :all, :all, :objects, :containers, :none))
       ensure_none_or_self_only_sync
       @hash = nil
     end
 
+    # Sets value of `affects`.
+    #
+    # @param [Object] value
     def affects=(value)
       @affects = convert_to_symbol(validate(value || :all, :all, :self_only, :children_only, :self_and_direct_children_only, :direct_children_only))
       ensure_none_or_self_only_sync
       @hash = nil
     end
 
+    # Used as part of the `same?` method to determine if the current ACE is the same as a supplied ACE
+    #
+    # @param [Ace] other ACE to compare to
+    # @return [Array] IDs of the supplied ACEs
     def get_comparison_ids(other = nil)
       ignore_other = true
       id_has_value = false
@@ -246,8 +321,8 @@ class Puppet::Type::Acl
     # and we are trying to determine if they are the same ace or
     # different given all of the different compare points.
     #
-    # @param other [Ace] The ace that we are comparing to.
-    # @return [Boolean] true if all points are equal
+    # @param [Ace] other The ace that we are comparing to.
+    # @return [Boolean] True if all points are equal
     def same?(other)
       return false unless other.is_a?(Ace)
 
@@ -264,8 +339,8 @@ class Puppet::Type::Acl
     # rights. We want to know if the two aces are equal on all
     # important data points.
     #
-    # @param other [Ace] The ace that we are comparing to.
-    # @return [Boolean] true if all points are equal
+    # @param [Ace] other The ace that we are comparing to.
+    # @return [Boolean] True if all points are equal
     def ==(other)
       return false unless other.is_a?(Ace)
 
@@ -275,6 +350,9 @@ class Puppet::Type::Acl
 
     alias eql? ==
 
+    # Returns hash of instance's fields
+    #
+    # @return [Hash] Hash of instance fields
     def hash
       get_comparison_ids[0].hash ^
         @rights.hash ^
@@ -284,6 +362,9 @@ class Puppet::Type::Acl
         @is_inherited.hash
     end
 
+    # Returns hash of instance's fields
+    #
+    # @return [Hash] Hash of instance fields
     def to_hash
       return @hash if @hash
 
@@ -308,14 +389,24 @@ class Puppet::Type::Acl
       to_hash.keys
     end
 
+    # Returns values of instance fields
+    #
+    # @return [Array] Values of fields from hash
     def values
       to_hash.values
     end
 
+    # Returns value of specified key in instance fields hash.
+    #
+    # @param [String] key Key used to get value from hash.
+    # @return [Object] Value of field.
     def [](key)
       to_hash[key]
     end
 
+    # Returns string representation of instance's fields.
+    #
+    # @return [String] String of instance hash.
     def inspect
       hash = to_hash
       return_value = hash.keys.map { |key|

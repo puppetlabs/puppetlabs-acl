@@ -1,3 +1,4 @@
+# Helper class used to represent ACL Rights
 class Puppet::Type::Acl
   # Simple ACL Rights object
   class Rights
