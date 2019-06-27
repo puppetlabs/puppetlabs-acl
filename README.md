@@ -1,12 +1,11 @@
-acl
-==============
+# acl
 
 #### Table of Contents
 
-2. [Module Description - What does the module do?](#module-description)
-3. [Setup - The basics of getting started with acl](#setup)
+1. [Module Description - What does the module do?](#module-description)
+1. [Setup - The basics of getting started with acl](#setup)
     * [Beginning with acl - Installation](#beginning-with-acl)
-4. [Usage - The custom type available for configuration](#usage)
+1. [Usage - The custom type available for configuration](#usage)
     * [Manage a basic ACL with all parameters expressed](#manage-a-basic-acl-with-all-parameters-expressed)
     * [Manage multiple permissions at once](#manage-multiple-permissions-at-once)
     * [Same target, multiple resources](#same-target-multiple-resources)
@@ -21,9 +20,9 @@ acl
     * [Set ACE propagation](#set-ace-propagation)
     * [Remove ACE permissions](#remove-ace-permissions)
     * [Use same identity, multiple ACEs](#use-same-identity-multiple-aces)
-5. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
-6. [Limitations - Known issues in acl](#limitations)
-7. [Development - Guide for contributing to the module](#development)
+1. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
+1. [Limitations - Known issues in acl](#limitations)
+1. [Development - Guide for contributing to the module](#development)
 
 ## Module Description
 
@@ -456,7 +455,7 @@ Puppet modules on the Puppet Forge are open projects, and community contribution
 
 We want to keep it as easy as possible to contribute changes so that our modules work in your environment. There are a few guidelines that we need contributors to follow so that we can have a chance of keeping on top of things.
 
-For more information, see our [module contribution guide.](https://docs.puppet.com/forge/contributing.html)
+For more information, see our [module contribution guide.](https://puppet.com/docs/puppet/latest/contributing.html)
 
 ### Contributors
 
