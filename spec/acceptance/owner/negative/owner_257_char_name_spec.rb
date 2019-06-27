@@ -7,7 +7,7 @@ def apply_manifest_and_verify(agent, target_name, file_content, user_id, owner_i
     verify_content_command = "cat /cygdrive/c/temp/#{target_name}"
 
     it 'Attempt to Execute ACL Manifest' do
-      execute_manifest_on(agent, acl_manifest(target_name, file_content, user_id, owner_id), { :debug => true }) do |result|
+      execute_manifest_on(agent, acl_manifest(target_name, file_content, user_id, owner_id), debug: true) do |result|
         assert_match(expected_error, result.stderr, 'Expected error was not detected!')
       end
     end

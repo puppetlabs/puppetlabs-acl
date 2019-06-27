@@ -4,7 +4,7 @@ require 'spec_helper_acceptance'
 def apply_manifest_and_verify(acl_regex, agent, file_content, rights, target)
   context "on #{agent}" do
     it 'Execute Manifest' do
-      execute_manifest_on(agent, acl_manifest(target, rights, file_content), { :debug => true }) do |result|
+      execute_manifest_on(agent, acl_manifest(target, rights, file_content), debug: true) do |result|
         assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
       end
     end

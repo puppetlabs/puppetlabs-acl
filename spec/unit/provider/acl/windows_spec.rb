@@ -1,4 +1,3 @@
-#! /usr/bin/env ruby
 require 'spec_helper'
 require 'puppet/type'
 require 'puppet/provider/acl/windows'
@@ -665,13 +664,13 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
       end
 
       it "returns mask that includes FILE_GENERIC_READ if ace.rights == ['read',execute']" do
-        ace.rights = %w[read execute]
+        ace.rights = ['read', 'execute']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
         (mask & base::FILE_GENERIC_READ).must be base::FILE_GENERIC_READ
       end
 
       it "returns mask that includes FILE_GENERIC_EXECUTE if ace.rights == ['read',execute']" do
-        ace.rights = %w[read execute]
+        ace.rights = ['read', 'execute']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
         (mask & base::FILE_GENERIC_EXECUTE).must be base::FILE_GENERIC_EXECUTE
       end

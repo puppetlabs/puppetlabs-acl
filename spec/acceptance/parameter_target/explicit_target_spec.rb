@@ -33,7 +33,7 @@ describe 'Windows ACL Module - Explicit Use of "target" Parameter' do
   windows_agents.each do |agent|
     context "on #{agent}" do
       it 'Execute Manifest' do
-        execute_manifest_on(agent, acl_manifest, { :debug => true }) do |result|
+        execute_manifest_on(agent, acl_manifest, debug: true) do |result|
           assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
         end
       end
