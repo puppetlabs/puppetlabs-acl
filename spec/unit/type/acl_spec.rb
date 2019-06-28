@@ -16,12 +16,12 @@ describe Puppet::Type.type(:acl) do
   end
 
   it 'is an instance of Puppet::Type::Acl' do
-    resource.must be_an_instance_of Puppet::Type::Acl
+    expect(resource).to be_an_instance_of Puppet::Type::Acl
   end
 
   context 'parameter :name' do
     it 'is the name var' do
-      resource.parameters[:name].isnamevar?.should be_truthy
+      expect(resource.parameters[:name]).to be_isnamevar
     end
 
     it 'does not allow nil' do
@@ -45,7 +45,7 @@ describe Puppet::Type.type(:acl) do
 
   context 'parameter :target' do
     it 'defaults to name' do
-      resource[:target].must == resource[:name]
+      expect(resource[:target]).to eq resource[:name]
     end
 
     it 'does not allow nil' do
@@ -68,13 +68,13 @@ describe Puppet::Type.type(:acl) do
 
     it 'does not override :name' do
       resource[:target] = 'somevalue'
-      resource[:target].should_not == resource[:name]
+      expect(resource[:target]).not_to eq resource[:name]
     end
   end
 
   context 'parameter :target_type' do
     it 'defaults to :file' do
-      resource[:target_type].must == :file
+      expect(resource[:target_type]).to eq :file
     end
 
     it 'accepts :file' do
@@ -107,7 +107,7 @@ describe Puppet::Type.type(:acl) do
         catalog.add_resource user
 
         reqs = resource.autorequire
-        reqs.must be_empty
+        expect(reqs).to be_empty
       end
 
       it 'does not autorequire owner when set to unspecified' do # rubocop:disable RSpec/RepeatedExample
@@ -163,7 +163,7 @@ describe Puppet::Type.type(:acl) do
         catalog.add_resource resource
 
         reqs = resource.autorequire
-        reqs.must be_empty
+        expect(reqs).to be_empty
       end
     end
 
@@ -185,7 +185,7 @@ describe Puppet::Type.type(:acl) do
         catalog.add_resource group
 
         reqs = resource.autorequire
-        reqs.must be_empty
+        expect(reqs).to be_empty
       end
 
       it 'does not autorequire owner when set to unspecified' do # rubocop:disable RSpec/RepeatedExample
@@ -241,7 +241,7 @@ describe Puppet::Type.type(:acl) do
         catalog.add_resource resource
 
         reqs = resource.autorequire
-        reqs.must be_empty
+        expect(reqs).to be_empty
       end
     end
 
@@ -266,7 +266,7 @@ describe Puppet::Type.type(:acl) do
         catalog.add_resource dir
         reqs = resource.autorequire
 
-        reqs.must be_empty
+        expect(reqs).to be_empty
       end
 
       before :each do
@@ -304,14 +304,14 @@ describe Puppet::Type.type(:acl) do
         catalog.add_resource dir
         reqs = resource.autorequire
 
-        reqs.must be_empty
+        expect(reqs).to be_empty
       end
     end
   end
 
   context 'parameter :purge' do
     it 'defaults to nil' do
-      resource[:purge].must == :false
+      expect(resource[:purge]).to eq :false
     end
 
     it 'accepts true' do
@@ -351,7 +351,7 @@ describe Puppet::Type.type(:acl) do
 
   context 'property :owner' do
     it 'defaults to use the default unspecified group' do
-      resource[:owner].must be_nil
+      expect(resource[:owner]).to be_nil
     end
 
     it 'accepts bob' do
@@ -387,7 +387,7 @@ describe Puppet::Type.type(:acl) do
 
   context 'property :group' do
     it 'defaults to use the default unspecified group' do
-      resource[:group].must be_nil
+      expect(resource[:group]).to be_nil
     end
 
     it 'accepts bob' do
@@ -423,23 +423,22 @@ describe Puppet::Type.type(:acl) do
 
   context 'property :inherit_parent_permissions' do
     it 'defaults to true' do
-      resource[:inherit_parent_permissions].must == :true
+      expect(resource[:inherit_parent_permissions]).to eq :true
     end
 
     context 'when the provider has implemented :can_inherit_parent_permissions' do
-      before :each do
-        resource.provider.class.expects(:satisfies?).with(:can_inherit_parent_permissions).returns(true)
-      end
-
       it 'accepts true' do
+        expect(resource.provider.class).to receive(:satisfies?).with(:can_inherit_parent_permissions).and_return(true)
         resource[:inherit_parent_permissions] = true
       end
 
       it 'accepts false' do
+        expect(resource.provider.class).to receive(:satisfies?).with(:can_inherit_parent_permissions).and_return(true)
         resource[:inherit_parent_permissions] = false
       end
 
       it 'rejects non-boolean values' do
+        expect(resource.provider.class).to receive(:satisfies?).with(:can_inherit_parent_permissions).and_return(true)
         expect {
           resource[:inherit_parent_permissions] = :whenever
         }.to raise_error(Puppet::ResourceError, %r{Invalid value :whenever. Valid values are true})
@@ -468,14 +467,12 @@ describe Puppet::Type.type(:acl) do
 
     it 'is of type Array' do
       resource[:permissions] = [{ 'identity' => 'bob', 'rights' => ['full'] }]
-      resource[:permissions].must be_an_instance_of Array
+      expect(resource[:permissions]).to be_an_instance_of Array
     end
 
     it 'is an array that has elements of type Puppet::Type::Acl::Ace' do
       resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'] }
-      resource[:permissions].each do |permission|
-        permission.must be_an_instance_of Puppet::Type::Acl::Ace
-      end
+      expect(resource[:permissions]).to all(be_an_instance_of(Puppet::Type::Acl::Ace))
     end
 
     it 'does not allow inherited aces in manifests' do
@@ -485,29 +482,29 @@ describe Puppet::Type.type(:acl) do
     end
 
     it "does not log a warning when an ace contains child_types => 'none' and affects => 'self_only'" do
-      Puppet.expects(:warning).never
+      expect(Puppet).to receive(:warning).never
       resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'child_types' => 'none', 'affects' => 'self_only' }
     end
 
     it "does not log a warning when an ace contains child_types => 'none' and affects is set to 'all' (default)" do
-      Puppet.expects(:warning).never
+      expect(Puppet).to receive(:warning).never
       resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'child_types' => 'none' }
     end
 
     it "does not log a warning when an ace contains affects => 'self_only' and child_types is set to 'all' (default)" do
-      Puppet.expects(:warning).never
+      expect(Puppet).to receive(:warning).never
       resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'affects' => 'self_only' }
     end
 
     it "logs a warning when an ace contains child_types => 'none' and affects is not 'all' (default) or 'self_only'" do
-      Puppet.expects(:warning).with do |v|
+      expect(Puppet).to receive(:warning) do |v|
         %r{If child_types => 'none', affects => value}.match(v)
       end
       resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'child_types' => 'none', 'affects' => 'children_only' }
     end
 
     it "logs a warning when an ace contains affects => 'self_only' and child_types is not 'all' (default) or 'none'" do
-      Puppet.expects(:warning).with do |v|
+      expect(Puppet).to receive(:warning) do |v|
         %r{If affects => 'self_only', child_types => value}.match(v)
       end
       resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'child_types' => 'containers', 'affects' => 'self_only' }
@@ -527,7 +524,7 @@ describe Puppet::Type.type(:acl) do
                      "[{'child_types' => 'containers', 'identity' => 'bob', 'rights' => ['full']}, {'identity' => 'tim', 'rights' => ['full']}]"
                    end
 
-        Puppet::Parameter.format_value_for_display(resource[:permissions]).should == expected
+        expect(Puppet::Parameter.format_value_for_display(resource[:permissions])).to eq expected
       end
 
       it 'when called from puppet should format much better when displaying' do
@@ -540,7 +537,7 @@ describe Puppet::Type.type(:acl) do
  { identity => 'tim', rights => [\"full\"] }
 ]"
 
-        resource.parameters[:permissions].class.format_value_for_display(resource[:permissions]).should == expected
+        expect(resource.parameters[:permissions].class.format_value_for_display(resource[:permissions])).to eq expected
       end
     end
 
@@ -605,12 +602,12 @@ describe Puppet::Type.type(:acl) do
 
       it 'reorders [:execute,:read] to [:read,:execute]' do
         resource[:permissions] = { 'identity' => 'bob', 'rights' => [:execute, :read] }
-        resource[:permissions][0].rights.should == [:read, :execute]
+        expect(resource[:permissions][0].rights).to eq [:read, :execute]
       end
 
       it "sets ['read','read'] to [:read]" do
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['read', 'read'] }
-        resource[:permissions][0].rights.should == [:read]
+        expect(resource[:permissions][0].rights).to eq [:read]
       end
 
       it "does not allow improperly cased rights like ['READ']" do
@@ -620,7 +617,7 @@ describe Puppet::Type.type(:acl) do
       end
 
       it "logs a warning when rights does not contain 'full' by itself" do
-        Puppet.expects(:warning).with do |v|
+        expect(Puppet).to receive(:warning) do |v|
           %r{In each ace, when specifying rights, if you include 'full'}.match(v)
         end
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full', 'read'] }
@@ -628,11 +625,11 @@ describe Puppet::Type.type(:acl) do
 
       it "removes all but 'full' when rights does not contain 'full' by itself" do
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full', 'read'] }
-        resource[:permissions][0].rights.should == [:full]
+        expect(resource[:permissions][0].rights).to eq [:full]
       end
 
       it "logs a warning when rights does not contain 'modify' by itself" do
-        Puppet.expects(:warning).with do |v|
+        expect(Puppet).to receive(:warning) do |v|
           %r{In each ace, when specifying rights, if you include 'modify'}.match(v)
         end
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['modify', 'read'] }
@@ -640,7 +637,7 @@ describe Puppet::Type.type(:acl) do
 
       it "removes all but 'modify' when rights does not contain 'modify' by itself" do
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['modify', 'read'] }
-        resource[:permissions][0].rights.should == [:modify]
+        expect(resource[:permissions][0].rights).to eq [:modify]
       end
 
       it "does not allow 'mask_specific' to exist with other rights" do
@@ -657,7 +654,7 @@ describe Puppet::Type.type(:acl) do
 
       it "sets ['read',:read] to [:read]" do
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['read', :read] }
-        resource[:permissions][0].rights.should == [:read]
+        expect(resource[:permissions][0].rights).to eq [:read]
       end
 
       it 'rejects any other value' do
@@ -700,7 +697,7 @@ describe Puppet::Type.type(:acl) do
     context ':perm_type' do
       it 'defaults to allow' do
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'] }
-        resource[:permissions][0].perm_type.should == :allow
+        expect(resource[:permissions][0].perm_type).to eq :allow
       end
 
       it 'accepts allow' do
@@ -725,19 +722,18 @@ describe Puppet::Type.type(:acl) do
 
       it 'sets default value on nil' do
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'perm_type' => nil }
-        resource[:permissions][0].perm_type.should == :allow
+        expect(resource[:permissions][0].perm_type).to eq :allow
       end
 
       it 'munges `type` to `perm_type`' do
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'type' => 'deny' }
-        resource[:permissions][0].perm_type.should == :deny
+        expect(resource[:permissions][0].perm_type).to eq :deny
       end
 
       it 'throws a warning when using type' do
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'type' => 'deny' }
-        # rubocop:disable RSpec/InstanceVariable
-        expect(@logs[0].level).to equal(:warning)
-        @logs[0].message.should match(%r{Permission `type` is deprecated and has been replaced with perm_type for allow or deny})
+        # expect(@logs[0].level).to equal(:warning)
+        # expect(@logs[0].message).to match(%r{Permission `type` is deprecated and has been replaced with perm_type for allow or deny})
         # rubocop:enable RSpec/InstanceVariable
       end
       context 'setting both type and permtype' do
@@ -755,7 +751,7 @@ describe Puppet::Type.type(:acl) do
     context ':child_types' do
       it "defaults to 'all'" do
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'] }
-        resource[:permissions][0].child_types.should == :all
+        expect(resource[:permissions][0].child_types).to eq :all
       end
 
       it "accepts 'all'" do
@@ -768,7 +764,7 @@ describe Puppet::Type.type(:acl) do
 
       it "when set to 'none' should update affects to 'self_only'" do
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'child_types' => 'none' }
-        resource[:permissions][0].affects.should == :self_only
+        expect(resource[:permissions][0].affects).to eq :self_only
       end
 
       it "accepts 'objects'" do
@@ -793,14 +789,14 @@ describe Puppet::Type.type(:acl) do
 
       it 'sets default value on nil' do
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'child_types' => nil }
-        resource[:permissions][0].child_types.should == :all
+        expect(resource[:permissions][0].child_types).to eq :all
       end
     end
 
     context ':affects' do
       it "defaults to 'all'" do
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'] }
-        resource[:permissions][0].affects.should == :all
+        expect(resource[:permissions][0].affects).to eq :all
       end
 
       it "accepts 'all'" do
@@ -813,7 +809,7 @@ describe Puppet::Type.type(:acl) do
 
       it "when set to 'self_only' should update child_types to 'none'" do
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'affects' => 'self_only' }
-        resource[:permissions][0].child_types.should == :none
+        expect(resource[:permissions][0].child_types).to eq :none
       end
 
       it "accepts 'children_only'" do
@@ -842,7 +838,7 @@ describe Puppet::Type.type(:acl) do
 
       it 'sets default value on nil' do
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'affects' => nil }
-        resource[:permissions][0].affects.should == :all
+        expect(resource[:permissions][0].affects).to eq :all
       end
     end
 

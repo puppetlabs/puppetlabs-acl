@@ -14,8 +14,8 @@ describe 'Ace' do
 
     it 'is equal for two like aces even with extra information' do
       sid = 'S-32-12-0'
-      provider = mock
-      provider.expects(:get_account_id).returns(sid)
+      provider = double
+      expect(provider).to receive(:get_account_id).and_return(sid)
       left = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'], 'id' => sid, 'mask' => '2023422').hash
       right = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'] }, provider).hash
 
@@ -24,8 +24,8 @@ describe 'Ace' do
 
     it 'is equal for two like aces when one has sid' do
       sid = 'S-1-1-0'
-      provider = mock
-      provider.expects(:get_account_id).returns(sid)
+      provider = double
+      expect(provider).to receive(:get_account_id).and_return(sid)
       left = Puppet::Type::Acl::Ace.new('identity' => 'Everyone', 'id' => sid, 'rights' => ['full']).hash
       right = Puppet::Type::Acl::Ace.new({ 'identity' => 'Everyone', 'rights' => ['full'] }, provider).hash
 
@@ -40,8 +40,8 @@ describe 'Ace' do
     end
 
     it 'is equal for two like aces when identities evaluate to the same because provider' do
-      provider = mock
-      provider.expects(:get_account_name).returns('same').twice
+      provider = double
+      expect(provider).to receive(:get_account_name).and_return('same').twice
 
       left = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'] }, provider).hash
       right = Puppet::Type::Acl::Ace.new({ 'identity' => 'BUILT IN\Administrators', 'rights' => ['full'] }, provider).hash
@@ -50,8 +50,8 @@ describe 'Ace' do
     end
 
     it 'is not equal for two like aces when identities do not evaluate to the same because provider' do
-      provider = mock
-      provider.stubs(:get_account_name).returns('one', 'two')
+      provider = double
+      allow(provider).to receive(:get_account_name).and_return('one', 'two')
 
       left = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'] }, provider).hash
       right = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'] }, provider).hash
@@ -60,8 +60,8 @@ describe 'Ace' do
     end
 
     it 'is equal for two aces when SIDs evaluate to the same because provider' do
-      provider = mock
-      provider.expects(:get_account_id).returns('S-1-1-0').twice
+      provider = double
+      expect(provider).to receive(:get_account_id).and_return('S-1-1-0').twice
 
       left = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'] }, provider).hash
       right = Puppet::Type::Acl::Ace.new({ 'identity' => 'NOTAdministrators', 'rights' => ['full'] }, provider).hash
@@ -70,8 +70,8 @@ describe 'Ace' do
     end
 
     it 'is not equal for two like aces when SIDs evaluate different because provider' do
-      provider = mock
-      provider.stubs(:get_account_id).returns('S-1-1-0', 'S-1-1-5')
+      provider = double
+      allow(provider).to receive(:get_account_id).and_return('S-1-1-0', 'S-1-1-5')
 
       left = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'] }, provider).hash
       right = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'] }, provider).hash
@@ -152,8 +152,8 @@ describe 'Ace' do
     end
 
     it 'is equal for two like aces when identities evaluate to the same because provider' do
-      provider = mock
-      provider.expects(:get_account_name).returns('same').twice
+      provider = double
+      expect(provider).to receive(:get_account_name).and_return('same').twice
 
       left = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'] }, provider)
       right = Puppet::Type::Acl::Ace.new({ 'identity' => 'BUILT IN\Administrators', 'rights' => ['full'] }, provider)
@@ -162,8 +162,8 @@ describe 'Ace' do
     end
 
     it 'is not equal for two like aces when identities do not evaluate to the same because provider' do
-      provider = mock
-      provider.stubs(:get_account_name).returns('one', 'two')
+      provider = double
+      allow(provider).to receive(:get_account_name).and_return('one', 'two')
 
       left = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'] }, provider)
       right = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
@@ -172,8 +172,8 @@ describe 'Ace' do
     end
 
     it 'is equal for two aces when SIDs evaluate to the same because provider' do
-      provider = mock
-      provider.expects(:get_account_id).returns('S-1-1-0').twice
+      provider = double
+      expect(provider).to receive(:get_account_id).and_return('S-1-1-0').twice
 
       left = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'] }, provider)
       right = Puppet::Type::Acl::Ace.new({ 'identity' => 'NOTAdministrators', 'rights' => ['full'] }, provider)
@@ -182,8 +182,8 @@ describe 'Ace' do
     end
 
     it 'is not equal for two like aces when SIDs evaluate different because provider' do
-      provider = mock
-      provider.stubs(:get_account_id).returns('S-1-1-0', 'S-1-1-5')
+      provider = double
+      allow(provider).to receive(:get_account_id).and_return('S-1-1-0', 'S-1-1-5')
 
       left = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'] }, provider)
       right = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'] }, provider)
@@ -264,8 +264,8 @@ describe 'Ace' do
     end
 
     it 'is true for two like aces when identities evaluate to the same because provider' do
-      provider = mock
-      provider.expects(:get_account_name).returns('same').twice
+      provider = double
+      expect(provider).to receive(:get_account_name).and_return('same').twice
 
       left = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'] }, provider)
       right = Puppet::Type::Acl::Ace.new({ 'identity' => 'BUILT IN\Administrators', 'rights' => ['full'] }, provider)
@@ -274,8 +274,8 @@ describe 'Ace' do
     end
 
     it 'is false for two like aces when identities do not evaluate to the same because provider' do
-      provider = mock
-      provider.stubs(:get_account_name).returns('one', 'two')
+      provider = double
+      allow(provider).to receive(:get_account_name).and_return('one', 'two')
 
       left = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'] }, provider)
       right = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
@@ -284,8 +284,8 @@ describe 'Ace' do
     end
 
     it 'is true for two aces when SIDs evaluate to the same because provider' do
-      provider = mock
-      provider.expects(:get_account_id).returns('S-1-1-0').twice
+      provider = double
+      expect(provider).to receive(:get_account_id).and_return('S-1-1-0').twice
 
       left = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'] }, provider)
       right = Puppet::Type::Acl::Ace.new({ 'identity' => 'NOTAdministrators', 'rights' => ['full'] }, provider)
@@ -294,8 +294,8 @@ describe 'Ace' do
     end
 
     it 'is false for two like aces when SIDs evaluate different because provider' do
-      provider = mock
-      provider.stubs(:get_account_id).returns('S-1-1-0', 'S-1-1-5')
+      provider = double
+      allow(provider).to receive(:get_account_id).and_return('S-1-1-0', 'S-1-1-5')
 
       left = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'] }, provider)
       right = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'] }, provider)
