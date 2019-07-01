@@ -1,4 +1,5 @@
 require 'spec_helper_acceptance'
+require 'pry-byebug'
 
 # rubocop:disable RSpec/EmptyExampleGroup
 def apply_manifest_with_rights(acl_regex, agent, rights, target)
@@ -54,6 +55,7 @@ describe 'Directory - Allow' do
     acl_regex = %r{.*\\bob:\(OI\)\(CI\)\(Rc,S,X,RA\)}
 
     windows_agents.each do |agent|
+      binding.pry
       apply_manifest_with_rights(acl_regex, agent, rights, target)
     end
   end
