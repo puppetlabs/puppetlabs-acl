@@ -60,7 +60,7 @@ describe 'Purge' do
     windows_agents.each do |agent|
       context "on #{agent}" do
         it 'Execute Apply Manifest' do
-          execute_manifest_on(agent, acl_manifest(target, file_content, user_id1, user_id2), { :debug => true }) do |result|
+          execute_manifest_on(agent, acl_manifest(target, file_content, user_id1, user_id2), debug: true) do |result|
             assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end
@@ -72,7 +72,7 @@ describe 'Purge' do
         end
 
         it 'Execute Purge Manifest' do
-          execute_manifest_on(agent, purge_acl_manifest(target, user_id2), { :debug => true }) do |result|
+          execute_manifest_on(agent, purge_acl_manifest(target, user_id2), debug: true) do |result|
             assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end

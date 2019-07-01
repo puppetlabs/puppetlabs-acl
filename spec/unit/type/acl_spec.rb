@@ -1,4 +1,3 @@
-#! /usr/bin/env ruby
 require 'spec_helper'
 require 'puppet/type'
 require 'puppet/type/acl'
@@ -271,7 +270,7 @@ describe Puppet::Type.type(:acl) do
       end
 
       before :each do
-        skip ('Not on Windows platform') unless Puppet.features.microsoft_windows?
+        skip 'Not on Windows platform' unless Puppet.features.microsoft_windows?
       end
 
       it 'autorequires an existing file resource when acl.target matches file.path exactly' do
@@ -533,7 +532,7 @@ describe Puppet::Type.type(:acl) do
 
       it 'when called from puppet should format much better when displaying' do
         # properties are out of order here
-        resource[:permissions] = [{ 'rights' => %w[read write], 'perm_type' => 'deny', 'child_types' => 'containers', 'identity' => 'bob' }, { 'rights' => ['full'], 'identity' => 'tim' }]
+        resource[:permissions] = [{ 'rights' => ['read', 'write'], 'perm_type' => 'deny', 'child_types' => 'containers', 'identity' => 'bob' }, { 'rights' => ['full'], 'identity' => 'tim' }]
 
         # and spaced / ordered properly here
         expected = "[
@@ -601,7 +600,7 @@ describe Puppet::Type.type(:acl) do
       end
 
       it 'accepts a combination of valid values' do
-        resource[:permissions] = { 'identity' => 'bob', 'rights' => %w[read execute] }
+        resource[:permissions] = { 'identity' => 'bob', 'rights' => ['read', 'execute'] }
       end
 
       it 'reorders [:execute,:read] to [:read,:execute]' do
@@ -610,7 +609,7 @@ describe Puppet::Type.type(:acl) do
       end
 
       it "sets ['read','read'] to [:read]" do
-        resource[:permissions] = { 'identity' => 'bob', 'rights' => %w[read read] }
+        resource[:permissions] = { 'identity' => 'bob', 'rights' => ['read', 'read'] }
         resource[:permissions][0].rights.should == [:read]
       end
 
@@ -624,11 +623,11 @@ describe Puppet::Type.type(:acl) do
         Puppet.expects(:warning).with do |v|
           %r{In each ace, when specifying rights, if you include 'full'}.match(v)
         end
-        resource[:permissions] = { 'identity' => 'bob', 'rights' => %w[full read] }
+        resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full', 'read'] }
       end
 
       it "removes all but 'full' when rights does not contain 'full' by itself" do
-        resource[:permissions] = { 'identity' => 'bob', 'rights' => %w[full read] }
+        resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full', 'read'] }
         resource[:permissions][0].rights.should == [:full]
       end
 
@@ -636,17 +635,17 @@ describe Puppet::Type.type(:acl) do
         Puppet.expects(:warning).with do |v|
           %r{In each ace, when specifying rights, if you include 'modify'}.match(v)
         end
-        resource[:permissions] = { 'identity' => 'bob', 'rights' => %w[modify read] }
+        resource[:permissions] = { 'identity' => 'bob', 'rights' => ['modify', 'read'] }
       end
 
       it "removes all but 'modify' when rights does not contain 'modify' by itself" do
-        resource[:permissions] = { 'identity' => 'bob', 'rights' => %w[modify read] }
+        resource[:permissions] = { 'identity' => 'bob', 'rights' => ['modify', 'read'] }
         resource[:permissions][0].rights.should == [:modify]
       end
 
       it "does not allow 'mask_specific' to exist with other rights" do
         expect {
-          resource[:permissions] = { 'identity' => 'bob', 'rights' => %w[mask_specific read] }
+          resource[:permissions] = { 'identity' => 'bob', 'rights' => ['mask_specific', 'read'] }
         }.to raise_error(Puppet::ResourceError, %r{In each ace, when specifying rights, if you include 'mask_specific'})
       end
 
@@ -669,7 +668,7 @@ describe Puppet::Type.type(:acl) do
 
       it 'rejects a value even if with valid values' do
         expect {
-          resource[:permissions] = { 'identity' => 'bob', 'rights' => %w[modify what] }
+          resource[:permissions] = { 'identity' => 'bob', 'rights' => ['modify', 'what'] }
         }.to raise_error(Puppet::ResourceError, %r{Invalid value "what". Valid values are})
       end
 

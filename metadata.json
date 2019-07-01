@@ -29,7 +29,7 @@
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 5.5.10 < 7.0.0"
+      "version_requirement": ">= 4.7.0 < 7.0.0"
     }
   ],
   "tags": [
@@ -41,7 +41,7 @@
     "file permissions"
   ],
   "description": "This module provides the ability to manage ACLs on nodes. Currently the only operating system supported is Windows",
-  "pdk-version": "1.8.0",
-  "template-url": "https://github.com/puppetlabs/pdk-templates",
-  "template-ref": "heads/master-0-g7281db5"
+  "pdk-version": "1.10.0",
+  "template-url": "https://github.com/puppetlabs/pdk-templates#master",
+  "template-ref": "1.11.1-0-g2ff8c24"
 }

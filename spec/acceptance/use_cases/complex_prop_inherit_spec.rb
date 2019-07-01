@@ -143,7 +143,7 @@ describe 'Use Cases' do
     windows_agents.each do |agent|
       context "on #{agent}" do
         it 'Execute ACL Manifest' do
-          execute_manifest_on(agent, acl_manifest(group1, group2, user_id1, user_id2, target, target_child, target_grand_child, file_content), { :debug => true }) do |result|
+          execute_manifest_on(agent, acl_manifest(group1, group2, user_id1, user_id2, target, target_child, target_grand_child, file_content), debug: true) do |result|
             assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end

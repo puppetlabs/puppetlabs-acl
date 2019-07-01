@@ -59,7 +59,7 @@ describe 'Module - Identity' do
         end
 
         it 'Execute Setup Manifest' do
-          execute_manifest_on(agent, setup_manifest(target_file, file_content), { :debug => true }) do |result|
+          execute_manifest_on(agent, setup_manifest(target_file, file_content), debug: true) do |result|
             assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end
@@ -71,7 +71,7 @@ describe 'Module - Identity' do
         end
 
         it 'Execute ACL Manifest' do
-          execute_manifest_on(agent, acl_manifest(target_file, sid), { :debug => true }) do |result|
+          execute_manifest_on(agent, acl_manifest(target_file, sid), debug: true) do |result|
             assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end

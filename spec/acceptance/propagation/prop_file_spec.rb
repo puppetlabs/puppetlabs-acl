@@ -61,7 +61,7 @@ describe 'Propagate - Negative' do
         agent_version_response = on(agent, puppet('--version')).stdout.chomp
         agent_version = Gem::Version.new(agent_version_response)
         it 'Execute Apply Manifest' do
-          execute_manifest_on(agent, acl_manifest(target_name, file_content, rights, prop_type, affects_child_type), { :debug => true }) do |result|
+          execute_manifest_on(agent, acl_manifest(target_name, file_content, rights, prop_type, affects_child_type), debug: true) do |result|
             verify_manifest = (agent_version >= Gem::Version.new('5.0.0')) ? verify_manifest_pup5 : verify_manifest_pup4
 
             assert_match(verify_manifest, result.stdout, 'Expected ACL change event not detected!')

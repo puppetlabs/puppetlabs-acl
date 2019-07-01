@@ -6,7 +6,7 @@ def apply_manifest_and_verify(prop_type, affects_child_type, acl_regex, agent)
     target_name = "prop_#{prop_type}_to_#{affects_child_type}"
     verify_acl_command = "icacls #{target_parent}/#{target_name}"
     it 'Execute Apply Manifest' do
-      execute_manifest_on(agent, acl_manifest(target_name, rights, prop_type, affects_child_type), { :debug => true }) do |result|
+      execute_manifest_on(agent, acl_manifest(target_name, rights, prop_type, affects_child_type), debug: true) do |result|
         assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
       end
     end

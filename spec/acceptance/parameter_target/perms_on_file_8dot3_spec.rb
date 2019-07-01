@@ -7,7 +7,7 @@ def apply_manifest_and_verify(file_name, target8dot3, file_content, agent, remov
   verify_content_command = "cat /cygdrive/c/temp/#{file_name}"
   context "on #{agent}" do
     it 'Execute Manifest' do
-      execute_manifest_on(agent, acl_manifest(file_name, target8dot3, file_content), { :debug => true }) do |result|
+      execute_manifest_on(agent, acl_manifest(file_name, target8dot3, file_content), debug: true) do |result|
         assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
       end
     end
@@ -20,7 +20,7 @@ def apply_manifest_and_verify(file_name, target8dot3, file_content, agent, remov
 
     if remove
       it 'Execute Remove Manifest' do
-        execute_manifest_on(agent, acl_manifest_remove(target8dot3), { :debug => true }) do |result|
+        execute_manifest_on(agent, acl_manifest_remove(target8dot3), debug: true) do |result|
           assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
         end
       end

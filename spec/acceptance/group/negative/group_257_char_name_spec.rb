@@ -56,7 +56,7 @@ describe 'Group - Negative' do
   windows_agents.each do |agent|
     context "On Windows Agent Change Group to Local Group with Long Name on #{agent}" do
       it 'Attempt to Execute ACL Manifest' do
-        execute_manifest_on(agent, acl_manifest, { :debug => true }) do |result|
+        execute_manifest_on(agent, acl_manifest, debug: true) do |result|
           assert_match(expected_error, result.stderr, 'Expected error was not detected!')
         end
 

@@ -4,7 +4,7 @@ require 'spec_helper_acceptance'
 def execute_manifest_with_mask(acl_regex, agent, mask)
   context "on #{agent}" do
     it 'Execute Manifest' do
-      execute_manifest_on(agent, acl_manifest(mask), { :debug => true }) do |result|
+      execute_manifest_on(agent, acl_manifest(mask), debug: true) do |result|
         assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
       end
     end

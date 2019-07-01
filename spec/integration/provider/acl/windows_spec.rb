@@ -1,4 +1,3 @@
-#! /usr/bin/env ruby
 require 'spec_helper'
 require 'puppet/type'
 require 'puppet/provider/acl/windows'
@@ -48,7 +47,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
   end
 
   before :each do
-    skip ('Not on Windows platform') unless Puppet.features.microsoft_windows?
+    skip 'Not on Windows platform' unless Puppet.features.microsoft_windows?
     resource.provider = provider
   end
 
@@ -284,13 +283,13 @@ describe Puppet::Type.type(:acl).provider(:windows) do
       end
 
       it 'handles minimally specified permissions' do
-        skip ('Not on Windows platform') unless Puppet.features.microsoft_windows?
+        skip 'Not on Windows platform' unless Puppet.features.microsoft_windows?
         permissions = [Puppet::Type::Acl::Ace.new({ 'identity' => 'Everyone', 'rights' => ['full'] }, provider)]
         set_perms(permissions).must == permissions
       end
 
       it 'handles fully specified permissions' do
-        skip ('Not on Windows platform') unless Puppet.features.microsoft_windows?
+        skip 'Not on Windows platform' unless Puppet.features.microsoft_windows?
         permissions = [Puppet::Type::Acl::Ace.new({ 'identity' => 'Everyone', 'rights' => ['full'], 'perm_type' => 'allow', 'child_types' => 'all', 'affects' => 'all' }, provider)]
         set_perms(permissions).must == permissions
       end
@@ -304,7 +303,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         { min_kernel: 10.0, identity: 'S-1-15-2-2' },
       ].each do |account|
         it "should not error when referencing special account #{account[:identity]}",
-           if:(Facter[:kernelmajversion].value.to_f >= account[:min_kernel]) do
+           if: (Facter[:kernelmajversion].value.to_f >= account[:min_kernel]) do
 
           permissions = [Puppet::Type::Acl::Ace.new({ 'identity' => account[:identity], 'rights' => ['full'] }, provider)]
           set_perms(permissions).must == permissions
@@ -317,7 +316,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         permissions = [
           Puppet::Type::Acl::Ace.new({ 'identity' => 'Everyone', 'rights' => ['full'] }, provider),
           Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrator', 'rights' => ['modify'] }, provider),
-          Puppet::Type::Acl::Ace.new({ 'identity' => 'Authenticated Users', 'rights' => %w[write read execute] }, provider),
+          Puppet::Type::Acl::Ace.new({ 'identity' => 'Authenticated Users', 'rights' => ['write', 'read', 'execute'] }, provider),
         ]
         set_perms(permissions).must == permissions
       end
@@ -367,8 +366,8 @@ describe Puppet::Type.type(:acl).provider(:windows) do
 
       it 'handles extraneous rights' do
         permissions = [
-          Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => %w[full modify] }, provider),
-          Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrator', 'rights' => %w[modify read] }, provider),
+          Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full', 'modify'] }, provider),
+          Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrator', 'rights' => ['modify', 'read'] }, provider),
         ]
         resource[:purge] = :true
         provider.inherit_parent_permissions = :false
@@ -413,9 +412,9 @@ describe Puppet::Type.type(:acl).provider(:windows) do
           Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['modify'], 'child_types' => 'containers' }, provider),
           Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['modify'], 'child_types' => 'objects' }, provider),
           Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['full'], 'affects' => 'self_only' }, provider),
-          Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => %w[read execute], 'affects' => 'direct_children_only' }, provider),
-          Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => %w[read execute], 'child_types' => 'containers', 'affects' => 'direct_children_only' }, provider),
-          Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => %w[read execute], 'child_types' => 'objects', 'affects' => 'direct_children_only' }, provider),
+          Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['read', 'execute'], 'affects' => 'direct_children_only' }, provider),
+          Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['read', 'execute'], 'child_types' => 'containers', 'affects' => 'direct_children_only' }, provider),
+          Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['read', 'execute'], 'child_types' => 'objects', 'affects' => 'direct_children_only' }, provider),
           Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['full'], 'affects' => 'children_only' }, provider),
           Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['full'], 'child_types' => 'containers', 'affects' => 'children_only' }, provider),
           Puppet::Type::Acl::Ace.new({ 'identity' => 'SYSTEM', 'rights' => ['full'], 'child_types' => 'objects', 'affects' => 'children_only' }, provider),
@@ -444,18 +443,18 @@ describe Puppet::Type.type(:acl).provider(:windows) do
 
         permissions = [
           Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'], 'affects' => 'all' }, provider),
-          Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => %w[write read], 'child_types' => 'objects', 'affects' => 'all' }, provider),
+          Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['write', 'read'], 'child_types' => 'objects', 'affects' => 'all' }, provider),
           Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['read'], 'child_types' => 'containers', 'affects' => 'all' }, provider),
           Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrator', 'rights' => ['modify'], 'affects' => 'self_only' }, provider),
           Puppet::Type::Acl::Ace.new({ 'identity' => 'Authenticated Users', 'rights' => ['full'], 'affects' => 'direct_children_only' }, provider),
           Puppet::Type::Acl::Ace.new({ 'identity' => 'Authenticated Users', 'rights' => ['modify'], 'child_types' => 'objects', 'affects' => 'direct_children_only' }, provider),
           Puppet::Type::Acl::Ace.new({ 'identity' => 'Authenticated Users', 'rights' => ['read'], 'child_types' => 'containers', 'affects' => 'direct_children_only' }, provider),
           Puppet::Type::Acl::Ace.new({ 'identity' => 'Users', 'rights' => ['read'], 'affects' => 'children_only' }, provider),
-          Puppet::Type::Acl::Ace.new({ 'identity' => 'Users', 'rights' => %w[read execute], 'child_types' => 'objects', 'affects' => 'children_only' }, provider),
+          Puppet::Type::Acl::Ace.new({ 'identity' => 'Users', 'rights' => ['read', 'execute'], 'child_types' => 'objects', 'affects' => 'children_only' }, provider),
           Puppet::Type::Acl::Ace.new({ 'identity' => 'Users', 'rights' => ['modify'], 'child_types' => 'containers', 'affects' => 'children_only' }, provider),
           Puppet::Type::Acl::Ace.new({ 'identity' => 'Everyone', 'rights' => ['read'], 'affects' => 'self_and_direct_children_only' }, provider),
           Puppet::Type::Acl::Ace.new({ 'identity' => 'Everyone', 'rights' => ['execute'], 'child_types' => 'objects', 'affects' => 'self_and_direct_children_only' }, provider),
-          Puppet::Type::Acl::Ace.new({ 'identity' => 'Everyone', 'rights' => %w[write read], 'child_types' => 'containers', 'affects' => 'self_and_direct_children_only' }, provider),
+          Puppet::Type::Acl::Ace.new({ 'identity' => 'Everyone', 'rights' => ['write', 'read'], 'child_types' => 'containers', 'affects' => 'self_and_direct_children_only' }, provider),
         ]
         resource[:purge] = :true
         provider.inherit_parent_permissions = :false
@@ -590,7 +589,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         [
           Puppet::Type::Acl::Ace.new('identity' => 'Everyone', 'rights' => ['full']),
           Puppet::Type::Acl::Ace.new('identity' => 'Administrator', 'rights' => ['modify']),
-          Puppet::Type::Acl::Ace.new('identity' => 'Authenticated Users', 'rights' => %w[write read execute]),
+          Puppet::Type::Acl::Ace.new('identity' => 'Authenticated Users', 'rights' => ['write', 'read', 'execute']),
         ]
       end
 
