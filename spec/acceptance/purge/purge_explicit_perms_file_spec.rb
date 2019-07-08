@@ -68,26 +68,26 @@ describe 'Purge' do
 
         it 'Verify that ACL Rights are Correct' do
           on(agent, verify_acl_command) do |result|
-            assert_match(acl_regex_user_id1, result.stdout, 'Expected ACL was not present!')
+            expect(result.stdout).to match(%r{#{acl_regex_user_id1}})
           end
         end
 
         it 'Execute Purge Manifest' do
           execute_manifest_on(agent, purge_acl_manifest(target, user_id2), debug: true) do |result|
-            assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
+            expect(result.stderr).not_to match(%r{Error:})
           end
         end
 
         it 'Verify that ACL Rights are Correct (Post-Purge)' do
           on(agent, verify_acl_command) do |result|
-            assert_no_match(acl_regex_user_id1, result.stdout, 'Unexpected ACL was present!')
-            assert_match(acl_regex_user_id2, result.stdout, 'Expected ACL was not present!')
+            expect(result.stdout).not_to match(%r{#{acl_regex_user_id1}})
+            expect(result.stdout).to match(%r{#{acl_regex_user_id2}})
           end
         end
 
         it 'Verify File Data Integrity' do
           on(agent, verify_content_command) do |result|
-            assert_match(file_content_regex(file_content), result.stdout, 'Expected file content is invalid!')
+            expect(result.stdout).to match(%r{#{file_content_regex(file_content)}})
           end
         end
       end

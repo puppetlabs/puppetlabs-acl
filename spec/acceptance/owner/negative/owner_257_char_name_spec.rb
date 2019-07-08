@@ -8,13 +8,13 @@ def apply_manifest_and_verify(agent, target_name, file_content, user_id, owner_i
 
     it 'Attempt to Execute ACL Manifest' do
       execute_manifest_on(agent, acl_manifest(target_name, file_content, user_id, owner_id), debug: true) do |result|
-        assert_match(expected_error, result.stderr, 'Expected error was not detected!')
+        expect(result.stderr).to match(%r{#{expected_error}})
       end
     end
 
     it 'Verify File Data Integrity' do
       on(agent, verify_content_command) do |result|
-        assert_match(file_content_regex(file_content), result.stdout, 'File content is invalid!')
+        expect(result.stdout).to match(%r{#{file_content_regex(file_content)}})
       end
     end
   end

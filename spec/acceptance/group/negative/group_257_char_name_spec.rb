@@ -57,12 +57,12 @@ describe 'Group - Negative' do
     context "On Windows Agent Change Group to Local Group with Long Name on #{agent}" do
       it 'Attempt to Execute ACL Manifest' do
         execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-          assert_match(expected_error, result.stderr, 'Expected error was not detected!')
+          expect(result.stderr).to match(%r{#{expected_error}})
         end
 
         step 'Verify File Data Integrity'
         on(agent, verify_content_command) do |result|
-          assert_match(file_content_regex, result.stdout, 'File content is invalid!')
+          expect(result.stdout).to match(%r{#{file_content_regex}})
         end
       end
     end

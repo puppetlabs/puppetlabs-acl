@@ -59,26 +59,26 @@ describe 'Use Cases' do
       context "on #{agent}" do
         it 'Execute ACL Manifest' do
           execute_manifest_on(agent, acl_manifest(target, target_child, file_content, group, user_id), debug: true) do |result|
-            assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
+            expect(result.stderr).not_to match(%r{Error:})
           end
         end
 
         it 'Verify that ACL Rights are Correct for Child' do
           on(agent, verify_acl_child_command) do |result|
-            assert_match(target_child_first_ace_regex, result.stdout, 'Expected ACL was not present!')
-            assert_match(target_child_second_ace_regex, result.stdout, 'Expected ACL was not present!')
+            expect(result.stdout).to match(%r{#{target_child_first_ace_regex}})
+            expect(result.stdout).to match(%r{#{target_child_second_ace_regex}})
           end
         end
 
         it 'Attempt to Update File' do
           execute_manifest_on(agent, update_manifest(target_child), debug: true) do |result|
-            assert_match(%r{Error:}, result.stderr, 'Expected error was not detected!')
+            expect(result.stderr).not_to match(%r{Error:})
           end
         end
 
         it 'Verify File Data Integrity' do
           on(agent, verify_content_command) do |result|
-            assert_match(file_content_regex(file_content), result.stdout, 'File content is invalid!')
+            expect(result.stdout).to match(%r{#{file_content_regex(file_content)}})
           end
         end
       end

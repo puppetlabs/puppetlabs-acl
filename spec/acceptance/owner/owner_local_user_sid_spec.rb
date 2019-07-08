@@ -75,7 +75,7 @@ describe 'Owner - SID' do
 
         it 'Execute Setup Manifest' do
           execute_manifest_on(agent, setup_manifest(target_name, file_content, owner_id), debug: true) do |result|
-            assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
+            expect(result.stderr).not_to match(%r{Error:})
           end
         end
 
@@ -87,19 +87,19 @@ describe 'Owner - SID' do
 
         it 'Execute ACL Manifest' do
           execute_manifest_on(agent, acl_manifest(target_name, sid), debug: true) do |result|
-            assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
+            expect(result.stderr).not_to match(%r{Error:})
           end
         end
 
         it 'Verify that ACL Rights are Correct' do
           on(agent, verify_owner_command) do |result|
-            assert_match(owner_regex, result.stdout, 'Expected ACL was not present!')
+            expect(result.stdout).to match(%r{#{owner_regex}})
           end
         end
 
         it 'Verify File Data Integrity' do
           on(agent, verify_content_command) do |result|
-            assert_match(file_content_regex, result.stdout, 'File content is invalid!')
+            expect(result.stdout).to match(%r{#{file_content_regex}})
           end
         end
       end

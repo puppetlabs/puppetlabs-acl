@@ -5,13 +5,13 @@ def execute_manifest_with_mask(acl_regex, agent, mask)
   context "on #{agent}" do
     it 'Execute Manifest' do
       execute_manifest_on(agent, acl_manifest(mask), debug: true) do |result|
-        assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
+        expect(result.stderr).not_to match(%r{Error:})
       end
     end
 
     it 'Verify that ACL Rights are Correct' do
       on(agent, verify_acl_command(mask)) do |result|
-        assert_match(acl_regex, result.stdout, 'Expected ACL was not present!')
+        expect(result.stdout).to match(%r{#{acl_regex}})
       end
     end
   end

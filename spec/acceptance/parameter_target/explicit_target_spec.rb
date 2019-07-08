@@ -34,13 +34,13 @@ describe 'Windows ACL Module - Explicit Use of "target" Parameter' do
     context "on #{agent}" do
       it 'Execute Manifest' do
         execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-          assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
+          expect(result.stderr).not_to match(%r{Error:})
         end
       end
 
       it 'Verify that ACL Rights are Correct' do
         on(agent, verify_acl_command) do |result|
-          assert_match(acl_regex, result.stdout, 'Expected ACL was not present!')
+          expect(result.stdout).to match(%r{#{acl_regex}})
         end
       end
     end

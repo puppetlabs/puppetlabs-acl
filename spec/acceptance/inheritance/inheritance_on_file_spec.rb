@@ -11,19 +11,19 @@ def apply_manifest_and_verify(perm_type, asset_type, child_inherit_type, acl_chi
   context "on #{agent}" do
     it 'Execute Apply Manifest' do
       execute_manifest_on(agent, acl_manifest(target_name, target_child, file_content, user_id_child, rights, perm_type, child_inherit_type), debug: true) do |result|
-        assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
+        expect(result.stderr).not_to match(%r{Error:})
       end
     end
 
     it 'Verify that ACL Rights are Correct on Child' do
       on(agent, verify_child_acl_command(target_child)) do |result|
-        assert_match(acl_child_regex, result.stdout, 'Expected ACL was not present!')
+        expect(result.stdout).to match(%r{#{acl_child_regex}})
       end
     end
 
     it 'Verify File Data Integrity' do
       on(agent, verify_content_command(target_name, target_child_name)) do |result|
-        assert_match(file_content_regex(file_content), result.stdout, 'File content is invalid!')
+        expect(result.stdout).to match(%r{#{file_content_regex(file_content)}})
       end
     end
   end

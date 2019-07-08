@@ -17,7 +17,7 @@ describe 'Basic Functionality - Negative' do
     linux_agents.each do |agent|
       it "Verify that the 'acl' Type Does not Work on Non-Windows Agents on #{agent}" do
         execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-          assert_match(%r{Error: Could not find a suitable provider for acl}, result.stderr, 'Expected error was not detected!')
+          expect(result.stderr).to match(%r{Error: Could not find a suitable provider for acl})
         end
       end
     end

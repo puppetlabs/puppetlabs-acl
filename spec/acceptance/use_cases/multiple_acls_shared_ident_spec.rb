@@ -112,52 +112,52 @@ describe 'Use Cases' do
     windows_agents.each do |agent|
       it 'Execute ACL Manifest' do
         execute_manifest_on(agent, acl_manifest(target, target_child, target_grand_child, group1, group2, user_id1, user_id2), debug: true) do |result|
-          assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
+          expect(result.stderr).not_to match(%r{Error:})
         end
       end
 
       it 'Verify that ACL Rights are Correct' do
         on(agent, verify_acl_command) do |result|
-          assert_match(target_group1_ace_regex, result.stdout, 'Expected ACL was not present!')
-          assert_match(target_group2_ace_regex, result.stdout, 'Expected ACL was not present!')
-          assert_match(target_user_id1_ace_regex, result.stdout, 'Expected ACL was not present!')
-          assert_match(target_user_id2_ace_regex, result.stdout, 'Expected ACL was not present!')
+          expect(result.stdout).to match(%r{#{target_group1_ace_regex}})
+          expect(result.stdout).to match(%r{#{target_group2_ace_regex}})
+          expect(result.stdout).to match(%r{#{target_user_id1_ace_regex}})
+          expect(result.stdout).to match(%r{#{target_user_id2_ace_regex}})
         end
       end
 
       it 'Verify that ACL Rights are Correct for Child' do
         on(agent, verify_acl_child_command) do |result|
           # ACL from parent(s) will still apply.
-          assert_match(target_group1_ace_regex, result.stdout, 'Expected ACL was not present!')
-          assert_match(target_group2_ace_regex, result.stdout, 'Expected ACL was not present!')
-          assert_match(target_user_id1_ace_regex, result.stdout, 'Expected ACL was not present!')
-          assert_match(target_user_id2_ace_regex, result.stdout, 'Expected ACL was not present!')
+          expect(result.stdout).to match(%r{#{target_group1_ace_regex}})
+          expect(result.stdout).to match(%r{#{target_group2_ace_regex}})
+          expect(result.stdout).to match(%r{#{target_user_id1_ace_regex}})
+          expect(result.stdout).to match(%r{#{target_user_id2_ace_regex}})
 
-          assert_match(target_child_group1_ace_regex, result.stdout, 'Expected ACL was not present!')
-          assert_match(target_child_group2_ace_regex, result.stdout, 'Expected ACL was not present!')
-          assert_match(target_child_user_id1_ace_regex, result.stdout, 'Expected ACL was not present!')
-          assert_match(target_child_user_id2_ace_regex, result.stdout, 'Expected ACL was not present!')
+          expect(result.stdout).to match(%r{#{target_child_group1_ace_regex}})
+          expect(result.stdout).to match(%r{#{target_child_group2_ace_regex}})
+          expect(result.stdout).to match(%r{#{target_child_user_id1_ace_regex}})
+          expect(result.stdout).to match(%r{#{target_child_user_id2_ace_regex}})
         end
       end
 
       it 'Verify that ACL Rights are Correct for Grand Child' do
         on(agent, verify_acl_grand_child_command) do |result|
           # ACL from parent(s) will still apply.
-          assert_match(target_group1_ace_regex, result.stdout, 'Expected ACL was not present!')
-          assert_match(target_group2_ace_regex, result.stdout, 'Expected ACL was not present!')
-          assert_match(target_user_id1_ace_regex, result.stdout, 'Expected ACL was not present!')
-          assert_match(target_user_id2_ace_regex, result.stdout, 'Expected ACL was not present!')
+          expect(result.stdout).to match(%r{#{target_group1_ace_regex}})
+          expect(result.stdout).to match(%r{#{target_group2_ace_regex}})
+          expect(result.stdout).to match(%r{#{target_user_id1_ace_regex}})
+          expect(result.stdout).to match(%r{#{target_user_id2_ace_regex}})
 
           # ACL from parent(s) will still apply.
-          assert_match(target_child_group1_ace_regex, result.stdout, 'Expected ACL was not present!')
-          assert_match(target_child_group2_ace_regex, result.stdout, 'Expected ACL was not present!')
-          assert_match(target_child_user_id1_ace_regex, result.stdout, 'Expected ACL was not present!')
-          assert_match(target_child_user_id2_ace_regex, result.stdout, 'Expected ACL was not present!')
+          expect(result.stdout).to match(%r{#{target_child_group1_ace_regex}})
+          expect(result.stdout).to match(%r{#{target_child_group2_ace_regex}})
+          expect(result.stdout).to match(%r{#{target_child_user_id1_ace_regex}})
+          expect(result.stdout).to match(%r{#{target_child_user_id2_ace_regex}})
 
-          assert_match(target_grand_child_group1_ace_regex, result.stdout, 'Expected ACL was not present!')
-          assert_match(target_grand_child_group2_ace_regex, result.stdout, 'Expected ACL was not present!')
-          assert_match(target_grand_child_user_id1_ace_regex, result.stdout, 'Expected ACL was not present!')
-          assert_match(target_grand_child_user_id2_ace_regex, result.stdout, 'Expected ACL was not present!')
+          expect(result.stdout).to match(%r{#{target_grand_child_group1_ace_regex}})
+          expect(result.stdout).to match(%r{#{target_grand_child_group2_ace_regex}})
+          expect(result.stdout).to match(%r{#{target_grand_child_user_id1_ace_regex}})
+          expect(result.stdout).to match(%r{#{target_grand_child_user_id2_ace_regex}})
         end
       end
     end

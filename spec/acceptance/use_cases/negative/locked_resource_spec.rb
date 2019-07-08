@@ -42,13 +42,13 @@ describe 'Use Cases' do
       context "on #{agent}" do
         it 'Execute ACL Manifest' do
           execute_manifest_on(agent, acl_manifest(target, file_content), debug: true) do |result|
-            assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
+            expect(result.stderr).not_to match(%r{Error:})
           end
         end
 
         it 'Attempt to Update File' do
           execute_manifest_on(agent, update_manifest(target), debug: true) do |result|
-            assert_match(%r{Error:.*Permission denied}, result.stderr, 'Expected error was not detected!')
+            expect(result.stderr).to match(%r{Error:.*Permission denied})
           end
         end
       end

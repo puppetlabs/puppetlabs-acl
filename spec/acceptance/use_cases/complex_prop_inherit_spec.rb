@@ -152,18 +152,18 @@ describe 'Use Cases' do
           on(agent, verify_acl_grand_child_command) do |result|
             # We only need to check the grand child because we are only concerned with rights
             # propagating and inheriting.
-            assert_match(target_grand_child_first_ace_regex, result.stdout, 'Expected ACL was not present!')
-            assert_match(target_grand_child_second_ace_regex, result.stdout, 'Expected ACL was not present!')
-            assert_match(target_grand_child_third_ace_regex, result.stdout, 'Expected ACL was not present!')
-            assert_match(target_grand_child_fourth_ace_regex, result.stdout, 'Expected ACL was not present!')
-            assert_match(target_grand_child_fifth_ace_regex, result.stdout, 'Expected ACL was not present!')
-            assert_match(target_grand_child_sixth_ace_regex, result.stdout, 'Expected ACL was not present!')
+            expect(result.stdout).to match(%r{#{target_grand_child_first_ace_regex}})
+            expect(result.stdout).to match(%r{#{target_grand_child_second_ace_regex}})
+            expect(result.stdout).to match(%r{#{target_grand_child_third_ace_regex}})
+            expect(result.stdout).to match(%r{#{target_grand_child_fourth_ace_regex}})
+            expect(result.stdout).to match(%r{#{target_grand_child_fifth_ace_regex}})
+            expect(result.stdout).to match(%r{#{target_grand_child_sixth_ace_regex}})
           end
         end
 
         it 'Verify File Data Integrity' do
           on(agent, verify_content_command) do |result|
-            assert_match(file_content_regex(file_content), result.stdout, 'File content is invalid!')
+            expect(result.stdout).to match(%r{#{file_content_regex(file_content)}})
           end
         end
       end

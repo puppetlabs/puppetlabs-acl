@@ -34,13 +34,13 @@ describe 'Identity - Negative' do
       context "on #{agent}" do
         it 'Execute Manifest' do
           execute_manifest_on(agent, acl_manifest(target_file, file_content, group_id), debug: true) do |result|
-            assert_match(%r{Error: Failed to set permissions for }, result.stderr, 'Expected error was not detected!')
+            expect(result.stderr).to match(%r{Error: Failed to set permissions for })
           end
         end
 
         it 'Verify File Data Integrity' do
           on(agent, verify_content_command(target_file)) do |result|
-            assert_match(file_content_regex(file_content), result.stdout, 'Expected file content is invalid!')
+            expect(result.stdout).to match(%r{#{file_content_regex(file_content)}})
           end
         end
       end
@@ -56,13 +56,13 @@ describe 'Identity - Negative' do
       context "on #{agent}" do
         it 'Execute Manifest' do
           execute_manifest_on(agent, acl_manifest(target_file, file_content, user_id), debug: true) do |result|
-            assert_match(%r{Error: Failed to set permissions for 'user_not_here'}, result.stderr, 'Expected error was not detected!')
+            expect(result.stderr).to match(%r{Error: Failed to set permissions for 'user_not_here'})
           end
         end
 
         it 'Verify File Data Integrity' do
           on(agent, verify_content_command(target_file)) do |result|
-            assert_match(file_content_regex(file_content), result.stdout, 'Expected file content is invalid!')
+            expect(result.stdout).to match(%r{#{file_content_regex(file_content)}})
           end
         end
       end

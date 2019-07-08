@@ -4,13 +4,13 @@ require 'spec_helper_acceptance'
 def apply_manifest_and_verify(agent, file_content, target, user_id, verify_acl_command)
   it 'Execute Manifest' do
     execute_manifest_on(agent, acl_manifest_user(target, file_content, user_id), debug: true) do |result|
-      assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
+      expect(result.stderr).not_to match(%r{Error:})
     end
   end
 
   it 'Verify that ACL Rights are Correct' do
     on(agent, powershell(verify_acl_command, 'EncodedCommand' => true)) do |result|
-      assert_match(%r{^1$}, result.stdout, 'Expected ACL was not present!')
+      expect(result.stdout).to match(%r{^1$})
     end
   end
 end
@@ -79,13 +79,13 @@ describe 'Identity' do
       context "on #{agent}" do
         it 'Execute Manifest' do
           execute_manifest_on(agent, acl_manifest_group(target, file_content, group_id), debug: true) do |result|
-            assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
+            expect(result.stderr).not_to match(%r{Error:})
           end
         end
 
         it 'Verify that ACL Rights are Correct' do
           on(agent, powershell(verify_acl_command, 'EncodedCommand' => true)) do |result|
-            assert_match(%r{^1$}, result.stdout, 'Expected ACL was not present!')
+            expect(result.stdout).not_to match(%r{^1$})
           end
         end
       end

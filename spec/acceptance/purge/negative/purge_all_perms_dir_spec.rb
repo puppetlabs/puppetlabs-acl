@@ -49,19 +49,19 @@ describe 'Purge' do
       context "on #{agent}" do
         it 'Execute Apply Manifest' do
           execute_manifest_on(agent, acl_manifest(target), debug: true) do |result|
-            assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
+            expect(result.stderr).not_to match(%r{Error:})
           end
         end
 
         it 'Verify that ACL Rights are Correct' do
           on(agent, verify_acl_command) do |result|
-            assert_match(acl_regex_user_id, result.stdout, 'Expected ACL was not present!')
+            expect(result.stdout).to match(%r{#{acl_regex_user_id}})
           end
         end
 
         it 'Attempt to Execute Purge Manifest' do
           execute_manifest_on(agent, purge_acl_manifest(target), debug: true, exepect_failures: true) do |result|
-            assert_match(verify_purge_error, result.stderr, 'Expected error was not detected!')
+            expect(result.stderr).to match(%r{#{verify_purge_error}})
           end
         end
       end

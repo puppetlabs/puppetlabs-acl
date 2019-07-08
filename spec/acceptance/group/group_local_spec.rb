@@ -1,23 +1,23 @@
 require 'spec_helper_acceptance'
 
 # rubocop:disable RSpec/EmptyExampleGroup
-def apply_manifest_and_verify(agent, file_content, group_id, group_regex, user_type)
+def apply_manifest_and_verify(agent, file_content, group_id, _group_regex, user_type)
   context "on #{agent}" do
     it 'Execute ACL Manifest' do
       execute_manifest_on(agent, acl_manifest(user_type, file_content, group_id), debug: true) do |result|
-        assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
+        expect(result.stderr).not_to match(%r{Error:})
       end
     end
 
     it 'Verify that ACL Rights are Correct' do
       on(agent, verify_group_command(user_type)) do |result|
-        assert_match(group_regex, result.stdout, 'Expected ACL was not present!')
+        expect(result.stdout).not_to match(%r{#{acl_regex}})
       end
     end
 
     it 'Verify File Data Integrity' do
       on(agent, verify_content_command(user_type)) do |result|
-        assert_match(file_content_regex(file_content), result.stdout, 'File content is invalid!')
+        expect(result.stdout).not_to match(%r{#{file_content_regex(file_content)}})
       end
     end
   end

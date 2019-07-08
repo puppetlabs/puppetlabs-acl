@@ -64,19 +64,19 @@ describe 'Propagate - Negative' do
           execute_manifest_on(agent, acl_manifest(target_name, file_content, rights, prop_type, affects_child_type), debug: true) do |result|
             verify_manifest = (agent_version >= Gem::Version.new('5.0.0')) ? verify_manifest_pup5 : verify_manifest_pup4
 
-            assert_match(verify_manifest, result.stdout, 'Expected ACL change event not detected!')
+            expect(result.stdout).to match(%r{#{verify_manifest}})
           end
         end
 
         it 'Verify that ACL Rights are Correct' do
           on(agent, verify_acl_command) do |result|
-            assert_match(acl_regex, result.stdout, 'Expected ACL was not present!')
+            expect(result.stdout).to match(%r{#{acl_regex}})
           end
         end
 
         it 'Verify File Data Integrity' do
           on(agent, verify_content_command) do |result|
-            assert_match(file_content_regex(file_content), result.stdout, 'File content is invalid!')
+            expect(result.stdout).to match(%r{#{file_content_regex(file_content)}})
           end
         end
       end

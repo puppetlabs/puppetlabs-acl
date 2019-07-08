@@ -9,19 +9,19 @@ def apply_manifest_and_verify(agent, target_name, file_content, owner_id, owner_
 
     it 'Execute ACL Manifest' do
       execute_manifest_on(agent, acl_manifest(target_name, file_content, owner_id), debug: true) do |result|
-        assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
+        expect(result.stderr).not_to match(%r{Error:})
       end
     end
 
     it 'Verify that ACL Rights are Correct' do
       on(agent, verify_owner_command) do |result|
-        assert_match(owner_regex, result.stdout, 'Expected ACL was not present!')
+        expect(result.stdout).to match(%r{#{owner_regex}})
       end
     end
 
     it 'Verify File Data Integrity' do
       on(agent, verify_content_command) do |result|
-        assert_match(file_content_regex(file_content), result.stdout, 'File content is invalid!')
+        expect(result.stdout).to match(%r{#{file_content_regex(file_content)}})
       end
     end
   end
@@ -96,13 +96,13 @@ describe 'Owner - Local Group' do
       context "on #{agent}" do
         it 'Execute ACL Manifest' do
           execute_manifest_on(agent, acl_manifest(target_name, file_content, owner_id), debug: true) do |result|
-            assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
+            expect(result.stderr).not_to match(%r{Error:})
           end
         end
 
         it 'Verify that ACL Rights are Correct' do
           on(agent, powershell(verify_owner_command, 'EncodedCommand' => true)) do |result|
-            assert_match(%r{^1$}, result.stdout, 'Expected ACL was not present!')
+            expect(result.stdout).to match(%r{^1$})
           end
         end
       end
