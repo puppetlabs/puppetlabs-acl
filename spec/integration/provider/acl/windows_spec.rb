@@ -55,7 +55,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
     resource[:target] = 'c:/somwerhaear2132312323123123123123123_does_not_exist'
 
     expect {
-      provider.owner.must_not be_nil
+      provider.owner.not_to be_nil
     }.to raise_error(Exception, %r{Failed to get security descriptor for path})
   end
 
@@ -95,11 +95,11 @@ describe Puppet::Type.type(:acl).provider(:windows) do
     end
 
     it 'is not nil' do
-      provider.owner.must_not be_nil
+      expect(provider.owner).not_to be_nil
     end
 
     it 'grabs current owner' do
-      provider.owner.must == 'S-1-5-32-544'
+      expect(provider.owner).to eq('S-1-5-32-544')
     end
 
     context '.flush' do
@@ -130,13 +130,13 @@ describe Puppet::Type.type(:acl).provider(:windows) do
     end
 
     it 'is not nil' do # rubocop:disable RSpec/RepeatedExample
-      provider.group.must_not be_nil
+      expect(provider.group).not_to be_nil
     end
 
     it 'grabs current group' do # rubocop:disable RSpec/RepeatedExample
       # there really isn't a default group, it depends on the primary group of the original CREATOR GROUP of a resource.
       # http://msdn.microsoft.com/en-us/library/windows/desktop/ms676927(v=vs.85).aspx
-      provider.group.must_not be_nil
+      expect(provider.group).not_to be_nil
     end
 
     context '.flush' do
@@ -172,11 +172,11 @@ describe Puppet::Type.type(:acl).provider(:windows) do
     end
 
     it 'is not nil' do
-      provider.inherit_parent_permissions.must_not be_nil
+      expect(provider.inherit_parent_permissions).not_to be_nil
     end
 
     it 'is true by default' do
-      provider.inherit_parent_permissions.must be_truthy
+      expect(provider.inherit_parent_permissions).to be_truthy
     end
 
     context '.flush' do
@@ -185,23 +185,23 @@ describe Puppet::Type.type(:acl).provider(:windows) do
       end
 
       it 'does nothing if inheritance is set to true (default)' do
-        provider.inherit_parent_permissions.must be_truthy
+        expect(provider.inherit_parent_permissions).to be_truthy
 
         # puppet will not make this call if values are in sync
         # provider.inherit_parent_permissions = :true
 
-        resource.provider.expects(:set_security_descriptor).never
+        expect(resource.provider).to receive(:set_security_descriptor).never
 
         resource.provider.flush
       end
 
       it 'updates inheritance to false when set to :false' do
-        provider.inherit_parent_permissions.must be_truthy
+        expect(provider.inherit_parent_permissions).to be_truthy
         provider.inherit_parent_permissions = false
 
         resource.provider.flush
 
-        provider.inherit_parent_permissions.must be false
+        expect(provider.inherit_parent_permissions).to be false
       end
     end
   end
@@ -212,11 +212,11 @@ describe Puppet::Type.type(:acl).provider(:windows) do
     end
 
     it 'is not nil' do
-      provider.permissions.must_not be_nil
+      expect(provider.permissions).not_to be_nil
     end
 
     it 'contains at least one ace' do
-      provider.permissions.count.must_not == 0
+      expect(provider.permissions.count).not_to eq 0
     end
 
     it 'contains aces that are access allowed' do
@@ -228,7 +228,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         end
       end
 
-      at_least_one.must be_truthy
+      expect(at_least_one).to be_truthy
     end
 
     it 'contains aces that allow inheritance' do
@@ -241,7 +241,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         end
       end
 
-      at_least_one.must be_truthy
+      expect(at_least_one).to be_truthy
     end
 
     it 'contains aces that are inherited' do
@@ -253,7 +253,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         end
       end
 
-      at_least_one.must be_truthy
+      expect(at_least_one).to be_truthy
     end
 
     it 'contains aces that propagate inheritance' do
@@ -266,7 +266,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         end
       end
 
-      at_least_one.must be_truthy
+      expect(at_least_one).to be_truthy
     end
 
     context 'when setting permissions' do
@@ -285,13 +285,13 @@ describe Puppet::Type.type(:acl).provider(:windows) do
       it 'handles minimally specified permissions' do
         skip 'Not on Windows platform' unless Puppet.features.microsoft_windows?
         permissions = [Puppet::Type::Acl::Ace.new({ 'identity' => 'Everyone', 'rights' => ['full'] }, provider)]
-        set_perms(permissions).must == permissions
+        expect(set_perms(permissions)).to eq permissions
       end
 
       it 'handles fully specified permissions' do
         skip 'Not on Windows platform' unless Puppet.features.microsoft_windows?
         permissions = [Puppet::Type::Acl::Ace.new({ 'identity' => 'Everyone', 'rights' => ['full'], 'perm_type' => 'allow', 'child_types' => 'all', 'affects' => 'all' }, provider)]
-        set_perms(permissions).must == permissions
+        expect(set_perms(permissions)).to eq permissions
       end
 
       [
@@ -306,9 +306,9 @@ describe Puppet::Type.type(:acl).provider(:windows) do
            if: (Facter[:kernelmajversion].value.to_f >= account[:min_kernel]) do
 
           permissions = [Puppet::Type::Acl::Ace.new({ 'identity' => account[:identity], 'rights' => ['full'] }, provider)]
-          set_perms(permissions).must == permissions
+          expect(set_perms(permissions)).to eq permissions
           # permissions = get_permissions_for_path(resource[:target]).select { |p| !p.inherited? }
-          # set_perms(removing_perms).must == (permissions - removing_perms)
+          # expect(set_perms(removing_perms)).to eq (permissions - removing_perms)
         end
       end
 
@@ -318,7 +318,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
           Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrator', 'rights' => ['modify'] }, provider),
           Puppet::Type::Acl::Ace.new({ 'identity' => 'Authenticated Users', 'rights' => ['write', 'read', 'execute'] }, provider),
         ]
-        set_perms(permissions).must == permissions
+        expect(set_perms(permissions)).to eq permissions
       end
 
       it 'handles setting folder protected' do
@@ -349,7 +349,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         resource[:purge] = true
         provider.inherit_parent_permissions = :false
 
-        set_perms(permissions).must == permissions
+        expect(set_perms(permissions)).to eq permissions
       end
 
       it 'handles setting ace inheritance' do
@@ -361,7 +361,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         resource[:purge] = :true
         provider.inherit_parent_permissions = :false
 
-        set_perms(permissions).must == permissions
+        expect(set_perms(permissions)).to eq permissions
       end
 
       it 'handles extraneous rights' do
@@ -379,7 +379,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
           Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrator', 'rights' => ['modify'] }, provider),
         ]
 
-        actual_perms.must == permissions
+        expect(actual_perms).to eq permissions
       end
 
       it 'handles deny' do
@@ -392,7 +392,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
 
         actual = set_perms(permissions)
 
-        actual.must == permissions
+        expect(actual).to eq permissions
       end
 
       it "handles deny when affects => 'self_only'" do
@@ -403,7 +403,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         resource[:purge] = :true
         provider.inherit_parent_permissions = :false
 
-        set_perms(permissions).must == permissions
+        expect(set_perms(permissions)).to eq permissions
       end
 
       it 'handles the same user with differing permissions appropriately' do
@@ -425,7 +425,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         resource[:purge] = :true
         provider.inherit_parent_permissions = :false
 
-        set_perms(permissions).must == permissions
+        expect(set_perms(permissions)).to eq permissions
       end
 
       it 'handles setting propagation appropriately' do
@@ -571,15 +571,15 @@ describe Puppet::Type.type(:acl).provider(:windows) do
             perm.identity = provider.get_account_name(perm.identity)
           end
           resource[:permissions] = permissions_hash
-
-          set_perms(permissions).must == permissions
         end
 
         it 'removes the permissions successfully' do
+          expect(set_perms(permissions)).to eq permissions
+
           provider.inherit_parent_permissions = false
           resource.provider.flush
 
-          provider.permissions.must == permissions
+          expect(provider.permissions).to eq permissions
         end
       end
     end
@@ -598,17 +598,16 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         permissions.each do |perm|
           perm.id = provider.get_account_id(perm.identity)
         end
-
-        set_perms(permissions).must == permissions
       end
 
       it 'removes specified permissions' do
+        expect(set_perms(permissions)).to eq(permissions)
         resource[:purge] = :listed_permissions
         removing_perms = [
           Puppet::Type::Acl::Ace.new({ 'identity' => 'Everyone', 'rights' => ['full'] }, provider),
         ]
 
-        set_perms(removing_perms).must == (permissions - removing_perms)
+        expect(set_perms(removing_perms)).to eq(permissions - removing_perms)
       end
 
       context 'when removing non-existing users' do

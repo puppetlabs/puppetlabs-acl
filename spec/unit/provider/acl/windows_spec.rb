@@ -13,12 +13,12 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
   end
 
   it 'is an instance of Puppet::Type::Acl::ProviderWindows' do
-    provider.must be_an_instance_of Puppet::Type::Acl::ProviderWindows
+    expect(provider).to be_an_instance_of(Puppet::Type::Acl::ProviderWindows)
   end
 
   context 'self.instances' do
     it 'returns an empty array' do
-      provider.class.instances.should == []
+      expect(provider.class.instances).to eq([])
     end
   end
 
@@ -73,48 +73,48 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
 
   context ':owner' do
     it 'is set to the default unspecified value by default' do
-      resource[:owner].must be_nil
+      expect(resource[:owner]).to be_nil
     end
 
     context '.insync?' do
       it 'returns true for Administrators and S-1-5-32-544' do
-        provider.owner_insync?('S-1-5-32-544', 'Administrators').must be_truthy
+        expect(provider).to be_owner_insync('S-1-5-32-544', 'Administrators')
       end
 
       it 'returns true for Administrators and Administrators' do
-        provider.owner_insync?('Administrators', 'Administrators').must be_truthy
+        expect(provider).to be_owner_insync('Administrators', 'Administrators')
       end
 
       it 'returns true for BUILTIN\\Administrators and Administrators' do
-        provider.owner_insync?('BUILTIN\\Administrators', 'Administrators').must be_truthy
+        expect(provider).to be_owner_insync('BUILTIN\\Administrators', 'Administrators')
       end
 
       it 'returns false for Administrators and Administrator (user)' do
-        provider.owner_insync?('Administrators', 'Administrator').must be false
+        expect(provider.owner_insync?('Administrators', 'Administrator')).to be false
       end
     end
   end
 
   context ':group' do
     it 'is set to the default unspecified value by default' do
-      resource[:group].must be_nil
+      expect(resource[:group]).to be_nil
     end
 
     context '.insync?' do
       it 'returns true for Administrators and S-1-5-32-544' do
-        provider.group_insync?('S-1-5-32-544', 'Administrators').must be_truthy
+        expect(provider).to be_group_insync('S-1-5-32-544', 'Administrators')
       end
 
       it 'returns true for Administrators and Administrators' do
-        provider.group_insync?('Administrators', 'Administrators').must be_truthy
+        expect(provider).to be_group_insync('Administrators', 'Administrators')
       end
 
       it 'returns true for BUILTIN\\Administrators and Administrators' do
-        provider.group_insync?('BUILTIN\\Administrators', 'Administrators').must be_truthy
+        expect(provider).to be_group_insync('BUILTIN\\Administrators', 'Administrators')
       end
 
       it 'returns false for Administrators and Administrator (user)' do
-        provider.group_insync?('Administrators', 'Administrator').must be false
+        expect(provider.group_insync?('Administrators', 'Administrator')).to be false
       end
     end
   end
@@ -124,268 +124,270 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
 
     context '.get_ace_type' do
       it 'returns allow if ace is nil' do
-        ace.stubs(:perm_type).returns(1) # ensure no false readings
-        ace.expects(:nil?).returns(true)
+        allow(ace).to receive(:perm_type).and_return(1) # ensure no false readings
+        expect(ace).to receive(:nil?).and_return(true)
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_type(ace).must == :allow
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_type(ace)).to eq(:allow)
       end
 
       it 'returns allow when ace.type is 0' do
-        ace.expects(:type).returns(0)
+        expect(ace).to receive(:type).and_return(0)
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_type(ace).must == :allow
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_type(ace)).to eq :allow
       end
 
       it 'returns deny when ace.type is 1' do
-        ace.expects(:type).returns(1)
+        expect(ace).to receive(:type).and_return(1)
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_type(ace).must == :deny
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_type(ace)).to eq :deny
       end
     end
 
     context '.get_ace_child_types' do
       it 'returns all if ace is nil' do
-        ace.stubs(:container_inherit?).returns(false) # ensure no false readings
-        ace.expects(:nil?).returns(true)
+        allow(ace).to receive(:container_inherit?).and_return(false) # ensure no false readings
+        expect(ace).to receive(:nil?).and_return(true)
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_child_types(ace).must == :all
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_child_types(ace)).to eq :all
       end
 
       it 'returns none when container_inherit and object_inherit are both false' do
-        ace.expects(:container_inherit?).returns(false).at_least_once
-        ace.expects(:object_inherit?).returns(false).at_least_once
+        expect(ace).to receive(:container_inherit?).and_return(false).at_least(:once)
+        expect(ace).to receive(:object_inherit?).and_return(false).at_least(:once)
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_child_types(ace).must == :none
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_child_types(ace)).to eq :none
       end
 
       it 'returns objects when container_inherit is false and object_inherit is true' do
-        ace.expects(:container_inherit?).returns(false).at_least_once
-        ace.expects(:object_inherit?).returns(true).at_least_once
+        expect(ace).to receive(:container_inherit?).and_return(false).at_least(:once)
+        expect(ace).to receive(:object_inherit?).and_return(true).at_least(:once)
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_child_types(ace).must == :objects
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_child_types(ace)).to eq :objects
       end
 
       it 'returns containers when container_inherit is true and object_inherit is false' do
-        ace.expects(:container_inherit?).returns(true).at_least_once
-        ace.expects(:object_inherit?).returns(false).at_least_once
+        expect(ace).to receive(:container_inherit?).and_return(true).at_least(:once)
+        expect(ace).to receive(:object_inherit?).and_return(false).at_least(:once)
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_child_types(ace).must == :containers
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_child_types(ace)).to eq :containers
       end
 
       it 'returns all when container_inherit and object_inherit are both true' do
-        ace.expects(:container_inherit?).returns(true).at_least_once
-        ace.expects(:object_inherit?).returns(true).at_least_once
+        expect(ace).to receive(:container_inherit?).and_return(true).at_least(:once)
+        expect(ace).to receive(:object_inherit?).and_return(true).at_least(:once)
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_child_types(ace).must == :all
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_child_types(ace)).to eq :all
       end
     end
 
     context '.get_ace_propagation' do
-      before :each do
-        ace.expects(:container_inherit?).returns(true).times(0..1)
-        ace.expects(:object_inherit?).returns(true).times(0..1)
-        ace.expects(:inherit_only?).returns(false).times(0..2)
+      before(:each) do
+        allow(ace).to receive(:container_inherit?).and_return(true).at_most(:once)
+        allow(ace).to receive(:object_inherit?).and_return(true).at_most(:once)
+        allow(ace).to receive(:inherit_only?).and_return(false).at_most(:twice)
       end
 
       it 'returns all if ace is nil' do
-        ace.stubs(:inherit_only?).returns(true) # ensure no false readings
-        ace.expects(:nil?).returns(true)
+        allow(ace).to receive(:inherit_only?).and_return(true) # ensure no false readings
+        expect(ace).to receive(:nil?).and_return(true)
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_propagation(ace).must == :all
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_propagation(ace)).to eq :all
       end
 
       context 'includes self' do
         it 'returns all when when ace.inherit_only? is false, ace.object_inherit? is true and ace.container_inherit? is true' do
-          Puppet::Provider::Acl::Windows::Base.get_ace_propagation(ace).must == :all
+          expect(Puppet::Provider::Acl::Windows::Base.get_ace_propagation(ace)).to eq :all
         end
 
         it 'returns all when when ace.inherit_only? is false, ace.object_inherit? is false and ace.container_inherit? is true (only one container OR object inherit type is required)' do
-          ace.expects(:object_inherit?).returns(false).times(0..1)
-          Puppet::Provider::Acl::Windows::Base.get_ace_propagation(ace).must == :all
+          expect(ace).to receive(:object_inherit?).and_return(false).at_most(:once)
+          expect(Puppet::Provider::Acl::Windows::Base.get_ace_propagation(ace)).to eq :all
         end
 
         it 'returns all when when ace.inherit_only? is false, ace.object_inherit? is true and ace.container_inherit? is true (only one container OR object inherit type is required)' do
-          ace.expects(:container_inherit?).returns(false).times(0..1)
-          Puppet::Provider::Acl::Windows::Base.get_ace_propagation(ace).must == :all
+          expect(ace).to receive(:container_inherit?).and_return(false).at_most(:once)
+          expect(Puppet::Provider::Acl::Windows::Base.get_ace_propagation(ace)).to eq :all
         end
 
         it 'returns self_only when ace.inherit_only? is false, ace.object_inherit? is false and ace.container_inherit? is false' do
-          ace.expects(:container_inherit?).returns(false).times(0..1)
-          ace.expects(:object_inherit?).returns(false).times(0..1)
-          Puppet::Provider::Acl::Windows::Base.get_ace_propagation(ace).must == :self_only
+          expect(ace).to receive(:container_inherit?).and_return(false).at_most(:once)
+          expect(ace).to receive(:object_inherit?).and_return(false).at_most(:once)
+          expect(Puppet::Provider::Acl::Windows::Base.get_ace_propagation(ace)).to eq :self_only
         end
 
         it 'returns self_and_direct_children when ace.inherit_only? is false and no_propagation_flag is set' do
-          ace.expects(:flags).returns(0x4) # http://msdn.microsoft.com/en-us/library/windows/desktop/ms692524(v=vs.85).aspx
+          expect(ace).to receive(:flags).and_return(0x4) # http://msdn.microsoft.com/en-us/library/windows/desktop/ms692524(v=vs.85).aspx
 
-          Puppet::Provider::Acl::Windows::Base.get_ace_propagation(ace).must == :self_and_direct_children_only
+          expect(Puppet::Provider::Acl::Windows::Base.get_ace_propagation(ace)).to eq :self_and_direct_children_only
         end
       end
 
       context 'inherit only (IO)' do
-        before :each do
-          ace.expects(:inherit_only?).returns(true).times(0..2)
-        end
-
         it 'returns children_only when ace.inherit_only? is true and no_propagation_flag is not set' do
-          ace.expects(:flags).returns(0x10)
+          expect(ace).to receive(:container_inherit?).and_return(true).at_most(:once)
+          expect(ace).to receive(:object_inherit?).and_return(true).at_most(:once)
+          expect(ace).to receive(:inherit_only?).and_return(true).at_most(:twice)
+          expect(ace).to receive(:flags).and_return(0x10)
 
-          Puppet::Provider::Acl::Windows::Base.get_ace_propagation(ace).must == :children_only
+          expect(Puppet::Provider::Acl::Windows::Base.get_ace_propagation(ace)).to eq :children_only
         end
 
         it 'returns direct_children_only when ace.inherit_only? is true and no_propagation_flag is set' do
-          ace.expects(:flags).returns(0x4) # http://msdn.microsoft.com/en-us/library/windows/desktop/ms692524(v=vs.85).aspx
+          expect(ace).to receive(:container_inherit?).and_return(true).at_most(:once)
+          expect(ace).to receive(:object_inherit?).and_return(true).at_most(:once)
+          expect(ace).to receive(:inherit_only?).and_return(true).at_most(:twice)
+          expect(ace).to receive(:flags).and_return(0x4) # http://msdn.microsoft.com/en-us/library/windows/desktop/ms692524(v=vs.85).aspx
 
-          Puppet::Provider::Acl::Windows::Base.get_ace_propagation(ace).must == :direct_children_only
+          expect(Puppet::Provider::Acl::Windows::Base.get_ace_propagation(ace)).to eq :direct_children_only
         end
       end
     end
 
     context '.get_ace_rights_from_mask' do
       it 'returns [] if ace is nil?' do
-        ace.expects(:nil?).returns(true)
+        expect(ace).to receive(:nil?).and_return(true)
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == []
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq []
       end
 
       it 'has only full if ace.mask contains GENERIC_ALL' do
-        ace.expects(:mask).returns(base::GENERIC_ALL).times(0..10)
+        expect(ace).to receive(:mask).and_return(base::GENERIC_ALL).at_most(10).times
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:full]
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq [:full]
       end
 
       it 'has only full if ace.mask contains FILE_ALL_ACCESS' do
-        ace.expects(:mask).returns(base::FILE_ALL_ACCESS).times(0..10)
+        expect(ace).to receive(:mask).and_return(base::FILE_ALL_ACCESS).at_most(10).times
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:full]
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq [:full]
       end
 
       it 'contains read, write, execute if ace.mask contains GENERIC_WRITE, GENERIC_READ, and GENERIC_EXECUTE' do
-        ace.expects(:mask).returns(base::GENERIC_WRITE |
+        expect(ace).to receive(:mask).and_return(base::GENERIC_WRITE |
                                    base::GENERIC_READ |
-                                   base::GENERIC_EXECUTE).times(0..10)
+                                   base::GENERIC_EXECUTE).at_most(10).times
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:write, :read, :execute]
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq [:write, :read, :execute]
       end
 
       it 'contains read, write, execute if ace.mask contains FILE_GENERIC_WRITE, FILE_GENERIC_READ, and FILE_GENERIC_EXECUTE' do
-        ace.expects(:mask).returns(base::FILE_GENERIC_WRITE |
+        expect(ace).to receive(:mask).and_return(base::FILE_GENERIC_WRITE |
                                    base::FILE_GENERIC_READ |
-                                   base::FILE_GENERIC_EXECUTE).times(0..10)
+                                   base::FILE_GENERIC_EXECUTE).at_most(10).times
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:write, :read, :execute]
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq [:write, :read, :execute]
       end
 
       it 'contains write, execute if ace.mask contains FILE_GENERIC_WRITE and FILE_GENERIC_EXECUTE' do
-        ace.expects(:mask).returns(base::FILE_GENERIC_WRITE |
-                                   base::FILE_GENERIC_EXECUTE).times(0..10)
+        expect(ace).to receive(:mask).and_return(base::FILE_GENERIC_WRITE |
+                                   base::FILE_GENERIC_EXECUTE).at_most(10).times
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:write, :execute]
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq [:write, :execute]
       end
 
       it 'contains modify if ace.mask contains GENERIC_WRITE, GENERIC_READ, GENERIC_EXECUTE and contains DELETE' do
-        ace.expects(:mask).returns(base::GENERIC_WRITE |
+        expect(ace).to receive(:mask).and_return(base::GENERIC_WRITE |
                                    base::GENERIC_READ |
                                    base::GENERIC_EXECUTE |
-                                   base::DELETE).times(0..10)
+                                   base::DELETE).at_most(10).times
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:modify]
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq [:modify]
       end
 
       it 'contains modify if ace.mask contains FILE_GENERIC_WRITE, FILE_GENERIC_READ, FILE_GENERIC_EXECUTE and contains DELETE' do
-        ace.expects(:mask).returns(base::FILE_GENERIC_WRITE |
+        expect(ace).to receive(:mask).and_return(base::FILE_GENERIC_WRITE |
                                    base::FILE_GENERIC_READ |
                                    base::FILE_GENERIC_EXECUTE |
-                                   base::DELETE).times(0..10)
+                                   base::DELETE).at_most(10).times
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:modify]
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq [:modify]
       end
 
       it 'contains read, execute if ace.mask contains GENERIC_READ and GENERIC_EXECUTE' do
-        ace.expects(:mask).returns(base::GENERIC_READ |
-                                   base::GENERIC_EXECUTE).times(0..10)
+        expect(ace).to receive(:mask).and_return(base::GENERIC_READ |
+                                   base::GENERIC_EXECUTE).at_most(10).times
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:read, :execute]
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq [:read, :execute]
       end
 
       it 'contains read, execute if ace.mask contains FILE_GENERIC_READ and FILE_GENERIC_EXECUTE' do
-        ace.expects(:mask).returns(base::FILE_GENERIC_READ |
-                                   base::FILE_GENERIC_EXECUTE).times(0..10)
+        expect(ace).to receive(:mask).and_return(base::FILE_GENERIC_READ |
+                                   base::FILE_GENERIC_EXECUTE).at_most(10).times
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:read, :execute]
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq [:read, :execute]
       end
 
       it 'contains write if ace.mask contains GENERIC_WRITE' do
-        ace.expects(:mask).returns(base::GENERIC_WRITE).times(0..10)
+        expect(ace).to receive(:mask).and_return(base::GENERIC_WRITE).at_most(10).times
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:write]
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq [:write]
       end
 
       it 'contains write if ace.mask contains FILE_GENERIC_WRITE' do
-        ace.expects(:mask).returns(base::FILE_GENERIC_WRITE).times(0..10)
+        expect(ace).to receive(:mask).and_return(base::FILE_GENERIC_WRITE).at_most(10).times
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:write]
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq [:write]
       end
 
       it 'contains mask_specific if ace.mask only contains FILE_WRITE_DATA' do
-        ace.expects(:mask).returns(base::FILE_WRITE_DATA).times(0..10)
+        expect(ace).to receive(:mask).and_return(base::FILE_WRITE_DATA).at_most(10).times
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:mask_specific]
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq [:mask_specific]
       end
 
       it 'contains mask_specific if ace.mask only contains FILE_APPEND_DATA' do
-        ace.expects(:mask).returns(base::FILE_APPEND_DATA).times(0..10)
+        expect(ace).to receive(:mask).and_return(base::FILE_APPEND_DATA).at_most(10).times
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:mask_specific]
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq [:mask_specific]
       end
 
       it 'contains read if ace.mask contains GENERIC_READ' do
-        ace.expects(:mask).returns(base::GENERIC_READ).times(0..10)
+        expect(ace).to receive(:mask).and_return(base::GENERIC_READ).at_most(10).times
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:read]
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq [:read]
       end
 
       it 'contains read if ace.mask contains FILE_GENERIC_READ' do
-        ace.expects(:mask).returns(base::FILE_GENERIC_READ).times(0..10)
+        expect(ace).to receive(:mask).and_return(base::FILE_GENERIC_READ).at_most(10).times
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:read]
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq [:read]
       end
 
       it 'contains mask_specific if ace.mask contains FILE_GENERIC_READ | FILE_WRITE_ATTRIBUTES' do
-        ace.expects(:mask).returns(base::FILE_GENERIC_READ |
-                                   base::FILE_WRITE_ATTRIBUTES).times(0..10)
+        expect(ace).to receive(:mask).and_return(base::FILE_GENERIC_READ |
+                                   base::FILE_WRITE_ATTRIBUTES).at_most(10).times
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:mask_specific]
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq [:mask_specific]
       end
 
       it 'contains mask_specific if ace.mask only contains FILE_READ_DATA' do
-        ace.expects(:mask).returns(base::FILE_READ_DATA).times(0..10)
+        expect(ace).to receive(:mask).and_return(base::FILE_READ_DATA).at_most(10).times
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:mask_specific]
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq [:mask_specific]
       end
 
       it 'contains execute if ace.mask contains GENERIC_EXECUTE' do
-        ace.expects(:mask).returns(base::GENERIC_EXECUTE).times(0..10)
+        expect(ace).to receive(:mask).and_return(base::GENERIC_EXECUTE).at_most(10).times
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:execute]
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq [:execute]
       end
 
       it 'contains execute if ace.mask contains FILE_GENERIC_EXECUTE' do
-        ace.expects(:mask).returns(base::FILE_GENERIC_EXECUTE).times(0..10)
+        expect(ace).to receive(:mask).and_return(base::FILE_GENERIC_EXECUTE).at_most(10).times
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:execute]
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq [:execute]
       end
 
       it 'contains mask_specific if ace.mask only contains FILE_EXECUTE' do
-        ace.expects(:mask).returns(base::FILE_EXECUTE).times(0..10)
+        expect(ace).to receive(:mask).and_return(base::FILE_EXECUTE).at_most(10).times
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:mask_specific]
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq [:mask_specific]
       end
 
       it 'contains mask_specific if ace.mask contains permissions too specific' do
-        ace.expects(:mask).returns(base::DELETE).times(0..10)
+        expect(ace).to receive(:mask).and_return(base::DELETE).at_most(10).times
 
-        Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace).must == [:mask_specific]
+        expect(Puppet::Provider::Acl::Windows::Base.get_ace_rights_from_mask(ace)).to eq [:mask_specific]
       end
     end
 
@@ -393,171 +395,171 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
       context 'when purge=>false (the default)' do
         it 'returns true for Administrators and specifying Administrators with same permissions' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
-          provider.are_permissions_insync?([admins], [admins]).must be true
+          expect(provider.are_permissions_insync?([admins], [admins])).to be true
         end
 
         it 'returns true for Administrators and specifying Administrators even if one specifies sid and other non-required information' do
           admins = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'] }, provider)
           admin2 = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'], 'id' => 'S-1-5-32-544', 'mask' => base::GENERIC_ALL, 'is_inherited' => false)
-          provider.are_permissions_insync?([admins], [admin2]).must be true
+          expect(provider.are_permissions_insync?([admins], [admin2])).to be true
         end
 
         it 'returns true for Administrators and specifying Administrators when more current permissions exist than are specified' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
           admin = Puppet::Type::Acl::Ace.new('identity' => 'Administrator', 'rights' => ['full'])
-          provider.are_permissions_insync?([admin, admins], [admin]).must be true
+          expect(provider.are_permissions_insync?([admin, admins], [admin])).to be true
         end
 
         it 'returns false for Administrators and specifying Administrators when more current permissions are specified than exist' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
           admin = Puppet::Type::Acl::Ace.new('identity' => 'Administrator', 'rights' => ['full'])
-          provider.are_permissions_insync?([admin], [admin, admins]).must be false
+          expect(provider.are_permissions_insync?([admin], [admin, admins])).to be false
         end
 
         it 'returns false for Administrators and specifying Administrators if rights are different' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
           admin2 = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['modify'])
-          provider.are_permissions_insync?([admins], [admin2]).must be false
+          expect(provider.are_permissions_insync?([admins], [admin2])).to be false
         end
 
         it 'returns false for Administrators and specifying Administrators if types are different' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'], 'perm_type' => 'allow')
           admin2 = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'], 'perm_type' => 'deny')
-          provider.are_permissions_insync?([admins], [admin2]).must be false
+          expect(provider.are_permissions_insync?([admins], [admin2])).to be false
         end
 
         it 'returns false for Administrators and specifying Administrators if child_types are different' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'], 'child_types' => 'all')
           admin2 = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'], 'child_types' => 'none')
-          provider.are_permissions_insync?([admins], [admin2]).must be false
+          expect(provider.are_permissions_insync?([admins], [admin2])).to be false
         end
 
         it 'returns false for Administrators and specifying Administrators if affects are different' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'], 'affects' => 'all')
           admin2 = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'], 'affects' => 'children_only')
-          provider.are_permissions_insync?([admins], [admin2]).must be false
+          expect(provider.are_permissions_insync?([admins], [admin2])).to be false
         end
 
         it 'returns false for Administrators and specifying Administrators if current is inherited' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'], 'is_inherited' => 'true')
           admin2 = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
-          provider.are_permissions_insync?([admins], [admin2]).must be false
+          expect(provider.are_permissions_insync?([admins], [admin2])).to be false
         end
 
         it 'returns true for Administrators and specifying S-1-5-32-544' do
           admins = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'] }, provider)
           admin_sid = Puppet::Type::Acl::Ace.new({ 'identity' => 'S-1-5-32-544', 'rights' => ['full'] }, provider)
-          provider.are_permissions_insync?([admins], [admin_sid]).must be true
+          expect(provider.are_permissions_insync?([admins], [admin_sid])).to be true
         end
 
         it 'returns false for nil and specifying Administrators' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
-          provider.are_permissions_insync?(nil, [admins]).must be false
+          expect(provider.are_permissions_insync?(nil, [admins])).to be false
         end
 
         it 'returns true for Administrators and specifying nil' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
-          provider.are_permissions_insync?([admins], nil).must be true
+          expect(provider.are_permissions_insync?([admins], nil)).to be true
         end
 
         it 'returns true for Administrators and specifying []' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
-          provider.are_permissions_insync?([admins], []).must be true
+          expect(provider.are_permissions_insync?([admins], [])).to be true
         end
 
         it 'returns false for [] and specifying Administrators' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
-          provider.are_permissions_insync?([], [admins]).must be false
+          expect(provider.are_permissions_insync?([], [admins])).to be false
         end
       end
 
       context 'when purge=>true' do
         it 'returns true for Administrators and specifying Administrators with same permissions' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
-          provider.are_permissions_insync?([admins], [admins], :true).must be true
+          expect(provider.are_permissions_insync?([admins], [admins], :true)).to be true
         end
 
         it 'returns true for Administrators and specifying Administrators even if one specifies sid and other non-required information' do
           admins = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'] }, provider)
           admin2 = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'], 'id' => 'S-1-5-32-544', 'mask' => base::GENERIC_ALL, 'is_inherited' => false }, provider)
-          provider.are_permissions_insync?([admins], [admin2], :true).must be true
+          expect(provider.are_permissions_insync?([admins], [admin2], :true)).to be true
         end
 
         it 'returns false for Administrators and specifying Administrators when more current permissions exist than are specified' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
           admin = Puppet::Type::Acl::Ace.new('identity' => 'Administrator', 'rights' => ['full'])
-          provider.are_permissions_insync?([admin, admins], [admin], :true).must be false
+          expect(provider.are_permissions_insync?([admin, admins], [admin], :true)).to be false
         end
 
         it 'returns false for Administrators and specifying Administrators when more permissions are specified than exist' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
           admin = Puppet::Type::Acl::Ace.new('identity' => 'Administrator', 'rights' => ['full'])
-          provider.are_permissions_insync?([admin], [admin, admins], :true).must be false
+          expect(provider.are_permissions_insync?([admin], [admin, admins], :true)).to be false
         end
 
         it 'returns false for nil and specifying Administrators' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
-          provider.are_permissions_insync?(nil, [admins], :true).must be false
+          expect(provider.are_permissions_insync?(nil, [admins], :true)).to be false
         end
 
         it 'returns false for Administrators and specifying nil' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
-          provider.are_permissions_insync?([admins], nil, :true).must be false
+          expect(provider.are_permissions_insync?([admins], nil, :true)).to be false
         end
 
         it 'returns false for Administrators and specifying []' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
-          provider.are_permissions_insync?([admins], [], :true).must be false
+          expect(provider.are_permissions_insync?([admins], [], :true)).to be false
         end
 
         it 'returns false for [] and specifying Administrators' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
-          provider.are_permissions_insync?([], [admins], :true).must be false
+          expect(provider.are_permissions_insync?([], [admins], :true)).to be false
         end
       end
 
       context 'when purge=>listed_permissions' do
         it 'returns false for Administrators and specifying Administrators with same permissions' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
-          provider.are_permissions_insync?([admins], [admins], :listed_permissions).must be false
+          expect(provider.are_permissions_insync?([admins], [admins], :listed_permissions)).to be false
         end
 
         it 'returns false for Administrators and specifying Administrators even if one specifies sid and other non-required information' do
           admins = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'] }, provider)
           admin2 = Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'], 'id' => 'S-1-5-32-544', 'mask' => base::GENERIC_ALL, 'is_inherited' => false }, provider)
-          provider.are_permissions_insync?([admins], [admin2], :listed_permissions).must be false
+          expect(provider.are_permissions_insync?([admins], [admin2], :listed_permissions)).to be false
         end
 
         it 'returns false for Administrators and specifying Administrators when more current permissions exist than are specified' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
           admin = Puppet::Type::Acl::Ace.new('identity' => 'Administrator', 'rights' => ['full'])
-          provider.are_permissions_insync?([admin, admins], [admin], :listed_permissions).must be false
+          expect(provider.are_permissions_insync?([admin, admins], [admin], :listed_permissions)).to be false
         end
 
         it 'returns false for Administrators and specifying Administrators when more permissions are specified than exist' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
           admin = Puppet::Type::Acl::Ace.new('identity' => 'Administrator', 'rights' => ['full'])
-          provider.are_permissions_insync?([admin], [admin, admins], :listed_permissions).must be false
+          expect(provider.are_permissions_insync?([admin], [admin, admins], :listed_permissions)).to be false
         end
 
         it 'returns true for nil and specifying Administrators' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
-          provider.are_permissions_insync?(nil, [admins], :listed_permissions).must be true
+          expect(provider.are_permissions_insync?(nil, [admins], :listed_permissions)).to be true
         end
 
         it 'returns true for Administrators and specifying nil' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
-          provider.are_permissions_insync?([admins], nil, :listed_permissions).must be true
+          expect(provider.are_permissions_insync?([admins], nil, :listed_permissions)).to be true
         end
 
         it 'returns true for Administrators and specifying []' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
-          provider.are_permissions_insync?([admins], [], :listed_permissions).must be true
+          expect(provider.are_permissions_insync?([admins], [], :listed_permissions)).to be true
         end
 
         it 'returns true for [] and specifying Administrators' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
-          provider.are_permissions_insync?([], [admins], :listed_permissions).must be true
+          expect(provider.are_permissions_insync?([], [admins], :listed_permissions)).to be true
         end
       end
     end
@@ -566,113 +568,113 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
       let(:ace) { Puppet::Type::Acl::Ace.new('identity' => 'Administrator', 'rights' => ['full']) }
 
       it 'retuns 0 if the ace is nil' do
-        Puppet::Provider::Acl::Windows::Base.get_account_mask(nil).must be 0
+        expect(Puppet::Provider::Acl::Windows::Base.get_account_mask(nil)).to be 0
       end
 
       it 'returns ace.mask if the mask has a value' do
         ace.mask = 0x31
-        Puppet::Provider::Acl::Windows::Base.get_account_mask(ace).must be 0x31
+        expect(Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)).to be 0x31
       end
 
       it "returns FILE_ALL_ACCESS if ace.rights includes 'full'" do
         ace.rights = ['full']
-        Puppet::Provider::Acl::Windows::Base.get_account_mask(ace).must be base::FILE_ALL_ACCESS
+        expect(Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)).to be base::FILE_ALL_ACCESS
       end
 
       it "returns mask including FILE_DELETE if ace.rights includes 'modify'" do
         ace.rights = ['modify']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & base::DELETE).must be base::DELETE
+        expect(mask & base::DELETE).to be base::DELETE
       end
 
       it "returns mask including FILE_GENERIC_WRITE if ace.rights includes 'modify'" do
         ace.rights = ['modify']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & base::FILE_GENERIC_WRITE).must be base::FILE_GENERIC_WRITE
+        expect(mask & base::FILE_GENERIC_WRITE).to be base::FILE_GENERIC_WRITE
       end
 
       it "returns mask including FILE_GENERIC_READ if ace.rights includes 'modify'" do
         ace.rights = ['modify']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & base::FILE_GENERIC_READ).must be base::FILE_GENERIC_READ
+        expect(mask & base::FILE_GENERIC_READ).to be base::FILE_GENERIC_READ
       end
 
       it "returns mask including FILE_GENERIC_EXECUTE if ace.rights includes 'modify'" do
         ace.rights = ['modify']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & base::FILE_GENERIC_EXECUTE).must be base::FILE_GENERIC_EXECUTE
+        expect(mask & base::FILE_GENERIC_EXECUTE).to be base::FILE_GENERIC_EXECUTE
       end
 
       it "returns mask that doesn't include FILE_ALL_ACCESS if ace.rights includes 'modify'" do
         ace.rights = ['modify']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & base::FILE_ALL_ACCESS).must_not be base::FILE_ALL_ACCESS
+        expect(mask & base::FILE_ALL_ACCESS).not_to be base::FILE_ALL_ACCESS
       end
 
       it "returns mask including FILE_GENERIC_WRITE if ace.rights includes 'write'" do
         ace.rights = ['write']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & base::FILE_GENERIC_WRITE).must be base::FILE_GENERIC_WRITE
+        expect(mask & base::FILE_GENERIC_WRITE).to be base::FILE_GENERIC_WRITE
       end
 
       it "returns mask that doesn't include FILE_GENERIC_READ if ace.rights only includes 'write'" do
         ace.rights = ['write']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & base::FILE_GENERIC_READ).must_not be base::FILE_GENERIC_READ
+        expect(mask & base::FILE_GENERIC_READ).not_to be base::FILE_GENERIC_READ
       end
 
       it "returns mask that doesn't include FILE_GENERIC_EXECUTE if ace.rights only includes 'write'" do
         ace.rights = ['write']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & base::FILE_GENERIC_EXECUTE).must_not be base::FILE_GENERIC_EXECUTE
+        expect(mask & base::FILE_GENERIC_EXECUTE).not_to be base::FILE_GENERIC_EXECUTE
       end
 
       it "returns mask including FILE_GENERIC_READ if ace.rights includes 'read'" do
         ace.rights = ['read']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & base::FILE_GENERIC_READ).must be base::FILE_GENERIC_READ
+        expect(mask & base::FILE_GENERIC_READ).to be base::FILE_GENERIC_READ
       end
 
       it "returns mask that doesn't include FILE_GENERIC_WRITE if ace.rights only includes 'read'" do
         ace.rights = ['read']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & base::FILE_GENERIC_WRITE).must_not be base::FILE_GENERIC_WRITE
+        expect(mask & base::FILE_GENERIC_WRITE).not_to be base::FILE_GENERIC_WRITE
       end
 
       it "returns mask that doesn't include FILE_GENERIC_EXECUTE if ace.rights only includes 'read'" do
         ace.rights = ['read']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & base::FILE_GENERIC_EXECUTE).must_not be base::FILE_GENERIC_EXECUTE
+        expect(mask & base::FILE_GENERIC_EXECUTE).not_to be base::FILE_GENERIC_EXECUTE
       end
 
       it "returns mask including FILE_GENERIC_EXECUTE if ace.rights only includes 'execute'" do
         ace.rights = ['execute']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & base::FILE_GENERIC_EXECUTE).must be base::FILE_GENERIC_EXECUTE
+        expect(mask & base::FILE_GENERIC_EXECUTE).to be base::FILE_GENERIC_EXECUTE
       end
 
       it "returns mask that doesn't include FILE_GENERIC_WRITE if ace.rights only includes 'execute'" do
         ace.rights = ['execute']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & base::FILE_GENERIC_WRITE).must_not be base::FILE_GENERIC_WRITE
+        expect(mask & base::FILE_GENERIC_WRITE).not_to be base::FILE_GENERIC_WRITE
       end
 
       it "returns mask that doesn't include FILE_GENERIC_READ if ace.rights only includes 'execute'" do
         ace.rights = ['execute']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & base::FILE_GENERIC_READ).must_not be base::FILE_GENERIC_READ
+        expect(mask & base::FILE_GENERIC_READ).not_to be base::FILE_GENERIC_READ
       end
 
       it "returns mask that includes FILE_GENERIC_READ if ace.rights == ['read',execute']" do
         ace.rights = ['read', 'execute']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & base::FILE_GENERIC_READ).must be base::FILE_GENERIC_READ
+        expect(mask & base::FILE_GENERIC_READ).to be base::FILE_GENERIC_READ
       end
 
       it "returns mask that includes FILE_GENERIC_EXECUTE if ace.rights == ['read',execute']" do
         ace.rights = ['read', 'execute']
         mask = Puppet::Provider::Acl::Windows::Base.get_account_mask(ace)
-        (mask & base::FILE_GENERIC_EXECUTE).must be base::FILE_GENERIC_EXECUTE
+        expect(mask & base::FILE_GENERIC_EXECUTE).to be base::FILE_GENERIC_EXECUTE
       end
     end
 
@@ -690,36 +692,33 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
       it "returns 0x0 (no flags) when child_types => 'none'" do
         ace.child_types = 'none'
         flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
-        flags.must == 0x0
+        expect(flags).to eq 0x0
       end
 
       it "returns 0x0 (no flags) when affects => 'self_only'" do
         ace.affects = 'self_only'
         flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
-        flags.must == 0x0
+        expect(flags).to eq 0x0
       end
 
       it "returns (CI) for child_types => 'containers', affects => 'all'" do
         ace.child_types = 'containers'
         flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
-        (flags & Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE
-        ).must be Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE
+        expect(flags & Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE).to be Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE
       end
 
       it "returns (OI) for child_types => 'objects', affects => 'all'" do
         ace.child_types = 'objects'
         flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
-        (flags & Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE
-        ).must be Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE
+        expect(flags & Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE).to be Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE
       end
 
       it "returns (OI)(CI)(IO) for child_types => 'all', affects => 'children_only'" do
         ace.affects = 'children_only'
         flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
-        (flags & (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+        expect(flags & (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
                   Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
-                  Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
-        ).must be(Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)).to be(Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
                   Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
                   Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
       end
@@ -728,9 +727,8 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
         ace.child_types = 'containers'
         ace.affects = 'children_only'
         flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
-        (flags & (Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
-                  Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
-        ).must be(Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
+        expect(flags & (Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)).to be(Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
                   Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
       end
 
@@ -738,19 +736,17 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
         ace.child_types = 'objects'
         ace.affects = 'children_only'
         flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
-        (flags & (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
-                  Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
-        ).must be(Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+        expect(flags & (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)).to be(Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
                   Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
       end
 
       it "returns (OI)(CI)(NP) for child_types => 'all', affects => 'self_and_direct_children_only'" do
         ace.affects = 'self_and_direct_children_only'
         flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
-        (flags & (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+        expect(flags & (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
                   Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
-                  Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE)
-        ).must be(Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE)).to be(Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
                   Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
                   Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE)
       end
@@ -759,9 +755,8 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
         ace.child_types = 'containers'
         ace.affects = 'self_and_direct_children_only'
         flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
-        (flags & (Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
-                  Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE)
-        ).must be(Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
+        expect(flags & (Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE)).to be(Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
                   Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE)
       end
 
@@ -769,20 +764,18 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
         ace.child_types = 'objects'
         ace.affects = 'self_and_direct_children_only'
         flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
-        (flags & (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
-                  Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE)
-        ).must be(Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+        expect(flags & (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE)).to be(Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
                   Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE)
       end
 
       it "returns (OI)(CI)(IO)(NP) for child_types => 'all', affects => 'direct_children_only'" do
         ace.affects = 'direct_children_only'
         flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
-        (flags & (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+        expect(flags & (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
                   Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
                   Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE |
-                  Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
-        ).must be(Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)).to be(Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
                   Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
                   Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE |
                   Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
@@ -792,10 +785,9 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
         ace.child_types = 'containers'
         ace.affects = 'direct_children_only'
         flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
-        (flags & (Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
+        expect(flags & (Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
                   Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE |
-                  Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
-        ).must be(Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)).to be(Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
                   Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE |
                   Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
       end
@@ -804,10 +796,9 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
         ace.child_types = 'objects'
         ace.affects = 'direct_children_only'
         flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
-        (flags & (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+        expect(flags & (Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
                   Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE |
-                  Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
-        ).must be(Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
+                  Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)).to be(Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
                   Puppet::Util::Windows::AccessControlEntry::NO_PROPAGATE_INHERIT_ACE |
                   Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE)
       end
@@ -816,12 +807,12 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
         ace.child_types = 'none'
         ace.affects = 'children_only'
         flags = Puppet::Provider::Acl::Windows::Base.get_account_flags(ace)
-        flags.must == 0x0
+        expect(flags).to eq 0x0
       end
 
       it "logs a warning when child_types => 'none' and affects is not 'all' (default) or 'self_only'" do
-        Puppet.expects(:warning).with do |v|
-          %r{If child_types => 'none', affects => value}.match(v)
+        expect(Puppet).to receive(:warning) do |arg|
+          %r{If child_types => 'none', affects => value}.match(arg)
         end
         ace.child_types = 'none'
         ace.affects = 'children_only'
@@ -848,7 +839,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
 
       it 'ignores the current dacl aces and only return the should aces when purge => true' do
         should_purge = true
-        provider.sync_aces(current_dacl, should_aces, should_purge).must == should_aces
+        expect(provider.sync_aces(current_dacl, should_aces, should_purge)).to eq should_aces
       end
 
       it 'does not add inherited to returned aces' do
@@ -856,7 +847,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
         current_dacl.allow(provider.get_account_id('Administrators'), base::FILE_ALL_ACCESS, Puppet::Util::Windows::AccessControlEntry::OBJECT_INHERIT_ACE |
                                                                                              Puppet::Util::Windows::AccessControlEntry::CONTAINER_INHERIT_ACE |
                                                                                              Puppet::Util::Windows::AccessControlEntry::INHERITED_ACE)
-        provider.sync_aces(current_dacl, should_aces, should_purge).must == should_aces
+        expect(provider.sync_aces(current_dacl, should_aces, should_purge)).to eq should_aces
       end
 
       it 'adds an unmanaged deny ace to the front of the array' do
