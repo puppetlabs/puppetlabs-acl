@@ -55,8 +55,6 @@ describe 'Propagate' do
     let(:affects_child_type) { 'all' }
     let(:acl_regex) { %r{.*\\bob:\(F\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify child', agent
-    end
+    include_examples 'execute manifest and verify child'
   end
 end

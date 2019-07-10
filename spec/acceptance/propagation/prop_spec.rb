@@ -47,9 +47,7 @@ describe 'Propagation' do
     let(:affects_child_type) { 'all' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(F\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context 'Propagate "all" to "containers" Child Types' do
@@ -57,9 +55,7 @@ describe 'Propagation' do
     let(:affects_child_type) { 'containers' }
     let(:acl_regex) { %r{.*\\bob:\(CI\)\(F\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context 'Propagate "all" to "none" Child Types' do
@@ -67,9 +63,7 @@ describe 'Propagation' do
     let(:affects_child_type) { 'none' }
     let(:acl_regex) { %r{.*\\bob:\(F\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context 'Propagate "all" to "objects" Child Types' do
@@ -77,9 +71,7 @@ describe 'Propagation' do
     let(:affects_child_type) { 'objects' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(F\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context 'Propagate "children_only" to "all" Child Types' do
@@ -87,9 +79,7 @@ describe 'Propagation' do
     let(:affects_child_type) { 'all' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(IO\)\(F\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context 'Propagate "children_only" to "containers" Child Types' do
@@ -97,9 +87,7 @@ describe 'Propagation' do
     let(:affects_child_type) { 'containers' }
     let(:acl_regex) { %r{.*\\bob:\(CI\)\(IO\)\(F\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context 'Propagate "children_only" to "objects" Child Types' do
@@ -107,9 +95,7 @@ describe 'Propagation' do
     let(:affects_child_type) { 'objects' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(IO\)\(F\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context 'Propagate "direct_children_only" to "all" Child Types' do
@@ -117,9 +103,7 @@ describe 'Propagation' do
     let(:affects_child_type) { 'all' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(NP\)\(IO\)\(F\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context 'Propagate "direct_children_only" to "containers" Child Types' do
@@ -127,9 +111,7 @@ describe 'Propagation' do
     let(:affects_child_type) { 'containers' }
     let(:acl_regex) { %r{.*\\bob:\(CI\)\(NP\)\(IO\)\(F\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context 'Propagate "direct_children_only" to "objects" Child Types' do
@@ -137,9 +119,7 @@ describe 'Propagation' do
     let(:affects_child_type) { 'objects' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(NP\)\(IO\)\(F\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context 'Propagate "self_and_direct_children_only" to "all" Child Types' do
@@ -147,9 +127,7 @@ describe 'Propagation' do
     let(:affects_child_type) { 'all' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(NP\)\(F\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context 'Propagate "self_and_direct_children_only" to "containers" Child Types' do
@@ -157,9 +135,7 @@ describe 'Propagation' do
     let(:affects_child_type) { 'containers' }
     let(:acl_regex) { %r{.*\\bob:\(CI\)\(NP\)\(F\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context 'Propagate "self_and_direct_children_only" to "objects" Child Types' do
@@ -167,8 +143,6 @@ describe 'Propagation' do
     let(:affects_child_type) { 'objects' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(NP\)\(F\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 end

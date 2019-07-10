@@ -44,33 +44,25 @@ describe 'Permissions - Directory' do
   context 'Add Permissions to a Directory with a Long Name (247 chars)' do
     let(:target) { 'c:/temp/ybqYlVTjWTRAaQPPyeaseAsuUhnclarfedIpqIdqwyimqPphcKpojhTHogTUWiaEkiOqbeEZKvNAqDcEjJarQzeNxihARGLytPNseasKZxhRxeCwZsopSUFTKTAgsxsBqRigMlZhFQiELGLZghRwhKXVHuUPxWqmeYCHejdQOoGRYqaxwdIqiYyhhSChEWlggsGToSLmrgPmotSACKrREyohRBPaKRUmlgCGVtrPhasdEfU' } # rubocop:disable Metrics/LineLength
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context 'Implicit Use of "target" Parameter Through Title' do
     let(:target) { 'c:/temp/implicit_target' }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context 'Remove Permissions from a Directory' do
     let(:target) { 'c:/temp/rem_perm_dir' }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent, true
-    end
+    include_examples 'execute manifest', true
   end
 
   context 'Remove Permissions from a Directory with a Long Name (247 chars)' do
     let(:target) { 'c:/temp/rem_lVTjWTRAaQPPyeaseAsuUhnclarfedIpqIdqwyimqPphcKpojhTHogTUWiaEkiOqbeEZKvNAqDcEjJarQzeNxihARGLytPNseasKZxhRxeCwZsopSUFTKTAgsxsBqRigMlZhFQiELGLZghRwhKXVHuUPxWqmeYCHejdQOoGRYqaxwdIqiYyhhSChEWlggsGToSLmrgPmotSACKrREyohRBPaKRUmlgCGVtrPhasdEfU' } # rubocop:disable Metrics/LineLength
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent, true
-    end
+    include_examples 'execute manifest', true
   end
 
   context 'Add Permissions to a Unicode Directory' do
@@ -81,8 +73,6 @@ describe 'Permissions - Directory' do
     let(:verify_acl_command) { "(Get-ACL ('#{target_parent}/' + [regex]::Unescape(\"#{raw_dirname}\")) | ForEach-Object { $_.Access } | Where-Object { $_.IdentityReference -match '\\\\bob' -and $_.FileSystemRights -eq 'FullControl' -and $_.InheritanceFlags -eq 'ContainerInherit, ObjectInherit' } | Measure-Object).Count" } # rubocop:disable Metrics/LineLength
     let(:acl_regex) { %r{^1$} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify (with PowerShell)', agent
-    end
+    include_examples 'execute manifest and verify (with PowerShell)'
   end
 end

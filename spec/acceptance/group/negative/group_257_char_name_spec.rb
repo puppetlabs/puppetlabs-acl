@@ -52,18 +52,16 @@ describe 'Group - Negative' do
     MANIFEST
   end
 
-  windows_agents.each do |agent|
-    context "On Windows Agent Change Group to Local Group with Long Name on #{agent}" do
-      it 'attempts to apply manifest, raises error' do
-        execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-          expect(result.stderr).to match(%r{#{expected_error}})
-        end
+  context 'change group to local group with long name' do
+    it 'attempts to apply manifest, raises error' do
+      apply_manifest(acl_manifest, expect_failures: true) do |result|
+        expect(result.stderr).to match(%r{#{expected_error}})
       end
+    end
 
-      it 'verifies file data integrity' do
-        expect(file(verify_content_path)).to be_file
-        expect(file(verify_content_path).content).to match(%r{#{file_content}})
-      end
+    it 'verifies file data integrity' do
+      expect(file(verify_content_path)).to be_file
+      expect(file(verify_content_path).content).to match(%r{#{file_content}})
     end
   end
 end

@@ -45,9 +45,7 @@ describe 'Owner - Local Group' do
     let(:owner_id) { 'jerks' }
     let(:acl_regex) { %r{.*\\jerks} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context 'Change Owner to Local Group with Long Name' do
@@ -56,9 +54,7 @@ describe 'Owner - Local Group' do
     let(:owner_id) { 'jasqddweruwqiouroaysfyuasudyfaisoyfqoiuwyefiaysdiyfzixycivzixyvciqywifyiasdiufyasdygfasirfwerqiuwyeriatsdtfastdfqwyitfastdfawerfytasdytfasydgtaisdytfiasydfiosayghiayhidfhygiasftawyegyfhgaysgfuyasgdyugfasuiyfguaqyfgausydgfaywgfuasgdfuaisydgfausasdfuygsadfyg' } # rubocop:disable Metrics/LineLength
     let(:acl_regex) { %r{.*\\jasq} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context 'Change Owner to Local Unicode Group' do
@@ -70,10 +66,6 @@ describe 'Owner - Local Group' do
     let(:verify_acl_command) { "(Get-ACL '#{target_parent}/#{target_name}' | Where-Object { $_.Owner -match ('.*\\\\' + [regex]::Unescape(\"#{raw_owner_id}\")) } | Measure-Object).Count" }
     let(:acl_regex) { %r{^1$} }
 
-    windows_agents.each do |agent|
-      context "on #{agent}" do
-        include_examples 'execute manifest and verify (with PowerShell)', agent
-      end
-    end
+    include_examples 'execute manifest and verify (with PowerShell)'
   end
 end

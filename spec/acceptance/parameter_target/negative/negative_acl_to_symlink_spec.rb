@@ -37,40 +37,34 @@ describe 'Negative - Specify Symlink as Target' do
         require => File['#{target}']
       }
 
-      exec { 'Create Windows Symlink':
-        command => '#{mklink_command}',
-        creates => '#{target_symlink}',
-        cwd     => '#{target_parent}',
-        require => User['#{user_id}']
+      file { '#{target_symlink}':
+        ensure => link,
+        target => '#{target}',
+        require => User['#{user_id}'],
       }
 
       acl { "#{target_symlink}":
         permissions  => [
           { identity => '#{user_id}', rights => ['full'] },
         ],
-        require      => Exec['Create Windows Symlink']
+        require      => File['#{target_symlink}']
       }
     MANIFEST
   end
 
-  windows_agents.each do |agent|
-    context "on #{agent}" do
-      it 'applies manifest' do
-        execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-          assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
-        end
-      end
+  it 'applies manifest' do
+    # not idempotent. complains that "Puppet cannot manage ACLs of symbolic links"
+    apply_manifest(acl_manifest)
+  end
 
-      it 'verifies ACL rights' do
-        on(agent, verify_acl_command) do |result|
-          assert_no_match(acl_regex, result.stdout, 'Expected ACL was not present!')
-        end
-      end
-
-      it 'verifies file data integrity' do
-        expect(file(verify_content_path)).to be_file
-        expect(file(verify_content_path).content).to match(%r{#{file_content}})
-      end
+  it 'verifies ACL rights' do
+    run_shell(verify_acl_command) do |result|
+      expect(result.stdout).not_to match(acl_regex)
     end
+  end
+
+  it 'verifies file data integrity' do
+    expect(file(verify_content_path)).to be_file
+    expect(file(verify_content_path).content).to match(%r{#{file_content}})
   end
 end

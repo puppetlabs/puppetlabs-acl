@@ -1,25 +1,22 @@
-shared_examples 'execute manifest' do |agent, remove = false, file_verify = false|
+shared_examples 'execute manifest' do |remove = false, file_verify = false|
   it 'applies manifest' do
-    execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-      expect(result.stderr).not_to match(%r{Error:})
-    end
+    # idempotent_apply(acl_manifest)
+    apply_manifest(acl_manifest)
   end
 
   it 'verifies ACL rights' do
-    on(agent, verify_acl_command) do |result|
+    run_shell(verify_acl_command) do |result|
       expect(result.stdout).to match(%r{#{acl_regex}})
     end
   end
 
   if remove
     it 'applies remove manifest' do
-      execute_manifest_on(agent, acl_manifest_remove, debug: true) do |result|
-        expect(result.stderr).not_to match(%r{Error:})
-      end
+      idempotent_apply(acl_manifest_remove)
     end
 
     it 'verifies ACL rights' do
-      on(agent, verify_acl_command) do |result|
+      run_shell(verify_acl_command) do |result|
         expect(result.stdout).not_to match(%r{#{acl_regex}})
       end
     end
@@ -33,15 +30,14 @@ shared_examples 'execute manifest' do |agent, remove = false, file_verify = fals
   end
 end
 
-shared_examples 'execute manifest and verify file' do |agent|
+shared_examples 'execute manifest and verify file' do
   it 'applies manifest' do
-    execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-      expect(result.stderr).not_to match(%r{Error:})
-    end
+    # idempotent_apply(acl_manifest)
+    apply_manifest(acl_manifest)
   end
 
   it 'verifies ACL rights' do
-    on(agent, verify_acl_command) do |result|
+    run_shell(verify_acl_command) do |result|
       expect(result.stdout).to match(%r{#{acl_regex}})
     end
   end
@@ -52,35 +48,33 @@ shared_examples 'execute manifest and verify file' do |agent|
   end
 end
 
-shared_examples 'execute manifest and verify (with PowerShell)' do |agent|
+shared_examples 'execute manifest and verify (with PowerShell)' do
   it 'applies manifest' do
-    execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-      expect(result.stderr).not_to match(%r{Error:})
-    end
+    # idempotent_apply(acl_manifest)
+    apply_manifest(acl_manifest)
   end
 
   it 'verifies ACL rights' do
-    on(agent, powershell(verify_acl_command, 'EncodedCommand' => true)) do |result|
-      expect(result.stdout).to match(acl_regex)
+    run_shell(powershell(verify_acl_command, 'EncodedCommand' => true)) do |result|
+      expect(result.stdout.strip).to match(acl_regex)
     end
   end
 end
 
-shared_examples 'execute manifest and verify child' do |agent|
+shared_examples 'execute manifest and verify child' do
   it 'applies manifest' do
-    execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-      expect(result.stderr).not_to match(%r{Error:})
-    end
+    # idempotent_apply(acl_manifest)
+    apply_manifest(acl_manifest)
   end
 
   it 'verifies ACL rights' do
-    on(agent, verify_acl_command) do |result|
+    run_shell(verify_acl_command) do |result|
       expect(result.stdout).to match(%r{#{acl_regex}})
     end
   end
 
   it 'verifies child ACL rights' do
-    on(agent, verify_child_acl_command) do |result|
+    run_shell(verify_child_acl_command) do |result|
       expect(result.stdout).not_to match(%r{#{acl_regex}})
     end
   end

@@ -138,32 +138,26 @@ describe 'Use Cases' do
     let(:target_grand_child_fifth_ace_regex) { %r{.*\\#{user_id2}:\(I\)\(DENY\)\(RX\)} }
     let(:target_grand_child_sixth_ace_regex) { %r{.*\\cool_peeps:\(I\)\(R\)} }
 
-    windows_agents.each do |agent|
-      context "on #{agent}" do
-        it 'applies manifest' do
-          execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-            assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
-          end
-        end
+    it 'applies manifest' do
+      idempotent_apply(acl_manifest)
+    end
 
-        it 'verifies ACL grand child rights' do
-          on(agent, verify_acl_grand_child_command) do |result|
-            # We only need to check the grand child because we are only concerned with rights
-            # propagating and inheriting.
-            expect(result.stdout).to match(%r{#{target_grand_child_first_ace_regex}})
-            expect(result.stdout).to match(%r{#{target_grand_child_second_ace_regex}})
-            expect(result.stdout).to match(%r{#{target_grand_child_third_ace_regex}})
-            expect(result.stdout).to match(%r{#{target_grand_child_fourth_ace_regex}})
-            expect(result.stdout).to match(%r{#{target_grand_child_fifth_ace_regex}})
-            expect(result.stdout).to match(%r{#{target_grand_child_sixth_ace_regex}})
-          end
-        end
-
-        it 'verfies file data integrity' do
-          expect(file(verify_content_path)).to be_file
-          expect(file(verify_content_path).content).to match(%r{#{file_content}})
-        end
+    it 'verifies ACL grand child rights' do
+      run_shell(verify_acl_grand_child_command) do |result|
+        # We only need to check the grand child because we are only concerned with rights
+        # propagating and inheriting.
+        expect(result.stdout).to match(%r{#{target_grand_child_first_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_grand_child_second_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_grand_child_third_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_grand_child_fourth_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_grand_child_fifth_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_grand_child_sixth_ace_regex}})
       end
+    end
+
+    it 'verfies file data integrity' do
+      expect(file(verify_content_path)).to be_file
+      expect(file(verify_content_path).content).to match(%r{#{file_content}})
     end
   end
 end

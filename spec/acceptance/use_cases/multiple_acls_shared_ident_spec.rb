@@ -110,56 +110,52 @@ describe 'Use Cases' do
     let(:target_grand_child_user_id1_ace_regex) { %r{.*\\bob:\(OI\)\(CI\)\(N\)} }
     let(:target_grand_child_user_id2_ace_regex) { %r{.*\\#{user_id2}:\(OI\)\(CI\)\(N\)} }
 
-    windows_agents.each do |agent|
-      it 'applies manifest' do
-        execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-          expect(result.stderr).not_to match(%r{Error:})
-        end
+    it 'applies manifest' do
+      idempotent_apply(acl_manifest)
+    end
+
+    it 'verifies ACL rights' do
+      run_shell(verify_acl_command) do |result|
+        expect(result.stdout).to match(%r{#{target_group1_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_group2_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_user_id1_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_user_id2_ace_regex}})
       end
+    end
 
-      it 'verifies ACL rights' do
-        on(agent, verify_acl_command) do |result|
-          expect(result.stdout).to match(%r{#{target_group1_ace_regex}})
-          expect(result.stdout).to match(%r{#{target_group2_ace_regex}})
-          expect(result.stdout).to match(%r{#{target_user_id1_ace_regex}})
-          expect(result.stdout).to match(%r{#{target_user_id2_ace_regex}})
-        end
+    it 'verifies child ACL rights' do
+      run_shell(verify_acl_child_command) do |result|
+        # ACL from parent(s) will still apply.
+        expect(result.stdout).to match(%r{#{target_group1_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_group2_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_user_id1_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_user_id2_ace_regex}})
+
+        expect(result.stdout).to match(%r{#{target_child_group1_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_child_group2_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_child_user_id1_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_child_user_id2_ace_regex}})
       end
+    end
 
-      it 'verifies child ACL rights' do
-        on(agent, verify_acl_child_command) do |result|
-          # ACL from parent(s) will still apply.
-          expect(result.stdout).to match(%r{#{target_group1_ace_regex}})
-          expect(result.stdout).to match(%r{#{target_group2_ace_regex}})
-          expect(result.stdout).to match(%r{#{target_user_id1_ace_regex}})
-          expect(result.stdout).to match(%r{#{target_user_id2_ace_regex}})
+    it 'verifies grand child ACL rights' do
+      run_shell(verify_acl_grand_child_command) do |result|
+        # ACL from parent(s) will still apply.
+        expect(result.stdout).to match(%r{#{target_group1_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_group2_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_user_id1_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_user_id2_ace_regex}})
 
-          expect(result.stdout).to match(%r{#{target_child_group1_ace_regex}})
-          expect(result.stdout).to match(%r{#{target_child_group2_ace_regex}})
-          expect(result.stdout).to match(%r{#{target_child_user_id1_ace_regex}})
-          expect(result.stdout).to match(%r{#{target_child_user_id2_ace_regex}})
-        end
-      end
+        # ACL from parent(s) will still apply.
+        expect(result.stdout).to match(%r{#{target_child_group1_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_child_group2_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_child_user_id1_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_child_user_id2_ace_regex}})
 
-      it 'verifies grand child ACL rights' do
-        on(agent, verify_acl_grand_child_command) do |result|
-          # ACL from parent(s) will still apply.
-          expect(result.stdout).to match(%r{#{target_group1_ace_regex}})
-          expect(result.stdout).to match(%r{#{target_group2_ace_regex}})
-          expect(result.stdout).to match(%r{#{target_user_id1_ace_regex}})
-          expect(result.stdout).to match(%r{#{target_user_id2_ace_regex}})
-
-          # ACL from parent(s) will still apply.
-          expect(result.stdout).to match(%r{#{target_child_group1_ace_regex}})
-          expect(result.stdout).to match(%r{#{target_child_group2_ace_regex}})
-          expect(result.stdout).to match(%r{#{target_child_user_id1_ace_regex}})
-          expect(result.stdout).to match(%r{#{target_child_user_id2_ace_regex}})
-
-          expect(result.stdout).to match(%r{#{target_grand_child_group1_ace_regex}})
-          expect(result.stdout).to match(%r{#{target_grand_child_group2_ace_regex}})
-          expect(result.stdout).to match(%r{#{target_grand_child_user_id1_ace_regex}})
-          expect(result.stdout).to match(%r{#{target_grand_child_user_id2_ace_regex}})
-        end
+        expect(result.stdout).to match(%r{#{target_grand_child_group1_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_grand_child_group2_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_grand_child_user_id1_ace_regex}})
+        expect(result.stdout).to match(%r{#{target_grand_child_user_id2_ace_regex}})
       end
     end
   end

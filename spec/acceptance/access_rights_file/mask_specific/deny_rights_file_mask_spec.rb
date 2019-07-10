@@ -37,9 +37,7 @@ describe 'File - Deny Mask Specific' do
     let(:file_content) { 'Slippery when dry.' }
     let(:acl_regex) { %r{.*\\bob:\(DENY\)\(S,AD,X,WA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context '"RD, DE, WEA, RC" Rights for Identity on File' do
@@ -47,9 +45,7 @@ describe 'File - Deny Mask Specific' do
     let(:file_content) { 'Pressure, oh the pressure.' }
     let(:acl_regex) { %r{.*\\bob:\(DENY\)\(D,Rc,RD,WEA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context '"S, DE, REA, WEA, RA, WA" Rights for Identity on File' do
@@ -57,9 +53,7 @@ describe 'File - Deny Mask Specific' do
     let(:file_content) { 'Gallons of hats on your head.' }
     let(:acl_regex) { %r{.*\\bob:\(DENY\)\(D,REA,WEA,RA,WA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context '"S, RA, WA, RC" Rights for Identity on File' do
@@ -67,9 +61,7 @@ describe 'File - Deny Mask Specific' do
     let(:file_content) { 'We need experienced fighter pilots to train these pigs in the basics of aviation!' }
     let(:acl_regex) { %r{.*\\bob:\(DENY\)\(Rc,S,RA,WA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context '"WD, REA, RA, S" Rights for Identity on File' do
@@ -77,8 +69,6 @@ describe 'File - Deny Mask Specific' do
     let(:file_content) { 'Tiny little people with small problems.' }
     let(:acl_regex) { %r{.*\\bob:\(DENY\)\(S,WD,REA,RA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 end

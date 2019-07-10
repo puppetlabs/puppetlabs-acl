@@ -38,8 +38,6 @@ describe 'Identity - User' do
     let(:file_content) { 'Brown cow goes moo.' }
     let(:acl_regex) { %r{.*\\#{user_id}:\(F\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 end

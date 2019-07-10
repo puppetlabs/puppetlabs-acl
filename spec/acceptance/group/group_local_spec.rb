@@ -55,9 +55,7 @@ describe 'Group' do
     let(:group_id) { 'jerks' }
     let(:acl_regex) { %r{.*\\jerks:\(M\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context 'Change Group to Local Group with Long Name' do
@@ -69,9 +67,7 @@ describe 'Group' do
 
     # rubocop:enable Metrics/LineLength
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context 'Change Group to Local User with Long Name' do
@@ -80,9 +76,7 @@ describe 'Group' do
     let(:group_id) { 'long_user_name_jerry' }
     let(:acl_regex) { %r{.*\\long_user_name_jerry:\(M\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context 'Change Group to Local User' do
@@ -92,8 +86,6 @@ describe 'Group' do
     let(:group_id) { random_username }
     let(:acl_regex) { %r{.*\\#{group_id}:\(M\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 end

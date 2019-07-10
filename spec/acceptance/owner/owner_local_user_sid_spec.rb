@@ -66,37 +66,29 @@ describe 'Owner - SID' do
     let(:verify_owner_command) { "cmd /c \"dir /q #{dosify_target}\"" }
     let(:owner_regex) { %r{.*\\#{owner_id}} }
 
-    windows_agents.each do |agent|
-      context "on #{agent}" do
-        it 'applies setup manifest' do
-          execute_manifest_on(agent, setup_manifest, debug: true) do |result|
-            expect(result.stderr).not_to match(%r{Error:})
-          end
-        end
+    it 'applies setup manifest' do
+      idempotent_apply(setup_manifest)
+    end
 
-        it 'retrieves SID of user account' do
-          on(agent, get_owner_sid_command) do |result|
-            sid = sid_regex.match(result.stdout)[1]
-          end
-        end
-
-        it 'applies manifest' do
-          execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-            expect(result.stderr).not_to match(%r{Error:})
-          end
-        end
-
-        it 'verifies ACL rights' do
-          on(agent, verify_owner_command) do |result|
-            expect(result.stdout).to match(%r{#{owner_regex}})
-          end
-        end
-
-        it 'verifies file data integrity' do
-          expect(file(verify_content_path)).to be_file
-          expect(file(verify_content_path).content).to match(%r{#{file_content}})
-        end
+    it 'retrieves SID of user account' do
+      run_shell(get_owner_sid_command) do |result|
+        sid = sid_regex.match(result.stdout)[1]
       end
+    end
+
+    it 'applies manifest' do
+      idempotent_apply(acl_manifest)
+    end
+
+    it 'verifies ACL rights' do
+      run_shell(verify_owner_command) do |result|
+        expect(result.stdout).to match(%r{#{owner_regex}})
+      end
+    end
+
+    it 'verifies file data integrity' do
+      expect(file(verify_content_path)).to be_file
+      expect(file(verify_content_path).content).to match(%r{#{file_content}})
     end
   end
 end

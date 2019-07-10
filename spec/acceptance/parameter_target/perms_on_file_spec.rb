@@ -47,9 +47,7 @@ describe 'Permissions - File' do
     let(:file_name) { 'add_perm_file.txt' }
     let(:file_content) { 'meowmeowmeow' }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent, false, true
-    end
+    include_examples 'execute manifest', false, true
   end
 
   context 'Add Permissions to a File with a Long Name (259 chars)' do
@@ -57,9 +55,7 @@ describe 'Permissions - File' do
       let(:file_name) { 'dqcEjJarQzeeNxWihARGLytPggNssxewZsopUFUoncTKAgsxsBqRigMlZEdNTEybqlVTjkDWTRASaQPyeeAsuUohncMlarIRphqIdqwyimqPphRTcKpojhTHoAgTUWiaEkiOqbeeEZKvNAhFQiELGLZghRwhKXVHuUPxWghKXVHuUPxWqmeYCHejdQOoGRYqaxwdIqiYyhhSCAhEWlggsGToSLmrgPmotSACKrREyohRBPaKRUmlgCGVtrP' } # rubocop:disable Metrics/LineLength }
       let(:file_content) { 'Salsa Mama! Caliente!' }
 
-      windows_agents.each do |agent|
-        include_examples 'execute manifest', agent, false, true
-      end
+      include_examples 'execute manifest', false, true
     end
   end
 
@@ -67,9 +63,7 @@ describe 'Permissions - File' do
     let(:file_name) { 'rem_perm_file.txt' }
     let(:file_content) { 'I love puppet, puppet love puppet, puppet love!' }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent, true, true
-    end
+    include_examples 'execute manifest', true, true
   end
 
   context 'Remove Permissions from a File with a Long Name (259 chars)' do
@@ -77,9 +71,7 @@ describe 'Permissions - File' do
       let(:file_name) { 'rem_file_zeeNxWihARGLytPggNssxewZsopUFUoncTKAgsxsBqRigMlZEdNTEybqlVTjkDWTRASaQPyeeAsuUohncMlarIRphqIdqwyimqPphRTcKpojhTHoAgTUWiaEkiOqbeeEZKvNAhFQiELGLZghRwhKXVHuUPxWghKXVHuUPxWqmeYCHejdQOoGRYqaxwdIqiYyhhSCAhEWlggsGToSLmrgPmotSACKrREyohRBPaKRUmlgCGVtrP' } # rubocop:disable Metrics/LineLength
       let(:file_content) { 'Happy Happy Happy Happy Happy!' }
 
-      windows_agents.each do |agent|
-        include_examples 'execute manifest', agent, true, true
-      end
+      include_examples 'execute manifest', true, true
     end
   end
 
@@ -91,8 +83,6 @@ describe 'Permissions - File' do
     let(:verify_acl_command) { "(Get-Acl ('#{target_parent}/' + [regex]::Unescape(\"#{raw_filename}\")) | ForEach-Object { $_.Access } | Where-Object { $_.IdentityReference -match '\\\\#{user_id}' -and $_.FileSystemRights -eq 'FullControl' } | Measure-Object).Count" } # rubocop:disable Metrics/LineLength
     let(:acl_regex) { %r{^1$} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify (with PowerShell)', agent
-    end
+    include_examples 'execute manifest and verify (with PowerShell)'
   end
 end
