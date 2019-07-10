@@ -58,10 +58,6 @@ describe 'Group - Unicode' do
     let(:raw_group_id) { 'group2_\u03A3\u03A4\u03A5\u03A6' }
     let(:group_id) {     "group2_\u03A3\u03A4\u03A5\u03A6" } # ΣΤΥΦ
 
-    windows_agents.each do |agent|
-      context "on #{agent}" do
-        include_examples 'execute manifest and verify (with PowerShell)', agent
-      end
-    end
+    include_examples 'execute manifest and verify (with PowerShell)'
   end
 end

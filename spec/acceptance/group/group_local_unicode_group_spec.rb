@@ -55,10 +55,6 @@ describe 'Group - Unicode' do
     let(:raw_group_id) { 'group_\u4388\u542B\u3D3C\u7F4D\uF961\u4381\u53F4\u79C0\u3AB2\u8EDE' }
     let(:group_id) { "group_\u4388\u542B\u3D3C\u7F4D\uF961\u4381\u53F4\u79C0\u3AB2\u8EDE" } # 䎈含㴼罍率䎁叴秀㪲軞
 
-    windows_agents.each do |agent|
-      context "on #{agent}" do
-        include_examples 'execute manifest and verify (with PowerShell)', agent
-      end
-    end
+    include_examples 'execute manifest and verify (with PowerShell)'
   end
 end

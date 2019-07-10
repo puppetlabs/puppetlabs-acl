@@ -34,9 +34,7 @@ describe 'Identity - Group' do
     let(:group_id) { 'bobs' }
     let(:file_content) { 'Cat barf.' }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context 'Specify Group with Long Name for Identity' do
@@ -45,8 +43,6 @@ describe 'Identity - Group' do
     let(:group_id) { 'nzxncvkjnzxjkcnvkjzxncvkjznxckjvnzxkjncvzxnvckjnzxkjcnvkjzxncvkjzxncvkjzxncvkjnzxkjcnvkzjxncvkjzxnvckjnzxkjcvnzxkncjvjkzxncvkjzxnvckjnzxjkcvnzxkjncvkjzxncvjkzxncvkjzxnkvcjnzxjkcvnkzxjncvkjzxncvkzckjvnzxkcvnjzxjkcnvzjxkncvkjzxnvkjsdnjkvnzxkjcnvkjznvkjxcbvzs' } # rubocop:disable Metrics/LineLength
     let(:file_content) { 'Pretty little poodle dressed in noodles.' }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 end

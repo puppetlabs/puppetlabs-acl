@@ -72,9 +72,7 @@ describe 'Inheritance - Directory' do
     let(:child_inherit_type) { 'true' }
     let(:acl_regex) { %r{.*\\bob:\(I\)\(OI\)\(CI\)\(F\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context 'Explicit Inheritance of "deny" Parent Permissions for Directory' do
@@ -83,9 +81,7 @@ describe 'Inheritance - Directory' do
     let(:child_inherit_type) { 'true' }
     let(:acl_regex) { %r{.*\\bob:\(I\)\(OI\)\(CI\)\(N\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context 'Remove Inheritance of "allow" Parent Permissions for Directory' do
@@ -94,9 +90,7 @@ describe 'Inheritance - Directory' do
     let(:child_inherit_type) { 'false' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(F\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context 'Remove Inheritance of "deny" Parent Permissions for Directory' do
@@ -105,8 +99,6 @@ describe 'Inheritance - Directory' do
     let(:child_inherit_type) { 'false' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(N\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 end

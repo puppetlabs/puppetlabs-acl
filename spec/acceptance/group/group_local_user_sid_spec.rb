@@ -34,24 +34,24 @@ describe 'Group - SID' do
 
     let(:acl_manifest) do
       <<-MANIFEST
-          acl { "#{target}":
-            purge           => 'true',
-            permissions     => [
-              { identity    => 'CREATOR GROUP',
-                rights      => ['modify']
-              },
-              { identity    => '#{user_id}',
-                rights      => ['read']
-              },
-              { identity    => 'Administrators',
-                rights      => ['full'],
-                affects     => 'all',
-                child_types => 'all'
-              }
-            ],
-            group           => '#{sid}',
-            inherit_parent_permissions => 'false'
-          }
+        acl { "#{target}":
+          purge           => 'true',
+          permissions     => [
+            { identity    => 'CREATOR GROUP',
+              rights      => ['modify']
+            },
+            { identity    => '#{user_id}',
+              rights      => ['read']
+            },
+            { identity    => 'Administrators',
+              rights      => ['full'],
+              affects     => 'all',
+              child_types => 'all'
+            }
+          ],
+          group           => '#{sid}',
+          inherit_parent_permissions => 'false'
+        }
       MANIFEST
     end
 
@@ -77,37 +77,30 @@ describe 'Group - SID' do
     let(:verify_group_command) { "icacls #{target}" }
     let(:group_regex) { %r{.*\\tom:\(M\)} }
 
-    windows_agents.each do |agent|
-      context "on #{agent}" do
-        it 'applies setup manifest' do
-          execute_manifest_on(agent, setup_manifest, debug: true) do |result|
-            expect(result.stderr).not_to match(%r{Error:})
-          end
-        end
+    it 'applies setup manifest' do
+      idempotent_apply(setup_manifest)
+    end
 
-        it 'retrieves SID of user account' do
-          on(agent, get_group_sid_command) do |result|
-            sid = sid_regex.match(result.stdout)[1]
-          end
-        end
-
-        it 'applies ACL manifest' do
-          execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-            expect(result.stderr).not_to match(%r{Error:})
-          end
-        end
-
-        it 'verifies ACL rights' do
-          on(agent, verify_group_command) do |result|
-            expect(result.stdout).to match(%r{#{group_regex}})
-          end
-        end
-
-        it 'verifies file data integrity' do
-          expect(file(verify_content_path)).to be_file
-          expect(file(verify_content_path).content).to match(%r{#{file_content}})
-        end
+    it 'retrieves SID of user account' do
+      run_shell(get_group_sid_command) do |result|
+        sid = sid_regex.match(result.stdout)[1]
       end
+    end
+
+    it 'applies ACL manifest' do
+      # TODO: find out why this is not idempotent
+      apply_manifest(acl_manifest)
+    end
+
+    it 'verifies ACL rights' do
+      run_shell(verify_group_command) do |result|
+        expect(result.stdout).to match(%r{#{group_regex}})
+      end
+    end
+
+    it 'verifies file data integrity' do
+      expect(file(verify_content_path)).to be_file
+      expect(file(verify_content_path).content).to match(%r{#{file_content}})
     end
   end
 end

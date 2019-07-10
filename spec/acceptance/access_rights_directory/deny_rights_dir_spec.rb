@@ -34,9 +34,7 @@ describe 'Directory - Deny' do
     let(:target) { "c:/temp/deny_#{rights}_rights_dir" }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(DENY\)\(Rc,S,X,RA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"full" Rights for Identity on Directory' do
@@ -44,9 +42,7 @@ describe 'Directory - Deny' do
     let(:target) { "c:/temp/deny_#{rights}_rights_dir" }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(N\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"modify" Rights for Identity on Directory' do
@@ -54,9 +50,7 @@ describe 'Directory - Deny' do
     let(:target) { "c:/temp/deny_#{rights}_rights_dir" }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(DENY\)\(M\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"read, execute" Rights for Identity on Directory' do
@@ -64,9 +58,7 @@ describe 'Directory - Deny' do
     let(:target) { 'c:/temp/deny_re_rights_dir' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(DENY\)\(RX\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"read" Rights for Identity on Directory' do
@@ -74,9 +66,7 @@ describe 'Directory - Deny' do
     let(:target) { "c:/temp/deny_#{rights}_rights_dir" }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(DENY\)\(R\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"write, execute" Rights for Identity on Directory' do
@@ -84,9 +74,7 @@ describe 'Directory - Deny' do
     let(:target) { 'c:/temp/deny_we_rights_dir' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(DENY\)\(W,Rc,X,RA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"write, read" Rights for Identity on Directory' do
@@ -94,9 +82,7 @@ describe 'Directory - Deny' do
     let(:target) { 'c:/temp/deny_wr_rights_dir' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(DENY\)\(R,W\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"write, read, execute" Rights for Identity on Directory' do
@@ -104,9 +90,7 @@ describe 'Directory - Deny' do
     let(:target) { 'c:/temp/deny_wre_rights_dir' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(DENY\)\(RX,W\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"write" Rights for Identity on Directory' do
@@ -114,8 +98,6 @@ describe 'Directory - Deny' do
     let(:target) { "c:/temp/deny_#{rights}_rights_dir" }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(DENY\)\(W,Rc\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 end

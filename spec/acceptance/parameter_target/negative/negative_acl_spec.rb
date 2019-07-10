@@ -22,26 +22,22 @@ describe 'Parameter Target - Negative' do
     MANIFEST
   end
 
-  windows_agents.each do |agent|
-    context "Specify Blank Target on #{agent}" do
-      let(:target) { '' }
+  context 'Specify Blank Target' do
+    let(:target) { '' }
 
-      it 'applies manifest' do
-        execute_manifest_on(agent, acl_manifest, debug: true, exepect_failures: true) do |result|
-          expect(result.stderr).to match(%r{Error:.*(A non-empty name must be specified|Empty string title at)})
-        end
+    it 'applies manifest, raises error' do
+      apply_manifest(acl_manifest, expect_failures: true) do |result|
+        expect(result.stderr).to match(%r{Error:.*(A non-empty name must be specified|Empty string title at)})
       end
     end
   end
 
-  windows_agents.each do |agent|
-    context "Specify Target with Invalid Path Characters on #{agent}" do
-      let(:target) { 'c:/temp/invalid_<:>|?*' }
+  context 'Specify Target with Invalid Path Characters' do
+    let(:target) { 'c:/temp/invalid_<:>|?*' }
 
-      it 'applies manifest' do
-        execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-          expect(result.stderr).to match(%r{Error:.*The filename, directory name, or volume label syntax is incorrect})
-        end
+    it 'applies manifest, raises error' do
+      apply_manifest(acl_manifest, expect_failures: true) do |result|
+        expect(result.stderr).to match(%r{Error:.*The filename, directory name, or volume label syntax is incorrect})
       end
     end
   end

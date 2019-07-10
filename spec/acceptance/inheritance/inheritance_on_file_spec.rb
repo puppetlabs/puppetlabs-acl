@@ -74,9 +74,7 @@ describe 'Inheritance' do
     let(:file_content) { 'Car repair is expensive' }
     let(:acl_regex) { %r{.*\\bob:\(I\)\(F\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context 'Explicit Inheritance of "deny" Parent Permissions for File' do
@@ -86,9 +84,7 @@ describe 'Inheritance' do
     let(:file_content) { 'Exploding pants on sale for half off.' }
     let(:acl_regex) { %r{.*\\bob:\(I\)\(N\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context 'Remove Inheritance of "allow" Parent Permissions for File' do
@@ -98,9 +94,7 @@ describe 'Inheritance' do
     let(:file_content) { 'Smell-o-vision: brought to you by the makers of Taste-o-vision!' }
     let(:acl_regex) { %r{.*\\bob:\(F\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context 'Remove Inheritance of "deny" Parent Permissions for File' do
@@ -110,8 +104,6 @@ describe 'Inheritance' do
     let(:file_content) { 'She smirked as he disdainfully choked down her tasteless humor.' }
     let(:acl_regex) { %r{.*\\bob:\(N\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 end

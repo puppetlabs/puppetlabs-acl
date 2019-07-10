@@ -15,12 +15,10 @@ describe 'Basic Functionality - Negative' do
     MANIFEST
   end
 
-  context 'ACL Fails Gracefully on Linux' do
-    linux_agents.each do |agent|
-      it "verifes that the 'acl' type does not work on non-Windows agents on #{agent}, raises error" do
-        execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-          expect(result.stderr).to match(%r{Error: Could not find a suitable provider for acl})
-        end
+  context 'ACL Fails Gracefully on Linux', unless: os[:family] == 'windows' do
+    it "verifes that the 'acl' type does not work on non-Windows agents" do
+      apply_manifest(acl_manifest, expect_failures: true) do |result|
+        expect(result.stderr).to match(%r{Error: Could not find a suitable provider for acl})
       end
     end
   end

@@ -59,13 +59,9 @@ describe 'Propagate - Negative' do
     let(:verify_acl_command) { "icacls #{target_parent}/#{target_name}" }
     let(:acl_regex) { %r{.*\\bob:\(F\)} }
 
-    windows_agents.each do |agent|
-      context "on #{agent}" do
-        let(:agent_version_response) { on(agent, puppet('--version')).stdout.chomp }
-        let(:agent_version) { Gem::Version.new(agent_version_response) }
+    let(:agent_version_response) { run_shell('puppet --version').stdout.chomp }
+    let(:agent_version) { Gem::Version.new(agent_version_response) }
 
-        include_examples 'execute manifest and verify file', agent
-      end
-    end
+    include_examples 'execute manifest and verify file'
   end
 end

@@ -93,30 +93,24 @@ describe 'Use Cases' do
     let(:user_id5_ace_regex) { %r{.*\\sally:\(W,Rc,X,RA\)} }
     let(:user_id6_ace_regex) { %r{.*\\betty:\(DENY\)\(R,W\)} }
 
-    windows_agents.each do |agent|
-      context "on #{agent}" do
-        it 'applies manifest' do
-          execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-            expect(result.stderr).not_to match(%r{Error:})
-          end
-        end
+    it 'applies manifest' do
+      idempotent_apply(acl_manifest)
+    end
 
-        it 'verifies ACL rights ' do
-          on(agent, verify_acl_command) do |result|
-            expect(result.stdout).to match(%r{#{user_id1_ace_regex}})
-            expect(result.stdout).to match(%r{#{user_id2_ace_regex}})
-            expect(result.stdout).to match(%r{#{user_id3_ace_regex}})
-            expect(result.stdout).to match(%r{#{user_id4_ace_regex}})
-            expect(result.stdout).to match(%r{#{user_id5_ace_regex}})
-            expect(result.stdout).to match(%r{#{user_id6_ace_regex}})
-          end
-        end
-
-        it 'verifies file data integrity' do
-          expect(file(verify_content_path)).to be_file
-          expect(file(verify_content_path).content).to match(%r{#{file_content}})
-        end
+    it 'verifies ACL rights ' do
+      run_shell(verify_acl_command) do |result|
+        expect(result.stdout).to match(%r{#{user_id1_ace_regex}})
+        expect(result.stdout).to match(%r{#{user_id2_ace_regex}})
+        expect(result.stdout).to match(%r{#{user_id3_ace_regex}})
+        expect(result.stdout).to match(%r{#{user_id4_ace_regex}})
+        expect(result.stdout).to match(%r{#{user_id5_ace_regex}})
+        expect(result.stdout).to match(%r{#{user_id6_ace_regex}})
       end
+    end
+
+    it 'verifies file data integrity' do
+      expect(file(verify_content_path)).to be_file
+      expect(file(verify_content_path).content).to match(%r{#{file_content}})
     end
   end
 end

@@ -34,44 +34,34 @@ describe 'Allow Mask Specific' do
     let(:mask) { '1048868' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(S,AD,X,WA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"RD, DC, WEA, RC" Rights for Identity on Directory' do
     let(:mask) { '131153' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(Rc,RD,WEA,DC\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"S, DE, REA, WEA, RA, WA" Rights for Identity on Directory' do
     let(:mask) { '1114520' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(D,REA,WEA,RA,WA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"S, RA, WA, RC" Rights for Identity on Directory' do
     let(:mask) { '1180032' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(Rc,S,RA,WA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"WD, REA, RA, S" Rights for Identity on Directory' do
     let(:mask) { '1048714' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(S,WD,REA,RA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 end

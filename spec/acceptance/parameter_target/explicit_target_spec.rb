@@ -32,9 +32,5 @@ describe 'Windows ACL Module - Explicit Use of "target" Parameter' do
     MANIFEST
   end
 
-  windows_agents.each do |agent|
-    context "on #{agent}" do
-      include_examples 'execute manifest', agent
-    end
-  end
+  include_examples 'execute manifest'
 end
