@@ -1,38 +1,7 @@
 require 'spec_helper_acceptance'
 
-def apply_manifest_and_verify(acl_regex, agent, prop_type)
-  context "on #{agent}" do
-    rights = 'full'
-    target_name = "prop_#{prop_type}"
-    target_child_name = "prop_#{prop_type}_child"
-    target_child = "#{target_parent}/#{target_name}/#{target_child_name}"
-
-    verify_acl_command = "icacls #{target_parent}/#{target_name}"
-    verify_child_acl_command = "icacls #{target_child}"
-
-    it 'Execute Apply Manifest' do
-      execute_manifest_on(agent, acl_manifest(target_name, rights, prop_type, target_child), debug: true) do |result|
-        expect(result.stderr).not_to match(%r{Error:})
-      end
-    end
-
-    it 'Verify that ACL Rights are Correct' do
-      on(agent, verify_acl_command) do |result|
-        expect(result.stdout).to match(%r{#{acl_regex}})
-      end
-    end
-
-    it 'Verify that ACL Rights are Correct on Child' do
-      on(agent, verify_child_acl_command) do |result|
-        expect(result.stdout).not_to match(%r{#{acl_regex}})
-      end
-    end
-  end
-end
-
-# rubocop:disable RSpec/EmptyExampleGroup
 describe 'Propagate' do
-  def acl_manifest(target_name, rights, prop_type, target_child)
+  let(:acl_manifest) do
     <<-MANIFEST
       file { "#{target_parent}":
         ensure => directory
@@ -72,12 +41,20 @@ describe 'Propagate' do
     MANIFEST
   end
 
+  let(:rights) { 'full' }
+  let(:target_name) { "prop_#{prop_type}" }
+  let(:target_child_name) { "prop_#{prop_type}_child" }
+  let(:target_child) { "#{target_parent}/#{target_name}/#{target_child_name}" }
+
+  let(:verify_acl_command) { "icacls #{target_parent}/#{target_name}" }
+  let(:verify_child_acl_command) { "icacls #{target_child}" }
+
   context 'Propagate "self_only" to No Child Types' do
-    prop_type = 'self_only'
-    acl_regex = %r{.*\\bob:\(F\)}
+    let(:prop_type) { 'self_only' }
+    let(:acl_regex) { %r{.*\\bob:\(F\)} }
+
     windows_agents.each do |agent|
-      apply_manifest_and_verify(acl_regex, agent, prop_type)
+      include_examples 'execute manifest and verify child', agent
     end
   end
 end
-# rubocop:enable RSpec/EmptyExampleGroup

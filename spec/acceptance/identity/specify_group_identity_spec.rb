@@ -1,30 +1,7 @@
 require 'spec_helper_acceptance'
 
-# rubocop:disable RSpec/EmptyExampleGroup
-def apply_manifest_and_verify(agent, file_content, group_id, target_file)
-  context "on #{agent}" do
-    it 'Execute Manifest' do
-      execute_manifest_on(agent, acl_manifest_with_group(target_file, file_content, group_id), debug: true) do |result|
-        expect(result.stderr).not_to match(%r{Error:})
-      end
-    end
-
-    it 'Verify that ACL Rights are Correct' do
-      on(agent, verify_acl_command(target_file)) do |result|
-        expect(result.stdout).to match(%r{#{acl_regex(group_id)}})
-      end
-    end
-
-    it 'Verify File Data Integrity' do
-      on(agent, verify_content_command(target_file)) do |result|
-        expect(result.stdout).to match(%r{#{file_content_regex(file_content)}})
-      end
-    end
-  end
-end
-
 describe 'Identity - Group' do
-  def acl_manifest_with_group(target_file, file_content, group_id)
+  let(:acl_manifest) do
     <<-MANIFEST
       file { '#{target_parent}':
         ensure => directory
@@ -48,64 +25,28 @@ describe 'Identity - Group' do
     MANIFEST
   end
 
-  def acl_manifest_with_user(target_file, file_content, user_id)
-    <<-MANIFEST
-      file { '#{target_parent}':
-        ensure => directory
-      }
-
-      file { '#{target_parent}/#{target_file}':
-        ensure  => file,
-        content => '#{file_content}',
-        require => File['#{target_parent}']
-      }
-
-      user { '#{user_id}':
-        ensure     => present,
-        groups     => 'Users',
-        managehome => true,
-        password   => "L0v3Pupp3t!"
-      }
-
-      acl { '#{target_parent}/#{target_file}':
-        permissions  => [
-          { identity => '#{user_id}', rights => ['full'] },
-        ],
-      }
-    MANIFEST
-  end
-
-  def verify_content_command(target_file)
-    "cat /cygdrive/c/temp/#{target_file}"
-  end
-
-  def verify_acl_command(target_file)
-    "icacls #{target_parent}/#{target_file}"
-  end
-
-  def acl_regex(group_id)
-    %r{.*\\#{group_id}:\(F\)}
-  end
+  let(:verify_acl_command) { "icacls #{target_parent}/#{target_file}" }
+  let(:verify_content_path) { "#{target_parent}/#{target_file}" }
+  let(:acl_regex) { %r{.*\\#{group_id}:\(F\)} }
 
   context 'Specify Group Identity' do
-    target_file = 'specify_group_ident.txt'
-    group_id = 'bobs'
-    file_content = 'Cat barf.'
+    let(:target_file) { 'specify_group_ident.txt' }
+    let(:group_id) { 'bobs' }
+    let(:file_content) { 'Cat barf.' }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(agent, file_content, group_id, target_file)
+      include_examples 'execute manifest and verify file', agent
     end
   end
 
   context 'Specify Group with Long Name for Identity' do
-    target_file = 'specify_long_group_ident.txt'
+    let(:target_file) { 'specify_long_group_ident.txt' }
     # 256 Characters
-    group_id = 'nzxncvkjnzxjkcnvkjzxncvkjznxckjvnzxkjncvzxnvckjnzxkjcnvkjzxncvkjzxncvkjzxncvkjnzxkjcnvkzjxncvkjzxnvckjnzxkjcvnzxkncjvjkzxncvkjzxnvckjnzxjkcvnzxkjncvkjzxncvjkzxncvkjzxnkvcjnzxjkcvnkzxjncvkjzxncvkzckjvnzxkcvnjzxjkcnvzjxkncvkjzxnvkjsdnjkvnzxkjcnvkjznvkjxcbvzs' # rubocop:disable Metrics/LineLength
-    file_content = 'Pretty little poodle dressed in noodles.'
+    let(:group_id) { 'nzxncvkjnzxjkcnvkjzxncvkjznxckjvnzxkjncvzxnvckjnzxkjcnvkjzxncvkjzxncvkjzxncvkjnzxkjcnvkzjxncvkjzxnvckjnzxkjcvnzxkncjvjkzxncvkjzxnvckjnzxjkcvnzxkjncvkjzxncvjkzxncvkjzxnkvcjnzxjkcvnkzxjncvkjzxncvkzckjvnzxkcvnjzxjkcnvzjxkncvkjzxnvkjsdnjkvnzxkjcnvkjznvkjxcbvzs' } # rubocop:disable Metrics/LineLength
+    let(:file_content) { 'Pretty little poodle dressed in noodles.' }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(agent, file_content, group_id, target_file)
+      include_examples 'execute manifest and verify file', agent
     end
   end
 end
-# rubocop:enable RSpec/EmptyExampleGroup

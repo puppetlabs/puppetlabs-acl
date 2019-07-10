@@ -1,36 +1,13 @@
 require 'spec_helper_acceptance'
 
-# rubocop:disable RSpec/EmptyExampleGroup
-def apply_manifest_and_verify(acl_regex, agent, file_content, rights, target)
-  context "on #{agent}" do
-    it 'Execute Manifest' do
-      execute_manifest_on(agent, acl_manifest(target, rights, file_content), debug: true) do |result|
-        expect(result.stderr).not_to match(%r{Error:})
-      end
-    end
-
-    it 'Verify that ACL Rights are Correct' do
-      on(agent, verify_acl_command(target)) do |result|
-        expect(result.stdout).to match(%r{#{acl_regex}})
-      end
-    end
-
-    it 'Verify File Data Integrity' do
-      on(agent, verify_content_command(target)) do |result|
-        expect(result.stdout).to match(%r{#{file_content_regex(file_content)}})
-      end
-    end
-  end
-end
-
 describe 'File - Allow' do
-  def acl_manifest(target, rights, file_content)
+  let(:acl_manifest) do
     <<-MANIFEST
       file { '#{target_parent}':
         ensure => directory
       }
 
-      file { '#{target}':
+      file { '#{target_parent}/#{target_file}':
         ensure  => file,
         content => '#{file_content}',
         require => File['#{target_parent}']
@@ -43,7 +20,7 @@ describe 'File - Allow' do
         password   => "L0v3Pupp3t!"
       }
 
-      acl { '#{target}':
+      acl { '#{target_parent}/#{target_file}':
         permissions  => [
           { identity => '#{user_id}', perm_type => 'allow', rights => ['#{rights}'] },
         ],
@@ -51,101 +28,95 @@ describe 'File - Allow' do
     MANIFEST
   end
 
-  def verify_content_command(target)
-    target = target[3..-1] # remove the leading 'c:/' from the target
-    "cat /cygdrive/c/#{target}"
-  end
+  let(:verify_acl_command) { "icacls #{target_parent}/#{target_file}" }
 
-  def verify_acl_command(target)
-    "icacls #{target}"
-  end
+  let(:verify_content_path) { "#{target_parent}/#{target_file}" }
 
   context '"execute" Rights for Identity on File' do
-    rights = 'execute'
-    target = "c:/temp/allow_#{rights}_rights_file.txt"
-    file_content = 'The bed that eats people. DEATH BED!'
-    acl_regex = %r{.*\\bob:\(Rc,S,X,RA\)}
+    let(:rights) { 'execute' }
+    let(:target_file) { "allow_#{rights}_rights_file.txt" }
+    let(:file_content) { 'The bed that eats people. DEATH BED!' }
+    let(:acl_regex) { %r{.*\\bob:\(Rc,S,X,RA\)} }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(acl_regex, agent, file_content, rights, target)
+      include_examples 'execute manifest and verify file', agent
     end
   end
 
   context '"modify" Rights for Identity on File' do
-    rights = 'modify'
-    target = "c:/temp/allow_#{rights}_rights_file.txt"
-    file_content = 'Snow on the bluff.'
-    acl_regex = %r{.*\\bob:\(M\)}
+    let(:rights) { 'modify' }
+    let(:target_file) { "allow_#{rights}_rights_file.txt" }
+    let(:file_content) { 'Snow on the bluff.' }
+    let(:acl_regex) { %r{.*\\bob:\(M\)} }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(acl_regex, agent, file_content, rights, target)
+      include_examples 'execute manifest and verify file', agent
     end
   end
 
   context '"read, execute" Rights for Identity on File' do
-    rights = "read','execute"
-    target = 'c:/temp/allow_re_rights_file.txt'
-    file_content = 'Get on the phone with baked beans!'
-    acl_regex = %r{.*\\bob:\(RX\)}
+    let(:rights) { "read','execute" }
+    let(:target_file) { 'allow_re_rights_file.txt' }
+    let(:file_content) { 'Get on the phone with baked beans!' }
+    let(:acl_regex) { %r{.*\\bob:\(RX\)} }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(acl_regex, agent, file_content, rights, target)
+      include_examples 'execute manifest and verify file', agent
     end
   end
 
   context '"read" Rights for Identity on File' do
-    rights = 'read'
-    target = "c:/temp/allow_#{rights}_rights_file.txt"
-    file_content = 'Deadly couch eating monster.'
-    acl_regex = %r{.*\\bob:\(R\)}
+    let(:rights) { 'read' }
+    let(:target_file) { "allow_#{rights}_rights_file.txt" }
+    let(:file_content) { 'Deadly couch eating monster.' }
+    let(:acl_regex) { %r{.*\\bob:\(R\)} }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(acl_regex, agent, file_content, rights, target)
+      include_examples 'execute manifest and verify file', agent
     end
   end
 
   context '"write, execute" Rights for Identity on File' do
-    rights = "write','execute"
-    target = 'c:/temp/allow_we_rights_file.txt'
-    file_content = 'Get on the phone with baked beans!'
-    acl_regex = %r{.*\\bob:\(W,Rc,X,RA\)}
+    let(:rights) { "write','execute" }
+    let(:target_file) { 'allow_we_rights_file.txt' }
+    let(:file_content) { 'Get on the phone with baked beans!' }
+    let(:acl_regex) { %r{.*\\bob:\(W,Rc,X,RA\)} }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(acl_regex, agent, file_content, rights, target)
+      include_examples 'execute manifest and verify file', agent
     end
   end
 
   context '"write, read" Rights for Identity on File' do
-    rights = "write','read"
-    target = 'c:/temp/allow_wr_rights_file.txt'
-    file_content = 'Mushy bean paste in my eyes!'
-    acl_regex = %r{.*\\bob:\(R,W\)}
+    let(:rights) { "write','read" }
+    let(:target_file) { 'allow_wr_rights_file.txt' }
+    let(:file_content) { 'Mushy bean paste in my eyes!' }
+    let(:acl_regex) { %r{.*\\bob:\(R,W\)} }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(acl_regex, agent, file_content, rights, target)
+      include_examples 'execute manifest and verify file', agent
     end
   end
 
   context '"write, read, execute" Rights for Identity on File' do
-    rights = "write','read','execute"
-    target = 'c:/temp/allow_wre_rights_file.txt'
-    file_content = 'Very small feet to eat.'
-    acl_regex = %r{.*\\bob:\(RX,W\)}
+    let(:rights) { "write','read','execute" }
+    let(:target_file) { 'allow_wre_rights_file.txt' }
+    let(:file_content) { 'Very small feet to eat.' }
+    let(:acl_regex) { %r{.*\\bob:\(RX,W\)} }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(acl_regex, agent, file_content, rights, target)
+      include_examples 'execute manifest and verify file', agent
     end
   end
 
   context '"write" Rights for Identity on File' do
-    rights = 'write'
-    target = "c:/temp/allow_#{rights}_rights_file.txt"
-    file_content = 'Smart bubbles in my bath.'
-    acl_regex = %r{.*\\bob:\(W,Rc\)}
+    let(:rights) { 'write' }
+    let(:target_file) { "allow_#{rights}_rights_file.txt" }
+    let(:file_content) { 'Smart bubbles in my bath.' }
+    let(:acl_regex) { %r{.*\\bob:\(W,Rc\)} }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(acl_regex, agent, file_content, rights, target)
+      include_examples 'execute manifest and verify file', agent
     end
   end
 end
-# rubocop:enable RSpec/EmptyExampleGroup

@@ -1,7 +1,7 @@
 require 'spec_helper_acceptance'
 
 describe 'Use Cases' do
-  def acl_manifest(target, target_child, file_content, group, user_id)
+  let(:acl_manifest) do
     <<-MANIFEST
       file { "#{target_parent}":
         ensure => directory
@@ -32,7 +32,7 @@ describe 'Use Cases' do
     MANIFEST
   end
 
-  def update_manifest(target_child)
+  let(:update_manifest) do
     <<-MANIFEST
       file { "#{target_child}":
         ensure  => file,
@@ -42,43 +42,44 @@ describe 'Use Cases' do
   end
 
   context "Inherit 'full' Rights for User's Group on Container and Deny User 'full' Rights on Object in Container" do
-    test_short_name = 'grant_full_deny_full'
-    file_content = 'Sad people'
-    target_name = "use_case_#{test_short_name}"
-    target_child_name = "use_case_child_#{test_short_name}.txt"
-    target = "#{target_parent}/#{target_name}"
-    target_child = "#{target}/#{target_child_name}"
-    verify_content_command = "cat /cygdrive/c/temp/#{target_name}/#{target_child_name}"
-    group = 'Administrators'
-    user_id = 'Administrator'
-    verify_acl_child_command = "icacls #{target_child}"
-    target_child_first_ace_regex = %r{.*\\Administrators:\(I\)\(F\)}
-    target_child_second_ace_regex = %r{.*\\Administrator:\(N\)}
+    let(:test_short_name) { 'grant_full_deny_full' }
+    let(:file_content) { 'Sad people' }
+    let(:target_name) { "use_case_#{test_short_name}" }
+    let(:target_child_name) { "use_case_child_#{test_short_name}.txt" }
+    let(:target) { "#{target_parent}/#{target_name}" }
+    let(:target_child) { "#{target}/#{target_child_name}" }
+    let(:verify_content_command) { "cat /cygdrive/c/temp/#{target_name}/#{target_child_name}" }
+    let(:group) { 'Administrators' }
+    let(:user_id) { 'Administrator' }
+    let(:verify_acl_child_command) { "icacls #{target_child}" }
+    let(:target_child_first_ace_regex) { %r{.*\\Administrators:\(I\)\(F\)} }
+    let(:target_child_second_ace_regex) { %r{.*\\Administrator:\(N\)} }
 
     windows_agents.each do |agent|
       context "on #{agent}" do
-        it 'Execute ACL Manifest' do
-          execute_manifest_on(agent, acl_manifest(target, target_child, file_content, group, user_id), debug: true) do |result|
+        it 'applies manifest' do
+          execute_manifest_on(agent, acl_manifest, debug: true) do |result|
             expect(result.stderr).not_to match(%r{Error:})
           end
         end
 
-        it 'Verify that ACL Rights are Correct for Child' do
+        it 'verifies ACL child rights' do
           on(agent, verify_acl_child_command) do |result|
             expect(result.stdout).to match(%r{#{target_child_first_ace_regex}})
             expect(result.stdout).to match(%r{#{target_child_second_ace_regex}})
           end
         end
 
-        it 'Attempt to Update File' do
-          execute_manifest_on(agent, update_manifest(target_child), debug: true) do |result|
+        it 'attempts to update file, raises error' do
+          execute_manifest_on(agent, update_manifest, debug: true) do |result|
             expect(result.stderr).not_to match(%r{Error:})
           end
         end
 
-        it 'Verify File Data Integrity' do
+        it 'verifies file data integrity' do
+          # Serverspec is unable to access the file
           on(agent, verify_content_command) do |result|
-            expect(result.stdout).to match(%r{#{file_content_regex(file_content)}})
+            assert_match(file_content_regex(file_content), result.stdout, 'File content is invalid!')
           end
         end
       end

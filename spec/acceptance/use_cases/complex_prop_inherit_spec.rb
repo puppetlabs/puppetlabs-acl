@@ -1,20 +1,19 @@
 require 'spec_helper_acceptance'
 
+# TODO: FIX TESTS
+
 describe 'Use Cases' do
-  def acl_manifest(group1, group2, user_id1, user_id2, target, target_child, target_grand_child, file_content)
+  let(:acl_manifest) do
     <<-MANIFEST
       file { "#{target_parent}":
         ensure => directory
       }
-
       group { "#{group1}":
         ensure => present
       }
-
       group { "#{group2}":
         ensure => present
       }
-
       user { "#{user_id1}":
         ensure     => present,
         groups     => ['Users', '#{group1}'],
@@ -22,7 +21,6 @@ describe 'Use Cases' do
         password   => "L0v3Pupp3t!",
         require => Group['#{group1}']
       }
-
       user { "#{user_id2}":
         ensure     => present,
         groups     => ['Users', '#{group2}'],
@@ -30,7 +28,6 @@ describe 'Use Cases' do
         password   => "L0v3Pupp3t!",
         require => Group['#{group2}']
       }
-
       file { "#{target}":
         ensure  => directory,
         require => File['#{target_parent}']
@@ -112,43 +109,44 @@ describe 'Use Cases' do
   end
 
   context 'Complex Propagation and Inheritance with Nested Paths' do
-    test_short_name = 'complex_prop_inherit'
-    file_content = 'Sight seeing blind people.'
+    random_username = generate_random_username
+    let(:test_short_name) { 'complex_prop_inherit' }
+    let(:file_content) { 'Sight seeing blind people.' }
 
-    target_name = "use_case_#{test_short_name}"
-    target_child_name = "use_case_child_#{test_short_name}"
-    target_grand_child_name = "use_case_grand_child_#{test_short_name}.txt"
+    let(:target_name) { "use_case_#{test_short_name}" }
+    let(:target_child_name) { "use_case_child_#{test_short_name}" }
+    let(:target_grand_child_name) { "use_case_grand_child_#{test_short_name}.txt" }
 
-    target = "#{target_parent}/#{target_name}"
-    target_child = "#{target}/#{target_child_name}"
-    target_grand_child = "#{target_child}/#{target_grand_child_name}"
+    let(:target) { "#{target_parent}/#{target_name}" }
+    let(:target_child) { "#{target}/#{target_child_name}" }
+    let(:target_grand_child) { "#{target_child}/#{target_grand_child_name}" }
 
-    verify_content_command = "cat /cygdrive/c/temp/#{target_name}/#{target_child_name}/#{target_grand_child_name}"
+    let(:verify_content_path) { "#{target_parent}/#{target_name}/#{target_child_name}/#{target_grand_child_name}" }
 
-    group1 = 'jerks'
-    group2 = 'cool_peeps'
+    let(:group1) { 'jerks' }
+    let(:group2) { 'cool_peeps' }
 
-    user_id1 = 'bob'
-    user_id2 = generate_random_username
+    let(:user_id1) { 'bob' }
+    let(:user_id2) { random_username }
 
-    verify_acl_grand_child_command = "icacls #{target_grand_child}"
+    let(:verify_acl_grand_child_command) { "icacls #{target_grand_child}" }
 
-    target_grand_child_first_ace_regex = %r{.*\\cool_peeps:\(N\)}
-    target_grand_child_second_ace_regex = %r{.*\\bob:\(I\)\(DENY\)\(M\)}
-    target_grand_child_third_ace_regex = %r{.*\\Administrators:\(I\)\(F\)}
-    target_grand_child_fourth_ace_regex = %r{.*\\bob:\(I\)\(R\)}
-    target_grand_child_fifth_ace_regex = %r{.*\\#{user_id2}:\(I\)\(DENY\)\(RX\)}
-    target_grand_child_sixth_ace_regex = %r{.*\\cool_peeps:\(I\)\(R\)}
+    let(:target_grand_child_first_ace_regex) { %r{.*\\cool_peeps:\(N\)} }
+    let(:target_grand_child_second_ace_regex) { %r{.*\\bob:\(I\)\(DENY\)\(M\)} }
+    let(:target_grand_child_third_ace_regex) { %r{.*\\Administrators:\(I\)\(F\)} }
+    let(:target_grand_child_fourth_ace_regex) { %r{.*\\bob:\(I\)\(R\)} }
+    let(:target_grand_child_fifth_ace_regex) { %r{.*\\#{user_id2}:\(I\)\(DENY\)\(RX\)} }
+    let(:target_grand_child_sixth_ace_regex) { %r{.*\\cool_peeps:\(I\)\(R\)} }
 
     windows_agents.each do |agent|
       context "on #{agent}" do
-        it 'Execute ACL Manifest' do
-          execute_manifest_on(agent, acl_manifest(group1, group2, user_id1, user_id2, target, target_child, target_grand_child, file_content), debug: true) do |result|
+        it 'applies manifest' do
+          execute_manifest_on(agent, acl_manifest, debug: true) do |result|
             assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
           end
         end
 
-        it 'Verify that ACL Rights are Correct for Grand Child' do
+        it 'verifies ACL grand child rights' do
           on(agent, verify_acl_grand_child_command) do |result|
             # We only need to check the grand child because we are only concerned with rights
             # propagating and inheriting.
@@ -161,10 +159,9 @@ describe 'Use Cases' do
           end
         end
 
-        it 'Verify File Data Integrity' do
-          on(agent, verify_content_command) do |result|
-            expect(result.stdout).to match(%r{#{file_content_regex(file_content)}})
-          end
+        it 'verfies file data integrity' do
+          expect(file(verify_content_path)).to be_file
+          expect(file(verify_content_path).content).to match(%r{#{file_content}})
         end
       end
     end

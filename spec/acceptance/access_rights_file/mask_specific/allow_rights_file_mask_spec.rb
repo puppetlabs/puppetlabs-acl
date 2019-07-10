@@ -1,30 +1,7 @@
 require 'spec_helper_acceptance'
 
-# rubocop:disable RSpec/EmptyExampleGroup
-def apply_manifest_and_verify(acl_regex, agent, file_content, mask)
-  context "on #{agent}" do
-    it 'Execute Manifest' do
-      execute_manifest_on(agent, acl_manifest(mask, file_content), debug: true) do |result|
-        expect(result.stderr).not_to match(%r{Error:})
-      end
-    end
-
-    it 'Verify that ACL Rights are Correct' do
-      on(agent, verify_acl_command(mask)) do |result|
-        expect(result.stdout).to match(%r{#{acl_regex}})
-      end
-    end
-
-    it 'Verify File Data Integrity' do
-      on(agent, verify_content_command(mask)) do |result|
-        expect(result.stdout).to match(%r{#{file_content_regex(file_content)}})
-      end
-    end
-  end
-end
-
 describe 'File - Allow Mask Specific' do
-  def acl_manifest(mask, file_content)
+  let(:acl_manifest) do
     <<-MANIFEST
       file { '#{target_parent}':
         ensure => directory
@@ -51,62 +28,57 @@ describe 'File - Allow Mask Specific' do
     MANIFEST
   end
 
-  def verify_acl_command(mask)
-    "icacls c:/temp/allow_#{mask}_rights_file.txt"
-  end
+  let(:verify_acl_command) { "icacls c:/temp/allow_#{mask}_rights_file.txt" }
 
-  def verify_content_command(mask)
-    "cat /cygdrive/c/temp/allow_#{mask}_rights_file.txt"
-  end
+  let(:verify_content_path) { "c:\\temp\\allow_#{mask}_rights_file.txt" }
 
   context '"AD, S, WA, X" Rights for Identity on File' do
-    mask = '1048868'
-    file_content = 'The puppets are controlling my mind!'
-    acl_regex = %r{.*\\bob:\(S,AD,X,WA\)}
+    let(:mask) { '1048868' }
+    let(:file_content) { 'The puppets are controlling my mind!' }
+    let(:acl_regex) { %r{.*\\bob:\(S,AD,X,WA\)} }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(acl_regex, agent, file_content, mask)
+      include_examples 'execute manifest and verify file', agent
     end
   end
 
   context '"RD, DE, WEA, RC" Rights for Identity on File' do
-    mask = '196625'
-    file_content = 'You are never going to feel it!'
-    acl_regex = %r{.*\\bob:\(DE,Rc,RD,WEA\)}
+    let(:mask) { '196625' }
+    let(:file_content) { 'You are never going to feel it!' }
+    let(:acl_regex) { %r{.*\\bob:\(DE,Rc,RD,WEA\)} }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(acl_regex, agent, file_content, mask)
+      include_examples 'execute manifest and verify file', agent
     end
   end
 
   context '"S, DE, REA, WEA, RA, WA" Rights for Identity on File' do
-    mask = '1114520'
-    file_content = 'Karate time!'
-    acl_regex = %r{.*\\bob:\(D,REA,WEA,RA,WA\)}
+    let(:mask) { '1114520' }
+    let(:file_content) { 'Karate time!' }
+    let(:acl_regex) { %r{.*\\bob:\(D,REA,WEA,RA,WA\)} }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(acl_regex, agent, file_content, mask)
+      include_examples 'execute manifest and verify file', agent
     end
   end
 
   context '"S, RA, WA, RC" Rights for Identity on File' do
-    mask = '1180032'
-    file_content = 'I like shoes made by Canadians.'
-    acl_regex = %r{.*\\bob:\(Rc,S,RA,WA\)}
+    let(:mask) { '1180032' }
+    let(:file_content) { 'I like shoes made by Canadians.' }
+    let(:acl_regex) { %r{.*\\bob:\(Rc,S,RA,WA\)} }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(acl_regex, agent, file_content, mask)
+      include_examples 'execute manifest and verify file', agent
     end
   end
 
   context '"WD, REA, RA, S" Rights for Identity on File' do
-    mask = '1048714'
-    file_content = 'My mind is going... I can feel it.'
-    acl_regex = %r{.*\\bob:\(S,WD,REA,RA\)}
+    let(:mask) { '1048714' }
+    let(:file_content) { 'My mind is going... I can feel it.' }
+    let(:acl_regex) { %r{.*\\bob:\(S,WD,REA,RA\)} }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(acl_regex, agent, file_content, mask)
+      include_examples 'execute manifest and verify file', agent
     end
   end
 end
-# rubocop:enable RSpec/EmptyExampleGroup

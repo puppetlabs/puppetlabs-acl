@@ -1,7 +1,9 @@
 require 'spec_helper_acceptance'
 
+sid = ''
+
 describe 'Owner - SID' do
-  def setup_manifest(target_name, file_content, owner_id)
+  let(:setup_manifest) do
     <<-MANIFEST
       file { "#{target_parent}":
         ensure => directory
@@ -29,7 +31,7 @@ describe 'Owner - SID' do
     MANIFEST
   end
 
-  def acl_manifest(target_name, sid)
+  let(:acl_manifest) do
     <<-MANIFEST
       acl { "#{target_parent}/#{target_name}":
         permissions  => [
@@ -43,64 +45,56 @@ describe 'Owner - SID' do
   end
 
   context 'Change Owner to Local User SID' do
-    os_check_command = 'cmd /c ver'
-    os_check_regex = %r{Version 5}
-    file_content = 'Rocket ship to the moon!'
-    target_name = 'owner_local_user_sid.txt'
-    owner_id = 'geraldo'
+    let(:os_check_command) { 'cmd /c ver' }
+    let(:os_check_regex) { %r{Version 5} }
+    let(:file_content) { 'Rocket ship to the moon!' }
+    let(:target_name) { 'owner_local_user_sid.txt' }
+    let(:owner_id) { 'geraldo' }
 
-    get_owner_sid_command = <<-GETSID
-    cmd /c "wmic useraccount where name='#{owner_id}' get sid"
-    GETSID
+    let(:get_owner_sid_command) do
+      <<-CMD
+        cmd /c "wmic useraccount where name='#{owner_id}' get sid"
+      CMD
+    end
 
-    sid_regex = %r{^(S-.+)$}
+    let(:sid_regex) { %r{^(S-.+)$} }
 
-    verify_content_command = "cat /cygdrive/c/temp/#{target_name}"
-    file_content_regex = %r{\A#{file_content}\z}
+    let(:verify_content_path) { "#{target_parent}/#{target_name}" }
+    let(:file_content_regex) { %r{\A#{file_content}\z} }
 
-    dosify_target = "c:\\temp\\#{target_name}"
-    verify_owner_command = "cmd /c \"dir /q #{dosify_target}\""
-    owner_regex = %r{.*\\#{owner_id}}
+    let(:dosify_target) { "c:\\temp\\#{target_name}" }
+    let(:verify_owner_command) { "cmd /c \"dir /q #{dosify_target}\"" }
+    let(:owner_regex) { %r{.*\\#{owner_id}} }
 
     windows_agents.each do |agent|
       context "on #{agent}" do
-        sid = ''
-        it 'Determine OS Type' do
-          on(agent, os_check_command) do |result|
-            if os_check_regex =~ result.stdout
-              skip_test('This test cannot run on a Windows 2003 system!')
-            end
-          end
-        end
-
-        it 'Execute Setup Manifest' do
-          execute_manifest_on(agent, setup_manifest(target_name, file_content, owner_id), debug: true) do |result|
+        it 'applies setup manifest' do
+          execute_manifest_on(agent, setup_manifest, debug: true) do |result|
             expect(result.stderr).not_to match(%r{Error:})
           end
         end
 
-        it 'Get SID of User Account' do
+        it 'retrieves SID of user account' do
           on(agent, get_owner_sid_command) do |result|
             sid = sid_regex.match(result.stdout)[1]
           end
         end
 
-        it 'Execute ACL Manifest' do
-          execute_manifest_on(agent, acl_manifest(target_name, sid), debug: true) do |result|
+        it 'applies manifest' do
+          execute_manifest_on(agent, acl_manifest, debug: true) do |result|
             expect(result.stderr).not_to match(%r{Error:})
           end
         end
 
-        it 'Verify that ACL Rights are Correct' do
+        it 'verifies ACL rights' do
           on(agent, verify_owner_command) do |result|
             expect(result.stdout).to match(%r{#{owner_regex}})
           end
         end
 
-        it 'Verify File Data Integrity' do
-          on(agent, verify_content_command) do |result|
-            expect(result.stdout).to match(%r{#{file_content_regex}})
-          end
+        it 'verifies file data integrity' do
+          expect(file(verify_content_path)).to be_file
+          expect(file(verify_content_path).content).to match(%r{#{file_content}})
         end
       end
     end

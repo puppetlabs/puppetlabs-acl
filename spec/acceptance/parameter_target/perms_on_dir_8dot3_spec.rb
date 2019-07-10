@@ -1,38 +1,7 @@
 require 'spec_helper_acceptance'
 
-# rubocop:disable RSpec/EmptyExampleGroup, RSpec/RepeatedDescription
-def apply_manifest_and_verify(agent, target, target8dot3, verify_acl_command, remove = false)
-  context "on #{agent}" do
-    acl_regex = %r{.*\\bob:\(OI\)\(CI\)\(F\)}
-    it 'Execute Manifest' do
-      execute_manifest_on(agent, acl_manifest(target, target8dot3), debug: true) do |result|
-        expect(result.stderr).not_to match(%r{Error:})
-      end
-    end
-
-    it 'Verify that ACL Rights are Correct' do
-      on(agent, verify_acl_command) do |result|
-        expect(result.stdout).to match(%r{#{acl_regex}})
-      end
-    end
-    if remove
-      it 'Execute Remove Manifest' do
-        execute_manifest_on(agent, acl_manifest_remove(target8dot3), debug: true) do |result|
-          expect(result.stderr).not_to match(%r{Error:})
-        end
-      end
-
-      it 'Verify that ACL Rights are Correct' do
-        on(agent, verify_acl_command) do |result|
-          expect(result.stdout).not_to match(%r{#{acl_regex}})
-        end
-      end
-    end
-  end
-end
-
 describe 'Permissions - Directory - 8.3' do
-  def acl_manifest(target, target8dot3)
+  let(:acl_manifest) do
     <<-MANIFEST
       file { "#{target_parent}":
         ensure => directory
@@ -58,7 +27,7 @@ describe 'Permissions - Directory - 8.3' do
     MANIFEST
   end
 
-  def acl_manifest_remove(target8dot3)
+  let(:acl_manifest_remove) do
     <<-MANIFEST
       acl { '#{target8dot3}':
         purge => 'listed_permissions',
@@ -69,24 +38,25 @@ describe 'Permissions - Directory - 8.3' do
     MANIFEST
   end
 
+  let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(F\)} }
+
   context 'Add Permissions to a 8.3 Directory' do
-    target = 'c:/temp/dir_short_name'
-    target8dot3 = 'c:/temp/DIR_SH~1'
-    verify_acl_command = "icacls #{target8dot3}"
+    let(:target) { 'c:/temp/dir_short_name' }
+    let(:target8dot3) { 'c:/temp/DIR_SH~1' }
+    let(:verify_acl_command) { "icacls #{target8dot3}" }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(agent, target, target8dot3, verify_acl_command)
+      include_examples 'execute manifest', agent
     end
   end
 
   context 'Remove Permissions from a 8.3 Directory' do
-    target = 'c:/temp/rem_dir_short_name'
-    target8dot3 = 'c:/temp/REM_DI~1'
-    verify_acl_command = "icacls #{target8dot3}"
+    let(:target) { 'c:/temp/rem_dir_short_name' }
+    let(:target8dot3) { 'c:/temp/REM_DI~1' }
+    let(:verify_acl_command) { "icacls #{target8dot3}" }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(agent, target, target8dot3, verify_acl_command, true)
+      include_examples 'execute manifest', agent, true
     end
   end
 end
-# rubocop:enable RSpec/EmptyExampleGroup, RSpec/RepeatedDescription

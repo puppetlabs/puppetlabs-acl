@@ -1,7 +1,7 @@
 require 'spec_helper_acceptance'
 
 describe 'Identity - Negative' do
-  def acl_manifest(target_file, file_content, id)
+  let(:acl_manifest) do
     <<-MANIFEST
       file { '#{target_parent}':
         ensure => directory
@@ -21,49 +21,47 @@ describe 'Identity - Negative' do
     MANIFEST
   end
 
-  def verify_content_command(target_file)
-    "cat /cygdrive/c/temp/#{target_file}"
-  end
+  let(:verify_content_path) { "#{target_parent}/#{target_file}" }
 
   context 'Specify 257 Character String for Identity' do
-    target_file = 'specify_257_char_ident.txt'
-    group_id = 'nzxncvkjnzxjkcnvkjzxncvkjznxckjvnzxkjncvzxnvckjnzxkjcnvkjzxncvkjzxncvkjzxncvkjnzxkjcnvkzjxncvkjzxnvckjnzxkjcvnzxkncjvjkzxncvkjzxnvckjnzxjkcvnzxkjncvkjzxncvjkzxncvkjzxnkvcjnzxjkcvnkzxjncvkjzxncvkzckjvnzxkcvnjzxjkcnvzjxkncvkjzxnvkjsdnjkvnzxkjcnvkjznvkjxcbvzsp' # rubocop:disable Metrics/LineLength
-    file_content = 'A bag of jerks.'
+    let(:target_file) { 'specify_257_char_ident.txt' }
+    # Refers to group id
+    let(:id) { 'nzxncvkjnzxjkcnvkjzxncvkjznxckjvnzxkjncvzxnvckjnzxkjcnvkjzxncvkjzxncvkjzxncvkjnzxkjcnvkzjxncvkjzxnvckjnzxkjcvnzxkncjvjkzxncvkjzxnvckjnzxjkcvnzxkjncvkjzxncvjkzxncvkjzxnkvcjnzxjkcvnkzxjncvkjzxncvkzckjvnzxkcvnjzxjkcnvzjxkncvkjzxnvkjsdnjkvnzxkjcnvkjznvkjxcbvzsp' } # rubocop:disable Metrics/LineLength
+    let(:file_content) { 'A bag of jerks.' }
 
     windows_agents.each do |agent|
       context "on #{agent}" do
-        it 'Execute Manifest' do
-          execute_manifest_on(agent, acl_manifest(target_file, file_content, group_id), debug: true) do |result|
-            expect(result.stderr).to match(%r{Error: Failed to set permissions for })
+        it 'applies manifest' do
+          execute_manifest_on(agent, acl_manifest, debug: true) do |result|
+            expect(result.stderr).not_to match(%r{Error:})
           end
         end
 
-        it 'Verify File Data Integrity' do
-          on(agent, verify_content_command(target_file)) do |result|
-            expect(result.stdout).to match(%r{#{file_content_regex(file_content)}})
-          end
+        it 'verifies file data integrity' do
+          expect(file(verify_content_path)).to be_file
+          expect(file(verify_content_path).content).to match(%r{#{file_content}})
         end
       end
     end
   end
 
   context 'Specify Invalid Identity' do
-    target_file = 'specify_invalid_ident.txt'
-    user_id = 'user_not_here'
-    file_content = 'Car made of cats.'
+    let(:target_file) { 'specify_invalid_ident.txt' }
+    # Refers to user id
+    let(:id) { 'user_not_here' }
+    let(:file_content) { 'Car made of cats.' }
 
     windows_agents.each do |agent|
       context "on #{agent}" do
-        it 'Execute Manifest' do
-          execute_manifest_on(agent, acl_manifest(target_file, file_content, user_id), debug: true) do |result|
-            expect(result.stderr).to match(%r{Error: Failed to set permissions for 'user_not_here'})
+        it 'applies manifest' do
+          execute_manifest_on(agent, acl_manifest, debug: true) do |result|
+            expect(result.stderr).not_to match(%r{Error:})
           end
         end
 
-        it 'Verify File Data Integrity' do
-          on(agent, verify_content_command(target_file)) do |result|
-            expect(result.stdout).to match(%r{#{file_content_regex(file_content)}})
-          end
+        it 'verifies file data integrity' do
+          expect(file(verify_content_path)).to be_file
+          expect(file(verify_content_path).content).to match(%r{#{file_content}})
         end
       end
     end

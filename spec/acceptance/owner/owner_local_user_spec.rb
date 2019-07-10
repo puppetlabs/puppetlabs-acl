@@ -1,34 +1,7 @@
 require 'spec_helper_acceptance'
 
-# rubocop:disable RSpec/EmptyExampleGroup
-def apply_manifest_and_verify(agent, file_content, owner_id, target_name, owner_regex)
-  context "on #{agent}" do
-    verify_content_command = "cat /cygdrive/c/temp/#{target_name}"
-    dosify_target = "c:\\temp\\#{target_name}"
-    verify_owner_command = "cmd /c \"dir /q #{dosify_target}\""
-
-    it 'Execute ACL Manifest' do
-      execute_manifest_on(agent, acl_manifest(target_name, file_content, owner_id), debug: true) do |result|
-        expect(result.stderr).not_to match(%r{Error:})
-      end
-    end
-
-    it 'Verify that ACL Rights are Correct' do
-      on(agent, verify_owner_command) do |result|
-        expect(result.stdout).to match(%r{#{owner_regex}})
-      end
-    end
-
-    it 'Verify File Data Integrity' do
-      on(agent, verify_content_command) do |result|
-        expect(result.stdout).to match(%r{#{file_content_regex(file_content)}})
-      end
-    end
-  end
-end
-
 describe 'Owner - Local User' do
-  def acl_manifest(target_name, file_content, owner_id)
+  let(:acl_manifest) do
     <<-MANIFEST
       file { "#{target_parent}":
         ensure => directory
@@ -65,52 +38,46 @@ describe 'Owner - Local User' do
     MANIFEST
   end
 
+  let(:dosify_target) { "c:\\temp\\#{target_name}" }
+  let(:verify_acl_command) { "cmd /c \"dir /q #{dosify_target}\"" }
+  let(:verify_content_path) { "#{target_parent}/#{target_name}" }
+
   context 'Change Owner to Local User' do
-    file_content = 'MoewMeowMoewBlahBalh!'
-    target_name = 'owner_local_user.txt'
-    owner_id = 'racecar'
-    owner_regex = %r{.*\\#{owner_id}}
+    let(:file_content) { 'MoewMeowMoewBlahBalh!' }
+    let(:target_name) { 'owner_local_user.txt' }
+    let(:owner_id) { 'racecar' }
+    let(:acl_regex) { %r{.*\\#{owner_id}} }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(agent, file_content, owner_id, target_name, owner_regex)
+      include_examples 'execute manifest and verify file', agent
     end
   end
 
   context 'Change Owner to Local User with Long Name' do
-    file_content = 'Dogs are barking animals. Cats are meowing animals.'
-    target_name = 'owner_local_long_user_name.txt'
-    owner_id = 'long_user_name_gerry'
+    let(:file_content) { 'Dogs are barking animals. Cats are meowing animals.' }
+    let(:target_name) { 'owner_local_long_user_name.txt' }
+    let(:owner_id) { 'long_user_name_gerry' }
     # The dir command chops the username at 16 characters.
-    owner_regex = %r{.*\\long}
+    let(:acl_regex) { %r{.*\\long} }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(agent, file_content, owner_id, target_name, owner_regex)
+      include_examples 'execute manifest and verify file', agent
     end
   end
 
   context 'Change Owner to Local Unicode User' do
-    file_content = 'Blurpy Bing Dangle.'
     prefix = SecureRandom.uuid.to_s
-    target_name = "#{prefix}.txt"
-    raw_owner_id = '\u03A3\u03A4\u03A5\u03A6'
-    owner_id =     "\u03A3\u03A4\u03A5\u03A6" # ΣΤΥΦ
-    verify_owner_command = "(Get-ACL '#{target_parent}/#{target_name}' | Where-Object { $_.Owner -match ('.*\\\\' + [regex]::Unescape(\"#{raw_owner_id}\")) } | Measure-Object).Count"
+    let(:file_content) { 'Blurpy Bing Dangle.' }
+    let(:target_name) { "#{prefix}.txt" }
+    let(:raw_owner_id) { '\u03A3\u03A4\u03A5\u03A6' }
+    let(:owner_id) { "\u03A3\u03A4\u03A5\u03A6" } # ΣΤΥΦ
+    let(:verify_acl_command) { "(Get-ACL '#{target_parent}/#{target_name}' | Where-Object { $_.Owner -match ('.*\\\\' + [regex]::Unescape(\"#{raw_owner_id}\")) } | Measure-Object).Count" }
+    let(:acl_regex) { %r{^1$} }
 
     windows_agents.each do |agent|
       context "on #{agent}" do
-        it 'Execute ACL Manifest' do
-          execute_manifest_on(agent, acl_manifest(target_name, file_content, owner_id), debug: true) do |result|
-            expect(result.stderr).not_to match(%r{Error:})
-          end
-        end
-
-        it 'Verify that ACL Rights are Correct' do
-          on(agent, powershell(verify_owner_command, 'EncodedCommand' => true)) do |result|
-            expect(result.stderr).not_to match(%r{^1$})
-          end
-        end
+        include_examples 'execute manifest and verify (with PowerShell)', agent
       end
     end
   end
 end
-# rubocop:enable RSpec/EmptyExampleGroup
