@@ -1,47 +1,7 @@
 require 'spec_helper_acceptance'
 
-# rubocop:disable RSpec/EmptyExampleGroup, RSpec/RepeatedDescription
-def apply_manifest_and_verify(file_name, target8dot3, file_content, agent, remove = nil)
-  acl_regex = %r{.*\\bob:\(F\)}
-  verify_acl_command = "icacls #{target_parent}/#{file_name}"
-  verify_content_command = "cat /cygdrive/c/temp/#{file_name}"
-  context "on #{agent}" do
-    it 'Execute Manifest' do
-      execute_manifest_on(agent, acl_manifest(file_name, target8dot3, file_content), debug: true) do |result|
-        assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
-      end
-    end
-
-    it 'Verify that ACL Rights are Correct' do
-      on(agent, verify_acl_command) do |result|
-        assert_match(acl_regex, result.stdout, 'Expected ACL was not present!')
-      end
-    end
-
-    if remove
-      it 'Execute Remove Manifest' do
-        execute_manifest_on(agent, acl_manifest_remove(target8dot3), debug: true) do |result|
-          assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
-        end
-      end
-
-      it 'Verify that ACL Rights are Correct' do
-        on(agent, verify_acl_command) do |result|
-          assert_no_match(acl_regex, result.stdout, 'Unexpected ACL was present!')
-        end
-      end
-    end
-
-    it 'Verify File Data Integrity' do
-      on(agent, verify_content_command) do |result|
-        assert_match(file_content_regex(file_content), result.stdout, 'Expected file content is invalid!')
-      end
-    end
-  end
-end
-
 describe 'Permissions - File - 8.3' do
-  def acl_manifest(file_name, target8dot3, file_content)
+  let(:acl_manifest) do
     <<-MANIFEST
       file { '#{target_parent}':
         ensure => directory
@@ -68,7 +28,7 @@ describe 'Permissions - File - 8.3' do
     MANIFEST
   end
 
-  def acl_manifest_remove(target8dot3)
+  let(:acl_manifest_remove) do
     <<-MANIFEST
       acl { '#{target8dot3}':
         purge => 'listed_permissions',
@@ -79,24 +39,27 @@ describe 'Permissions - File - 8.3' do
     MANIFEST
   end
 
+  let(:acl_regex) { %r{.*\\bob:\(F\)} }
+  let(:verify_acl_command) { "icacls #{target_parent}/#{file_name}" }
+  let(:verify_content_path) { "#{target_parent}/#{file_name}" }
+
   context 'Add Permissions to 8.3 File' do
-    file_name = 'file_short_name.txt'
-    target8dot3 = 'c:/temp/FILE_S~2.TXT'
-    file_content = 'short file names are very short'
+    let(:file_name) { 'file_short_name.txt' }
+    let(:target8dot3) { 'c:/temp/FILE_S~2.TXT' }
+    let(:file_content) { 'short file names are very short' }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(file_name, target8dot3, file_content, agent)
+      include_examples 'execute manifest', agent
     end
   end
 
   context 'Remove Permissions from 8.3 File' do
-    file_name = 'rem_file_short_name.txt'
-    target8dot3 = 'c:/temp/REM_FI~2.TXT'
-    file_content = 'wax candle butler space station zebra glasses'
+    let(:file_name) { 'rem_file_short_name.txt' }
+    let(:target8dot3) { 'c:/temp/REM_FI~2.TXT' }
+    let(:file_content) { 'wax candle butler space station zebra glasses' }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(file_name, target8dot3, file_content, agent, true)
+      include_examples 'execute manifest', agent, true
     end
   end
 end
-# rubocop:enable RSpec/EmptyExampleGroup, RSpec/RepeatedDescription

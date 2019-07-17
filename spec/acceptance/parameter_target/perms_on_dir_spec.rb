@@ -1,39 +1,7 @@
 require 'spec_helper_acceptance'
 
-# rubocop:disable RSpec/EmptyExampleGroup, RSpec/RepeatedDescription
-def apply_manifest_and_verify(agent, target, remove = false)
-  context "on #{agent}" do
-    verify_acl_command = "icacls #{target}"
-    acl_regex = %r{.*\\bob:\(OI\)\(CI\)\(F\)}
-    it 'Execute Manifest' do
-      execute_manifest_on(agent, acl_manifest(target), debug: true) do |result|
-        assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
-      end
-    end
-
-    it 'Verify that ACL Rights are Correct' do
-      on(agent, verify_acl_command) do |result|
-        assert_match(acl_regex, result.stdout, 'Expected ACL was not present!')
-      end
-    end
-    if remove
-      it 'Execute Remove Manifest' do
-        execute_manifest_on(agent, acl_manifest_remove(target), debug: true) do |result|
-          assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
-        end
-      end
-
-      it 'Verify that ACL Rights are Correct' do
-        on(agent, verify_acl_command) do |result|
-          assert_no_match(acl_regex, result.stdout, 'Unexpected ACL was present!')
-        end
-      end
-    end
-  end
-end
-
 describe 'Permissions - Directory' do
-  def acl_manifest(target)
+  let(:acl_manifest) do
     <<-MANIFEST
       file { "#{target_parent}":
         ensure => directory
@@ -59,7 +27,7 @@ describe 'Permissions - Directory' do
     MANIFEST
   end
 
-  def acl_manifest_remove(target)
+  let(:acl_manifest_remove) do
     <<-MANIFEST
       acl { '#{target}':
         purge => 'listed_permissions',
@@ -70,59 +38,51 @@ describe 'Permissions - Directory' do
     MANIFEST
   end
 
+  let(:verify_acl_command) { "icacls #{target}" }
+  let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(F\)} }
+
   context 'Add Permissions to a Directory with a Long Name (247 chars)' do
-    target = 'c:/temp/ybqYlVTjWTRAaQPPyeaseAsuUhnclarfedIpqIdqwyimqPphcKpojhTHogTUWiaEkiOqbeEZKvNAqDcEjJarQzeNxihARGLytPNseasKZxhRxeCwZsopSUFTKTAgsxsBqRigMlZhFQiELGLZghRwhKXVHuUPxWqmeYCHejdQOoGRYqaxwdIqiYyhhSChEWlggsGToSLmrgPmotSACKrREyohRBPaKRUmlgCGVtrPhasdEfU' # rubocop:disable Metrics/LineLength
+    let(:target) { 'c:/temp/ybqYlVTjWTRAaQPPyeaseAsuUhnclarfedIpqIdqwyimqPphcKpojhTHogTUWiaEkiOqbeEZKvNAqDcEjJarQzeNxihARGLytPNseasKZxhRxeCwZsopSUFTKTAgsxsBqRigMlZhFQiELGLZghRwhKXVHuUPxWqmeYCHejdQOoGRYqaxwdIqiYyhhSChEWlggsGToSLmrgPmotSACKrREyohRBPaKRUmlgCGVtrPhasdEfU' } # rubocop:disable Metrics/LineLength
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(agent, target)
+      include_examples 'execute manifest', agent
     end
   end
 
   context 'Implicit Use of "target" Parameter Through Title' do
-    target = 'c:/temp/implicit_target'
+    let(:target) { 'c:/temp/implicit_target' }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(agent, target)
+      include_examples 'execute manifest', agent
     end
   end
 
   context 'Remove Permissions from a Directory' do
-    target = 'c:/temp/rem_perm_dir'
+    let(:target) { 'c:/temp/rem_perm_dir' }
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(agent, target, true)
+      include_examples 'execute manifest', agent, true
     end
   end
 
   context 'Remove Permissions from a Directory with a Long Name (247 chars)' do
-    target = 'c:/temp/rem_lVTjWTRAaQPPyeaseAsuUhnclarfedIpqIdqwyimqPphcKpojhTHogTUWiaEkiOqbeEZKvNAqDcEjJarQzeNxihARGLytPNseasKZxhRxeCwZsopSUFTKTAgsxsBqRigMlZhFQiELGLZghRwhKXVHuUPxWqmeYCHejdQOoGRYqaxwdIqiYyhhSChEWlggsGToSLmrgPmotSACKrREyohRBPaKRUmlgCGVtrPhasdEfU' # rubocop:disable Metrics/LineLength
+    let(:target) { 'c:/temp/rem_lVTjWTRAaQPPyeaseAsuUhnclarfedIpqIdqwyimqPphcKpojhTHogTUWiaEkiOqbeEZKvNAqDcEjJarQzeNxihARGLytPNseasKZxhRxeCwZsopSUFTKTAgsxsBqRigMlZhFQiELGLZghRwhKXVHuUPxWqmeYCHejdQOoGRYqaxwdIqiYyhhSChEWlggsGToSLmrgPmotSACKrREyohRBPaKRUmlgCGVtrPhasdEfU' } # rubocop:disable Metrics/LineLength
 
     windows_agents.each do |agent|
-      apply_manifest_and_verify(agent, target, true)
+      include_examples 'execute manifest', agent, true
     end
   end
 
   context 'Add Permissions to a Unicode Directory' do
     prefix = SecureRandom.uuid.to_s
-    raw_dirname = prefix + '_\u3140\u3145\u3176\u3145\u3172\u3142\u3144\u3149\u3151\u3167\u3169\u3159\u3158'
-    dirname =     "#{prefix}_\u3140\u3145\u3176\u3145\u3172\u3142\u3144\u3149\u3151\u3167\u3169\u3159\u3158"
-    target = "#{target_parent}/#{dirname}"
-
-    verify_acl_command = "(Get-ACL ('#{target_parent}/' + [regex]::Unescape(\"#{raw_dirname}\")) | ForEach-Object { $_.Access } | Where-Object { $_.IdentityReference -match '\\\\bob' -and $_.FileSystemRights -eq 'FullControl' -and $_.InheritanceFlags -eq 'ContainerInherit, ObjectInherit' } | Measure-Object).Count" # rubocop:disable Metrics/LineLength
+    let(:raw_dirname) { prefix + '_\u3140\u3145\u3176\u3145\u3172\u3142\u3144\u3149\u3151\u3167\u3169\u3159\u3158' }
+    let(:dirname) { "#{prefix}_\u3140\u3145\u3176\u3145\u3172\u3142\u3144\u3149\u3151\u3167\u3169\u3159\u3158" }
+    let(:target) { "#{target_parent}/#{dirname}" }
+    let(:verify_acl_command) { "(Get-ACL ('#{target_parent}/' + [regex]::Unescape(\"#{raw_dirname}\")) | ForEach-Object { $_.Access } | Where-Object { $_.IdentityReference -match '\\\\bob' -and $_.FileSystemRights -eq 'FullControl' -and $_.InheritanceFlags -eq 'ContainerInherit, ObjectInherit' } | Measure-Object).Count" } # rubocop:disable Metrics/LineLength
+    let(:acl_regex) { %r{^1$} }
 
     windows_agents.each do |agent|
-      it 'Execute Manifest' do
-        execute_manifest_on(agent, acl_manifest(target), debug: true) do |result|
-          assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
-        end
-      end
-
-      it 'Verify that ACL Rights are Correct' do
-        on(agent, powershell(verify_acl_command, 'EncodedCommand' => true)) do |result|
-          assert_match(%r{^1$}, result.stdout, 'Expected ACL was not present!')
-        end
-      end
+      include_examples 'execute manifest and verify (with PowerShell)', agent
     end
   end
 end
-# rubocop:enable RSpec/EmptyExampleGroup, RSpec/RepeatedDescription

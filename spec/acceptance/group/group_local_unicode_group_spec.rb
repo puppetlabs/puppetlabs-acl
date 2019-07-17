@@ -1,7 +1,9 @@
 require 'spec_helper_acceptance'
 
+prefix = SecureRandom.uuid.to_s
+
 describe 'Group - Unicode' do
-  def acl_manifest(prefix, file_content, group_id)
+  let(:acl_manifest) do
     <<-MANIFEST
       file { "#{target_parent}":
         ensure => directory
@@ -42,36 +44,20 @@ describe 'Group - Unicode' do
         group           => '#{group_id}',
         inherit_parent_permissions => 'false'
       }
-      MANIFEST
+    MANIFEST
   end
 
-  def verify_group_command(prefix, raw_group_id)
-    "(Get-ACL 'c:/temp/#{prefix}.txt' | Where-Object { $_.Group -match ('.*\\\\' + [regex]::Unescape(\"#{raw_group_id}\")) } | Measure-Object).Count"
-  end
-
-  def verify_content_command(user_type)
-    "cat /cygdrive/c/group_#{user_type}.txt"
-  end
+  let(:verify_acl_command) { "(Get-ACL 'c:/temp/#{prefix}.txt' | Where-Object { $_.Group -match ('.*\\\\' + [regex]::Unescape(\"#{raw_group_id}\")) } | Measure-Object).Count" }
+  let(:acl_regex) { %r{^1$} }
 
   context 'Change Group to Local Unicode Group' do
-    prefix = SecureRandom.uuid.to_s
-    file_content = 'Dangers driving drunk while insane.'
-    raw_group_id = 'group_\u4388\u542B\u3D3C\u7F4D\uF961\u4381\u53F4\u79C0\u3AB2\u8EDE'
-    group_id = "group_\u4388\u542B\u3D3C\u7F4D\uF961\u4381\u53F4\u79C0\u3AB2\u8EDE" # 䎈含㴼罍率䎁叴秀㪲軞
+    let(:file_content) { 'Dangers driving drunk while insane.' }
+    let(:raw_group_id) { 'group_\u4388\u542B\u3D3C\u7F4D\uF961\u4381\u53F4\u79C0\u3AB2\u8EDE' }
+    let(:group_id) { "group_\u4388\u542B\u3D3C\u7F4D\uF961\u4381\u53F4\u79C0\u3AB2\u8EDE" } # 䎈含㴼罍率䎁叴秀㪲軞
 
     windows_agents.each do |agent|
       context "on #{agent}" do
-        it 'Execute ACL Manifest' do
-          execute_manifest_on(agent, acl_manifest(prefix, file_content, group_id), debug: true) do |result|
-            assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
-          end
-        end
-
-        it 'Verify that ACL Rights are Correct' do
-          on(agent, powershell(verify_group_command(prefix, raw_group_id), 'EncodedCommand' => true)) do |result|
-            assert_match(%r{^1$}, result.stdout, 'Expected ACL was not present!')
-          end
-        end
+        include_examples 'execute manifest and verify (with PowerShell)', agent
       end
     end
   end

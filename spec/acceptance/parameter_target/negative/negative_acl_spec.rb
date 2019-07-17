@@ -1,7 +1,7 @@
 require 'spec_helper_acceptance'
 
 describe 'Parameter Target - Negative' do
-  def acl_manifest(target)
+  let(:acl_manifest) do
     <<-MANIFEST
       file { "#{target_parent}":
         ensure => directory
@@ -24,10 +24,11 @@ describe 'Parameter Target - Negative' do
 
   windows_agents.each do |agent|
     context "Specify Blank Target on #{agent}" do
-      target = ''
-      it 'Execute Manifest' do
-        execute_manifest_on(agent, acl_manifest(target), debug: true, exepect_failures: true) do |result|
-          assert_match(%r{Error:.*(A non-empty name must be specified|Empty string title at)}, result.stderr, 'Expected error was not detected!')
+      let(:target) { '' }
+
+      it 'applies manifest' do
+        execute_manifest_on(agent, acl_manifest, debug: true, exepect_failures: true) do |result|
+          expect(result.stderr).to match(%r{Error:.*(A non-empty name must be specified|Empty string title at)})
         end
       end
     end
@@ -35,11 +36,11 @@ describe 'Parameter Target - Negative' do
 
   windows_agents.each do |agent|
     context "Specify Target with Invalid Path Characters on #{agent}" do
-      target = 'c:/temp/invalid_<:>|?*'
-      it 'Execute Manifest' do
-        execute_manifest_on(agent, acl_manifest(target), debug: true) do |result|
-          assert_match(%r{Error:.*The filename, directory name, or volume label syntax is incorrect},
-                       result.stderr, 'Expected error was not detected!')
+      let(:target) { 'c:/temp/invalid_<:>|?*' }
+
+      it 'applies manifest' do
+        execute_manifest_on(agent, acl_manifest, debug: true) do |result|
+          expect(result.stderr).to match(%r{Error:.*The filename, directory name, or volume label syntax is incorrect})
         end
       end
     end

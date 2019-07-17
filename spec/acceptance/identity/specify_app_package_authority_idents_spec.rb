@@ -43,31 +43,31 @@ describe 'Identity' do
               }
             MANIFEST
 
-            it 'Execute ACL Manifest' do
+            it 'applies manifest' do
               # exit code 2: The run succeeded, and some resources were changed.
               execute_manifest_on(agent, acl_manifest, expect_changes: true) do |result|
-                assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
+                expect(result.stderr).not_to match(%r{Error:})
               end
             end
 
             original_acl_rights = ''
-            it 'Verify that ACL Rights are Correct' do
+            it 'verifies ACL rights' do
               on(agent, verify_acl_command) do |result|
                 original_acl_rights = result.stdout
-                assert_match(account[:acl_regex], original_acl_rights, 'Expected ACL was not present!')
+                expect(original_acl_rights).to match(%r{#{account[:acl_regex]}})
               end
             end
 
-            it 'Execute ACL Manifest again' do
+            it 'applies manifest again, raises error' do
               execute_manifest_on(agent, acl_manifest, catch_changes: true) do |result|
-                assert_no_match(%r{Error:}, result.stderr, 'Unexpected error was detected!')
+                expect(result.stderr).to match(%r{Error:})
               end
             end
 
-            it 'Verify that ACL Rights are Correct again' do
+            it 'verifies ACL rights again' do
               on(agent, verify_acl_command) do |result|
-                assert_match(account[:acl_regex], result.stdout, 'Expected ACL was not present!')
-                assert_equal(result.stdout, original_acl_rights)
+                expect(result.stdout).to match(%r{#{account[:acl_regex]}})
+                expect(result.stdout).to eq(original_acl_rights)
               end
             end
           end
