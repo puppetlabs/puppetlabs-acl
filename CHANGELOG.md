@@ -1,3 +1,22 @@
+## 2019-07-23 - Supported Release 3.0.0
+  
+### Summary
+
+Major release which removes support for older versions of Puppet-Agent. Also adds support for Windows Server 2019
+
+#### Features
+
+- Add support for Windows Server 2019 ([FM-7693](https://tickets.puppetlabs.com/browse/FM-7693))
+- Add Puppet Strings docs ([MODULES-9304](https://tickets.puppetlabs.com/browse/MODULES-9304))
+
+#### Bug Fixes
+
+-  Update acceptance tests to improve the quality and efficiency ([MODULES-9294](https://tickets.puppetlabs.com/browse/MODULES-9294))
+
+#### Changed
+
+- Raise lower Puppet bound to 5.5.10 ([MODULES-9297](https://tickets.puppetlabs.com/browse/MODULES-9297))
+
 ## 2018-10-10 - Supported Release 2.1.0
 
 ### Summary
