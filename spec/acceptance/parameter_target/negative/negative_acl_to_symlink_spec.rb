@@ -53,7 +53,7 @@ describe 'Negative - Specify Symlink as Target' do
   end
 
   it 'applies manifest' do
-    # not idempotent. complains that "Puppet cannot manage ACLs of symbolic links"
+    # not idempotent. complains that "Puppet cannot manage ACLs of symbolic links". This is a known constraint of the module, see: https://github.com/puppetlabs/puppetlabs-acl#Limitations
     apply_manifest(acl_manifest)
   end
 
