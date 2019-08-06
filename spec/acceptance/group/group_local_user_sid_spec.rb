@@ -89,7 +89,7 @@ describe 'Group - SID' do
 
     it 'applies ACL manifest' do
       # TODO: find out why this is not idempotent
-      apply_manifest(acl_manifest)
+      idempotent_apply(acl_manifest)
     end
 
     it 'verifies ACL rights' do

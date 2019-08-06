@@ -14,6 +14,7 @@ init:
   - 'mkdir C:\ProgramData\PuppetLabs\hiera && exit 0'
   - 'mkdir C:\ProgramData\PuppetLabs\puppet\var && exit 0'
 environment:
+  APPVEYOR_RDP_PASSWORD: 'Qu@lity!'
   matrix:
     -
       RUBY_VERSION: 24-x64
@@ -55,6 +56,7 @@ for:
     - type Gemfile.lock
   test_script:
      - bundle exec rake spec_prep
+     - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
      - bundle exec rake litmus:acceptance:localhost
 install:
   - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%

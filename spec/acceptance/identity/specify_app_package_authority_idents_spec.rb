@@ -24,6 +24,7 @@ describe 'Identity' do
     context 'specify APPLICATION PACKAGE AUTHORITY accounts' do
       it "Check Minimum Supported OS for #{account[:id]}" do
         # use of host_inventory returns nil with localhost
+        require 'pry'; binding.pry
         kernelmajversion = run_shell('facter kernelmajversion').stdout.to_f
 
         # try next agent if user is unsupported on this Windows version
