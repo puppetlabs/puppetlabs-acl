@@ -34,9 +34,7 @@ describe 'Directory - Allow' do
     let(:target) { "c:/temp/allow_#{rights}_rights_dir" }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(Rc,S,X,RA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"modify" Rights for Identity on Directory' do
@@ -44,9 +42,7 @@ describe 'Directory - Allow' do
     let(:target) { "c:/temp/allow_#{rights}_rights_dir" }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(M\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"read, execute" Rights for Identity on Directory' do
@@ -54,9 +50,7 @@ describe 'Directory - Allow' do
     let(:target) { 'c:/temp/allow_re_rights_dir' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(RX\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"read" Rights for Identity on Directory' do
@@ -64,9 +58,7 @@ describe 'Directory - Allow' do
     let(:target) { "c:/temp/allow_#{rights}_rights_dir" }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(R\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"write, execute" Rights for Identity on Directory' do
@@ -74,9 +66,7 @@ describe 'Directory - Allow' do
     let(:target) { 'c:/temp/allow_we_rights_dir' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(W,Rc,X,RA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"write, read" Rights for Identity on Directory' do
@@ -84,9 +74,7 @@ describe 'Directory - Allow' do
     let(:target) { 'c:/temp/allow_wr_rights_dir' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(R,W\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"write, read, execute" Rights for Identity on Directory' do
@@ -94,9 +82,7 @@ describe 'Directory - Allow' do
     let(:target) { 'c:/temp/allow_wre_rights_dir' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(RX,W\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"write" Rights for Identity on Directory' do
@@ -104,8 +90,6 @@ describe 'Directory - Allow' do
     let(:target) { "c:/temp/allow_#{rights}_rights_dir" }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(W,Rc\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 end

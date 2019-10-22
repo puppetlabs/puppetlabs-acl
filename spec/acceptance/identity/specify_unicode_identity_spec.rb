@@ -63,11 +63,7 @@ describe 'Identity' do
     let(:file_content) { 'Garbage bag full of money.' }
     let(:verify_acl_command) { "(Get-ACL '#{target}' | ForEach-Object { $_.Access } | Where-Object { $_.IdentityReference -match ('\\\\' + [regex]::Unescape(\"#{raw_group_id}\")) -and $_.FileSystemRights -eq 'FullControl' } | Measure-Object).Count" } # rubocop:disable Metrics/LineLength
 
-    windows_agents.each do |agent|
-      context "on #{agent}" do
-        include_examples 'execute manifest and verify (with PowerShell)', agent
-      end
-    end
+    include_examples 'execute manifest and verify (with PowerShell)'
   end
 
   context 'Windows ACL Module - Specify User Name Containing Unicode for Identity' do
@@ -79,10 +75,6 @@ describe 'Identity' do
     let(:file_content) { 'Flying Spaghetti Monster wants to save your soul.' }
     let(:verify_acl_command) { "(Get-ACL '#{target}' | ForEach-Object { $_.Access } | Where-Object { $_.IdentityReference -match ('\\\\' + [regex]::Unescape(\"#{raw_user_id}\")) -and $_.FileSystemRights -eq 'FullControl' } | Measure-Object).Count" } # rubocop:disable Metrics/LineLength
 
-    windows_agents.each do |agent|
-      context "on #{agent}" do
-        include_examples 'execute manifest and verify (with PowerShell)', agent
-      end
-    end
+    include_examples 'execute manifest and verify (with PowerShell)'
   end
 end

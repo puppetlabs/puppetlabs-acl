@@ -34,44 +34,34 @@ describe 'Directory - Deny Mask Specific' do
     let(:mask) { '1048868' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(DENY\)\(S,AD,X,WA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"DE, REA, WEA, RA, WA" Rights for Identity on Directory' do
     let(:mask) { '65944' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(DENY\)\(D,REA,WEA,RA,WA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"RD, S, DC, WEA, RC" Rights for Identity on Directory' do
     let(:mask) { '131153' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(DENY\)\(Rc,S,RD,WEA,DC\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"S, RA, WA, Rc" Rights for Identity on Directory' do
     let(:mask) { '1180032' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(DENY\)\(Rc,S,RA,WA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context '"WD, REA, RA, S" Rights for Identity on File' do
     let(:mask) { '1048714' }
     let(:acl_regex) { %r{.*\\bob:\(OI\)\(CI\)\(DENY\)\(S,WD,REA,RA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 end

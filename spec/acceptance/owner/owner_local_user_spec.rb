@@ -48,9 +48,7 @@ describe 'Owner - Local User' do
     let(:owner_id) { 'racecar' }
     let(:acl_regex) { %r{.*\\#{owner_id}} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context 'Change Owner to Local User with Long Name' do
@@ -60,9 +58,7 @@ describe 'Owner - Local User' do
     # The dir command chops the username at 16 characters.
     let(:acl_regex) { %r{.*\\long} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context 'Change Owner to Local Unicode User' do
@@ -74,10 +70,6 @@ describe 'Owner - Local User' do
     let(:verify_acl_command) { "(Get-ACL '#{target_parent}/#{target_name}' | Where-Object { $_.Owner -match ('.*\\\\' + [regex]::Unescape(\"#{raw_owner_id}\")) } | Measure-Object).Count" }
     let(:acl_regex) { %r{^1$} }
 
-    windows_agents.each do |agent|
-      context "on #{agent}" do
-        include_examples 'execute manifest and verify (with PowerShell)', agent
-      end
-    end
+    include_examples 'execute manifest and verify (with PowerShell)'
   end
 end

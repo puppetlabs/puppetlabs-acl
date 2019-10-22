@@ -35,20 +35,18 @@ describe 'Owner - Negative' do
 
   context 'Specify 257 Character String for Owner' do
     let(:file_content) { 'I AM TALKING VERY LOUD!' }
-    let(:target_name) { 'owner_257_char_name.txt' }
+    let(:target_name)  { 'owner_257_char_name.txt' }
     let(:owner_id) { 'jasqddsweruwqiouroaysfyuasudyfaisoyfqoiuwyefiaysdiyfzixycivzixyvciqywifyiasdiufyasdygfasirfwerqiuwyeriatsdtfastdfqwyitfastdfawerfytasdytfasydgtaisdytfiasydfiosayghiayhidfhygiasftawyegyfhgaysgfuyasgdyugfasuiyfguaqyfgausydgfaywgfuasgdfuaisydgfausasdfuygsadfyg' } # rubocop:disable Metrics/LineLength
 
-    windows_agents.each do |agent|
-      it 'applies manifest, raises error' do
-        execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-          expect(result.stderr).to match(%r{Error:.*User does not exist})
-        end
+    it 'applies manifest, raises error' do
+      apply_manifest(acl_manifest, expect_failures: true) do |result|
+        expect(result.stderr).to match(%r{Error:.*User does not exist})
       end
+    end
 
-      it 'verifies file data integrity' do
-        expect(file(verify_content_path)).to be_file
-        expect(file(verify_content_path).content).to match(%r{#{file_content}})
-      end
+    it 'verifies file data integrity' do
+      expect(file(verify_content_path)).to be_file
+      expect(file(verify_content_path).content).to match(%r{#{file_content}})
     end
   end
 end

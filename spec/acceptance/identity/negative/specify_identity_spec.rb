@@ -29,19 +29,15 @@ describe 'Identity - Negative' do
     let(:id) { 'nzxncvkjnzxjkcnvkjzxncvkjznxckjvnzxkjncvzxnvckjnzxkjcnvkjzxncvkjzxncvkjzxncvkjnzxkjcnvkzjxncvkjzxnvckjnzxkjcvnzxkncjvjkzxncvkjzxnvckjnzxjkcvnzxkjncvkjzxncvjkzxncvkjzxnkvcjnzxjkcvnkzxjncvkjzxncvkzckjvnzxkcvnjzxjkcnvzjxkncvkjzxnvkjsdnjkvnzxkjcnvkjznvkjxcbvzsp' } # rubocop:disable Metrics/LineLength
     let(:file_content) { 'A bag of jerks.' }
 
-    windows_agents.each do |agent|
-      context "on #{agent}" do
-        it 'applies manifest' do
-          execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-            expect(result.stderr).not_to match(%r{Error:})
-          end
-        end
-
-        it 'verifies file data integrity' do
-          expect(file(verify_content_path)).to be_file
-          expect(file(verify_content_path).content).to match(%r{#{file_content}})
-        end
+    it 'applies manifest, raises error' do
+      apply_manifest(acl_manifest, expect_failures: true) do |result|
+        expect(result.stderr).to match(%r{Error: Failed to set permissions for })
       end
+    end
+
+    it 'verifies file data integrity' do
+      expect(file(verify_content_path)).to be_file
+      expect(file(verify_content_path).content).to match(%r{#{file_content}})
     end
   end
 
@@ -51,19 +47,15 @@ describe 'Identity - Negative' do
     let(:id) { 'user_not_here' }
     let(:file_content) { 'Car made of cats.' }
 
-    windows_agents.each do |agent|
-      context "on #{agent}" do
-        it 'applies manifest' do
-          execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-            expect(result.stderr).not_to match(%r{Error:})
-          end
-        end
-
-        it 'verifies file data integrity' do
-          expect(file(verify_content_path)).to be_file
-          expect(file(verify_content_path).content).to match(%r{#{file_content}})
-        end
+    it 'applies manifest, raises error' do
+      apply_manifest(acl_manifest, expect_failures: true) do |result|
+        expect(result.stderr).to match(%r{Error: Failed to set permissions for 'user_not_here'})
       end
+    end
+
+    it 'verifies file data integrity' do
+      expect(file(verify_content_path)).to be_file
+      expect(file(verify_content_path).content).to match(%r{#{file_content}})
     end
   end
 end

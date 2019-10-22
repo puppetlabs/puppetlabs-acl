@@ -38,9 +38,7 @@ describe 'File - Allow' do
     let(:file_content) { 'The bed that eats people. DEATH BED!' }
     let(:acl_regex) { %r{.*\\bob:\(Rc,S,X,RA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context '"modify" Rights for Identity on File' do
@@ -49,9 +47,7 @@ describe 'File - Allow' do
     let(:file_content) { 'Snow on the bluff.' }
     let(:acl_regex) { %r{.*\\bob:\(M\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context '"read, execute" Rights for Identity on File' do
@@ -60,9 +56,7 @@ describe 'File - Allow' do
     let(:file_content) { 'Get on the phone with baked beans!' }
     let(:acl_regex) { %r{.*\\bob:\(RX\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context '"read" Rights for Identity on File' do
@@ -71,9 +65,7 @@ describe 'File - Allow' do
     let(:file_content) { 'Deadly couch eating monster.' }
     let(:acl_regex) { %r{.*\\bob:\(R\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context '"write, execute" Rights for Identity on File' do
@@ -82,9 +74,7 @@ describe 'File - Allow' do
     let(:file_content) { 'Get on the phone with baked beans!' }
     let(:acl_regex) { %r{.*\\bob:\(W,Rc,X,RA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context '"write, read" Rights for Identity on File' do
@@ -93,9 +83,7 @@ describe 'File - Allow' do
     let(:file_content) { 'Mushy bean paste in my eyes!' }
     let(:acl_regex) { %r{.*\\bob:\(R,W\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context '"write, read, execute" Rights for Identity on File' do
@@ -104,9 +92,7 @@ describe 'File - Allow' do
     let(:file_content) { 'Very small feet to eat.' }
     let(:acl_regex) { %r{.*\\bob:\(RX,W\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context '"write" Rights for Identity on File' do
@@ -115,8 +101,6 @@ describe 'File - Allow' do
     let(:file_content) { 'Smart bubbles in my bath.' }
     let(:acl_regex) { %r{.*\\bob:\(W,Rc\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 end

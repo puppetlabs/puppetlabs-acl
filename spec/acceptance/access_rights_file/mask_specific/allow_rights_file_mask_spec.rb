@@ -37,9 +37,7 @@ describe 'File - Allow Mask Specific' do
     let(:file_content) { 'The puppets are controlling my mind!' }
     let(:acl_regex) { %r{.*\\bob:\(S,AD,X,WA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context '"RD, DE, WEA, RC" Rights for Identity on File' do
@@ -47,9 +45,7 @@ describe 'File - Allow Mask Specific' do
     let(:file_content) { 'You are never going to feel it!' }
     let(:acl_regex) { %r{.*\\bob:\(DE,Rc,RD,WEA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context '"S, DE, REA, WEA, RA, WA" Rights for Identity on File' do
@@ -57,9 +53,7 @@ describe 'File - Allow Mask Specific' do
     let(:file_content) { 'Karate time!' }
     let(:acl_regex) { %r{.*\\bob:\(D,REA,WEA,RA,WA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context '"S, RA, WA, RC" Rights for Identity on File' do
@@ -67,9 +61,7 @@ describe 'File - Allow Mask Specific' do
     let(:file_content) { 'I like shoes made by Canadians.' }
     let(:acl_regex) { %r{.*\\bob:\(Rc,S,RA,WA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 
   context '"WD, REA, RA, S" Rights for Identity on File' do
@@ -77,8 +69,6 @@ describe 'File - Allow Mask Specific' do
     let(:file_content) { 'My mind is going... I can feel it.' }
     let(:acl_regex) { %r{.*\\bob:\(S,WD,REA,RA\)} }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest and verify file', agent
-    end
+    include_examples 'execute manifest and verify file'
   end
 end

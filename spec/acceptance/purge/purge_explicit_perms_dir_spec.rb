@@ -34,7 +34,7 @@ describe 'Purge' do
     MANIFEST
   end
 
-  let(:purge_acl_manifest) do
+  let(:acl_manifest_purge) do
     <<-MANIFEST
       acl { "#{target}":
         purge        => 'true',
@@ -55,32 +55,24 @@ describe 'Purge' do
     let(:acl_regex_user_id1) { %r{.*\\bob:\(OI\)\(CI\)\(F\)} }
     let(:acl_regex_user_id2) { %r{.*\\#{user_id2}:\(OI\)\(CI\)\(F\)} }
 
-    windows_agents.each do |agent|
-      context "on #{agent}" do
-        it 'applies manifest' do
-          execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-            expect(result.stderr).not_to match(%r{Error:})
-          end
-        end
+    it 'applies manifest' do
+      idempotent_apply(acl_manifest)
+    end
 
-        it 'verifies ACL rights' do
-          on(agent, verify_acl_command) do |result|
-            expect(result.stdout).to match(%r{#{acl_regex_user_id1}})
-          end
-        end
+    it 'verifies ACL rights' do
+      run_shell(verify_acl_command) do |result|
+        expect(result.stdout).to match(%r{#{acl_regex_user_id1}})
+      end
+    end
 
-        it 'executes purge' do
-          execute_manifest_on(agent, purge_acl_manifest, debug: true) do |result|
-            expect(result.stderr).not_to match(%r{Error:})
-          end
-        end
+    it 'executes purge' do
+      idempotent_apply(acl_manifest_purge)
+    end
 
-        it 'verifies ACL rights (post-purge)' do
-          on(agent, verify_acl_command) do |result|
-            expect(result.stdout).not_to match(%r{#{acl_regex_user_id1}})
-            expect(result.stdout).to match(%r{#{acl_regex_user_id2}})
-          end
-        end
+    it 'verifies ACL rights (post-purge)' do
+      run_shell(verify_acl_command) do |result|
+        expect(result.stdout).not_to match(%r{#{acl_regex_user_id1}})
+        expect(result.stdout).to match(%r{#{acl_regex_user_id2}})
       end
     end
   end

@@ -1,5 +1,7 @@
 require 'spec_helper_acceptance'
 
+random_username = generate_random_username
+
 describe 'Purge' do
   let(:acl_manifest) do
     <<-MANIFEST
@@ -47,42 +49,32 @@ describe 'Purge' do
   end
 
   context 'Purge All Other Permissions from Directory without Inheritance' do
-    random_username = generate_random_username
     let(:target) { "#{target_parent}/purge_all_other_no_inherit" }
     let(:user_id1) { 'bob' }
     let(:user_id2) { random_username }
 
     let(:verify_acl_command) { "icacls #{target}" }
     let(:acl_regex_user_id1) { %r{.*\\bob:\(OI\)\(CI\)\(F\)} }
-    let(:acl_regex_user_id2) { %r{\Ac:\/temp\/purge_all_other_no_inherit.*\\#{user_id2}:\(OI\)\(CI\)\(F\)\n\nSuccessfully} }
+    let(:acl_regex_user_id2) { %r{\Ac:\/temp\/purge_all_other_no_inherit.*\\#{user_id2}:\(OI\)\(CI\)\(F\)(\\r|\\n|\r|\n)*Successfully} }
 
-    windows_agents.each do |agent|
-      context "on #{agent}" do
-        it 'applies manifest' do
-          execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-            expect(result.stderr).not_to match(%r{Error:})
-          end
-        end
+    it 'applies manifest' do
+      idempotent_apply(acl_manifest)
+    end
 
-        it 'verifies ACL rights' do
-          on(agent, verify_acl_command) do |result|
-            assert_match(acl_regex_user_id1, result.stdout, 'Expected ACL was not present!')
-            expect(result.stdout).to match(%r{#{acl_regex_user_id1}})
-          end
-        end
+    it 'verifies ACL rights' do
+      run_shell(verify_acl_command) do |result|
+        expect(result.stdout).to match(%r{#{acl_regex_user_id1}})
+      end
+    end
 
-        it 'executes purge' do
-          execute_manifest_on(agent, acl_manifest_purge, debug: true) do |result|
-            expect(result.stderr).not_to match(%r{Error:})
-          end
-        end
+    it 'executes purge' do
+      idempotent_apply(acl_manifest_purge)
+    end
 
-        it 'verifies ACL rights (post-purge)' do
-          on(agent, verify_acl_command, acceptable_exit_codes: [0, 5]) do |result|
-            expect(result.stdout).not_to match(%r{#{acl_regex_user_id1}})
-            expect(result.stdout).to match(%r{#{acl_regex_user_id2}})
-          end
-        end
+    it 'verifies ACL rights (post-purge)' do
+      run_shell(verify_acl_command, acceptable_exit_codes: [0, 5]) do |result|
+        expect(result.stdout).not_to match(acl_regex_user_id1)
+        expect(result.stdout).to match(acl_regex_user_id2)
       end
     end
   end

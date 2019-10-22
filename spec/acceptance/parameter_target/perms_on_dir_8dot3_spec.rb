@@ -45,9 +45,7 @@ describe 'Permissions - Directory - 8.3' do
     let(:target8dot3) { 'c:/temp/DIR_SH~1' }
     let(:verify_acl_command) { "icacls #{target8dot3}" }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context 'Remove Permissions from a 8.3 Directory' do
@@ -55,8 +53,6 @@ describe 'Permissions - Directory - 8.3' do
     let(:target8dot3) { 'c:/temp/REM_DI~1' }
     let(:verify_acl_command) { "icacls #{target8dot3}" }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent, true
-    end
+    include_examples 'execute manifest', true
   end
 end

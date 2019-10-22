@@ -1,7 +1,7 @@
 require 'spec_helper_acceptance'
 
 describe 'Use Cases' do
-  def acl_manifest(target, target_child, user_id1, user_id2, user_id3, user_id4, user_id5, user_id6)
+  let(:acl_manifest) do
     <<-MANIFEST
       file { "#{target_parent}":
         ensure => directory
@@ -102,35 +102,29 @@ describe 'Use Cases' do
     let(:user_id5_ace_regex) { %r{.*\\sally:\(OI\)\(CI\)\(M\)} }
     let(:user_id6_ace_regex) { %r{.*\\betty:\(OI\)\(CI\)\(DENY\)\(R\)} }
 
-    windows_agents.each do |agent|
-      context "on #{agent}" do
-        it 'Execute ACL Manifest' do
-          execute_manifest_on(agent, acl_manifest(target, target_child, user_id1, user_id2, user_id3, user_id4, user_id5, user_id6), debug: true) do |result|
-            expect(result.stderr).not_to match(%r{Error:})
-          end
-        end
+    it 'applies manifest' do
+      idempotent_apply(acl_manifest)
+    end
 
-        it 'Verify that ACL Rights are Correct' do
-          on(agent, verify_acl_command) do |result|
-            expect(result.stdout).to match(%r{#{user_id1_ace_regex}})
-            expect(result.stdout).to match(%r{#{user_id2_ace_regex}})
-            expect(result.stdout).to match(%r{#{user_id3_ace_regex}})
-            expect(result.stdout).not_to match(%r{#{user_id4_ace_regex}})
-            expect(result.stdout).not_to match(%r{#{user_id5_ace_regex}})
-            expect(result.stdout).not_to match(%r{#{user_id6_ace_regex}})
-          end
-        end
+    it 'verifies ACL rights' do
+      run_shell(verify_acl_command) do |result|
+        expect(result.stdout).to match(%r{#{user_id1_ace_regex}})
+        expect(result.stdout).to match(%r{#{user_id2_ace_regex}})
+        expect(result.stdout).to match(%r{#{user_id3_ace_regex}})
+        expect(result.stdout).not_to match(%r{#{user_id4_ace_regex}})
+        expect(result.stdout).not_to match(%r{#{user_id5_ace_regex}})
+        expect(result.stdout).not_to match(%r{#{user_id6_ace_regex}})
+      end
+    end
 
-        it 'Verify that ACL Rights are Correct for Child' do
-          on(agent, verify_acl_child_command) do |result|
-            expect(result.stdout).to match(%r{#{user_id1_ace_regex}})
-            expect(result.stdout).to match(%r{#{user_id2_ace_regex}})
-            expect(result.stdout).to match(%r{#{user_id3_ace_regex}})
-            expect(result.stdout).to match(%r{#{user_id4_ace_regex}})
-            expect(result.stdout).to match(%r{#{user_id5_ace_regex}})
-            expect(result.stdout).to match(%r{#{user_id6_ace_regex}})
-          end
-        end
+    it 'verifies child ACL rights' do
+      run_shell(verify_acl_child_command) do |result|
+        expect(result.stdout).to match(%r{#{user_id1_ace_regex}})
+        expect(result.stdout).to match(%r{#{user_id2_ace_regex}})
+        expect(result.stdout).to match(%r{#{user_id3_ace_regex}})
+        expect(result.stdout).to match(%r{#{user_id4_ace_regex}})
+        expect(result.stdout).to match(%r{#{user_id5_ace_regex}})
+        expect(result.stdout).to match(%r{#{user_id6_ace_regex}})
       end
     end
   end

@@ -37,19 +37,13 @@ describe 'Use Cases' do
     let(:file_content) { 'Why this hurt bad!' }
     let(:target_file) { "use_case_#{test_short_name}.txt" }
 
-    windows_agents.each do |agent|
-      context "on #{agent}" do
-        it 'applies manifest' do
-          execute_manifest_on(agent, acl_manifest, debug: true) do |result|
-            expect(result.stderr).not_to match(%r{Error:})
-          end
-        end
+    it 'applies manifest' do
+      apply_manifest(acl_manifest)
+    end
 
-        it 'attempts to update file, raises error' do
-          execute_manifest_on(agent, update_manifest, debug: true) do |result|
-            expect(result.stderr).to match(%r{Error:.*Permission denied})
-          end
-        end
+    it 'attempts to update file, raises error' do
+      apply_manifest(update_manifest, expect_failures: true) do |result|
+        expect(result.stderr).to match(%r{Error:.*Permission denied})
       end
     end
   end

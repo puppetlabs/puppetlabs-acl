@@ -48,9 +48,7 @@ describe 'Permissions - File - 8.3' do
     let(:target8dot3) { 'c:/temp/FILE_S~2.TXT' }
     let(:file_content) { 'short file names are very short' }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent
-    end
+    include_examples 'execute manifest'
   end
 
   context 'Remove Permissions from 8.3 File' do
@@ -58,8 +56,6 @@ describe 'Permissions - File - 8.3' do
     let(:target8dot3) { 'c:/temp/REM_FI~2.TXT' }
     let(:file_content) { 'wax candle butler space station zebra glasses' }
 
-    windows_agents.each do |agent|
-      include_examples 'execute manifest', agent, true
-    end
+    include_examples 'execute manifest', true
   end
 end
