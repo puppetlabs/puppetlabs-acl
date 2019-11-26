@@ -5,7 +5,7 @@
   default_configs:
     inherit_from: ".rubocop_todo.yml"
 ".travis.yml":
-  unmanaged: true
+  simplecov: true
 Gemfile:
   use_litmus: true
   optional:
