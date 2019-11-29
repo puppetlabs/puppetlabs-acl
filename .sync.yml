@@ -1,48 +1,26 @@
 ---
-.gitignore:
-  required:
-    - ---.project
-
-.gitlab-ci.yml:
+".gitlab-ci.yml":
   delete: true
-
-.rubocop.yml:
+".rubocop.yml":
   default_configs:
-    inherit_from: .rubocop_todo.yml
-
-.travis.yml:
-  unmanaged: true
-
+    inherit_from: ".rubocop_todo.yml"
+".travis.yml":
+  simplecov: true
+appveyor.yml:
+  simplecov: true
 Gemfile:
+  use_litmus: true
   optional:
-    ':development':
-      - gem: net-telnet
-        version: '0.1.0'
-        condition: "Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new('2.3.0')"
-      - gem: net-telnet
-        condition: "Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('2.3.0')"
-      - gem: 'github_changelog_generator'
-        git: 'https://github.com/skywinder/github-changelog-generator'
-        ref: '20ee04ba1234e9e83eb2ffb5056e23d641c7a018'
-        condition: "Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('2.2.2')"
-  required:
-    ':system_tests':
-      - gem: 'puppet-module-posix-system-r#{minor_version}'
-        platforms: ruby
-      - gem: 'puppet-module-win-system-r#{minor_version}'
-        platforms:
-          - mswin
-          - mingw
-          - x64_mingw
-      - gem: beaker-testmode_switcher
-        version: '~> 0.4'
-      - gem: master_manipulator
-      - gem: puppet-blacksmith
-        version: '~> 3.4'
-
-spec/default_facts.yml:
-  unmanaged: true
-
-#spec/spec_helper.rb:
-#  mock_with: ':rspec'
-#  coverage_report: true
+    ":development":
+    - gem: net-telnet
+      version: 0.1.0
+      condition: Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new('2.3.0')
+    - gem: net-telnet
+      condition: Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('2.3.0')
+    - gem: github_changelog_generator
+      git: https://github.com/skywinder/github-changelog-generator
+      ref: 20ee04ba1234e9e83eb2ffb5056e23d641c7a018
+      condition: Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('2.2.2')
+spec/spec_helper.rb:
+  mock_with: ":rspec"
+  coverage_report: true
