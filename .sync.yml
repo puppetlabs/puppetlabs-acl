@@ -8,6 +8,9 @@
   deploy_to_forge:
     enabled: false
   simplecov: true
+  notifications:
+    slack:
+      secure: AlI3PETMDYeUke1uxWTNSoWYoG8edaPi/h0WgjSZvE72SJqwmxWIjP9hOfzzrefiKBsLT4PZdkuCuOuW22g/FAQ8xMwk1S4Vt/eu42KCYE5SSYtKgqO4XvzNqWflB52BfDsDh84W7eJzb2hMIhIrGido2RIs7oqpGJ//xi9xZAY=
 appveyor.yml:
   simplecov: true
 Gemfile:
