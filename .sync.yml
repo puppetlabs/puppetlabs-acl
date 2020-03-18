@@ -12,12 +12,22 @@
   simplecov: true
   notifications:
     slack:
-      secure: AlI3PETMDYeUke1uxWTNSoWYoG8edaPi/h0WgjSZvE72SJqwmxWIjP9hOfzzrefiKBsLT4PZdkuCuOuW22g/FAQ8xMwk1S4Vt/eu42KCYE5SSYtKgqO4XvzNqWflB52BfDsDh84W7eJzb2hMIhIrGido2RIs7oqpGJ//xi9xZAY=
+      secure: >-
+        AlI3PETMDYeUke1uxWTNSoWYoG8edaPi/h0WgjSZvE72SJqwmxWIjP9hOfzzrefiKBsLT4PZdkuCuOuW22g/FAQ8xMwk1S4Vt/eu42KCYE5SSYtKgqO4XvzNqWflB52BfDsDh84W7eJzb2hMIhIrGido2RIs7oqpGJ//xi9xZAY=
 appveyor.yml:
   environment:
     HONEYCOMB_WRITEKEY: 7f3c63a70eecc61d635917de46bea4e6
     HONEYCOMB_DATASET: litmus tests
   simplecov: true
+  use_litmus: true
+  matrix_extras:
+  - RUBY_VERSION: 25-x64
+    ACCEPTANCE: 'yes'
+    TARGET_HOST: localhost
+  - RUBY_VERSION: 25-x64
+    ACCEPTANCE: 'yes'
+    TARGET_HOST: localhost
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
 Gemfile:
   use_litmus: true
   optional:
@@ -31,6 +41,9 @@ Gemfile:
       git: https://github.com/skywinder/github-changelog-generator
       ref: 20ee04ba1234e9e83eb2ffb5056e23d641c7a018
       condition: Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('2.2.2')
+Rakefile:
+  requires:
+  use_litmus_tasks: true
 spec/spec_helper.rb:
   mock_with: ":rspec"
   coverage_report: true
