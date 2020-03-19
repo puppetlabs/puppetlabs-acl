@@ -48,7 +48,7 @@ describe 'Identity' do
             apply_manifest(acl_manifest, expect_failures) do |result|
               expect(result.exit_code).to eq(2)
             end
-            apply_manifest(acl_manifest)
+            apply_manifest(acl_manifest, catch_changes: true)
           end
 
           original_acl_rights = ''

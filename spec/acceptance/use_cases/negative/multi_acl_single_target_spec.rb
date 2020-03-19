@@ -39,7 +39,7 @@ describe 'Use Cases' do
     let(:target_second_ace_regex) { %r{.*\\bob:\(N\)} }
 
     it 'applies manifest' do
-      idempotent_apply(acl_manifest)
+      acl_idempotent_apply(acl_manifest)
     end
 
     it 'verifies ACL rights' do

@@ -139,7 +139,7 @@ describe 'Use Cases' do
     let(:target_grand_child_sixth_ace_regex) { %r{.*\\cool_peeps:\(I\)\(R\)} }
 
     it 'applies manifest' do
-      idempotent_apply(acl_manifest)
+      acl_idempotent_apply(acl_manifest)
     end
 
     it 'verifies ACL grand child rights' do

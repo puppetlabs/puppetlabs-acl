@@ -1,7 +1,7 @@
 shared_examples 'execute manifest' do |remove = false, file_verify = false|
   it 'applies manifest' do
-    # idempotent_apply(acl_manifest)
-    apply_manifest(acl_manifest)
+    # acl_idempotent_apply(acl_manifest)
+    apply_manifest(acl_manifest, catch_failures: true)
   end
 
   it 'verifies ACL rights' do
@@ -12,7 +12,7 @@ shared_examples 'execute manifest' do |remove = false, file_verify = false|
 
   if remove
     it 'applies remove manifest' do
-      idempotent_apply(acl_manifest_remove)
+      apply_manifest(acl_manifest_remove, catch_failures: true)
     end
 
     it 'verifies ACL rights' do
@@ -32,8 +32,8 @@ end
 
 shared_examples 'execute manifest and verify file' do
   it 'applies manifest' do
-    # idempotent_apply(acl_manifest)
-    apply_manifest(acl_manifest)
+    # acl_idempotent_apply(acl_manifest)
+    apply_manifest(acl_manifest, catch_failures: true)
   end
 
   it 'verifies ACL rights' do
@@ -50,8 +50,8 @@ end
 
 shared_examples 'execute manifest and verify (with PowerShell)' do
   it 'applies manifest' do
-    # idempotent_apply(acl_manifest)
-    apply_manifest(acl_manifest)
+    # acl_idempotent_apply(acl_manifest)
+    apply_manifest(acl_manifest, catch_failures: true)
   end
 
   it 'verifies ACL rights' do
@@ -63,8 +63,8 @@ end
 
 shared_examples 'execute manifest and verify child' do
   it 'applies manifest' do
-    # idempotent_apply(acl_manifest)
-    apply_manifest(acl_manifest)
+    # acl_idempotent_apply(acl_manifest)
+    apply_manifest(acl_manifest, catch_failures: true)
   end
 
   it 'verifies ACL rights' do

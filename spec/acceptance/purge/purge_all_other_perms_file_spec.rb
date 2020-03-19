@@ -60,7 +60,7 @@ describe 'Purge' do
     let(:acl_regex_user_id1) { %r{.*\\bob:\(F\)} }
 
     it 'applies manifest' do
-      idempotent_apply(acl_manifest)
+      acl_idempotent_apply(acl_manifest)
     end
 
     it 'verifies ACL rights' do
@@ -70,7 +70,7 @@ describe 'Purge' do
     end
 
     it 'executes purge' do
-      apply_manifest(acl_manifest_purge)
+      apply_manifest(acl_manifest_purge, catch_failures: true)
     end
   end
 end

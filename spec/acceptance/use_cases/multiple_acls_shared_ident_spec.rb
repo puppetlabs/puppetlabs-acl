@@ -111,7 +111,7 @@ describe 'Use Cases' do
     let(:target_grand_child_user_id2_ace_regex) { %r{.*\\#{user_id2}:\(OI\)\(CI\)\(N\)} }
 
     it 'applies manifest' do
-      idempotent_apply(acl_manifest)
+      acl_idempotent_apply(acl_manifest)
     end
 
     it 'verifies ACL rights' do

@@ -25,6 +25,11 @@ def linux_agents
   agents.select { |agent| fact_on(agent, 'kernel') == 'Linux' }
 end
 
+def acl_idempotent_apply(manifest)
+  apply_manifest(manifest, catch_failures: true)
+  apply_manifest(manifest, catch_changes: true)
+end
+
 # The following are modified helpers from beaker-4.7.0/lib/beaker/dsl/wrappers.rb
 
 # Returns a {Beaker::Command} object for executing powershell commands on a host

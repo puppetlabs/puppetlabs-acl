@@ -45,7 +45,7 @@ describe 'Purge' do
     let(:verify_purge_error) { %r{Error:.*Value for permissions should be an array with at least one element specified} }
 
     it 'applies manifest' do
-      idempotent_apply(acl_manifest)
+      acl_idempotent_apply(acl_manifest)
     end
 
     it 'verifies ACL rights' do

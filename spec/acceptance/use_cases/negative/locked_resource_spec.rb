@@ -38,7 +38,7 @@ describe 'Use Cases' do
     let(:target_file) { "use_case_#{test_short_name}.txt" }
 
     it 'applies manifest' do
-      apply_manifest(acl_manifest)
+      apply_manifest(acl_manifest, catch_failures: true)
     end
 
     it 'attempts to update file, raises error' do

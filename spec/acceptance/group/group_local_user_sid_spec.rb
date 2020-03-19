@@ -78,7 +78,7 @@ describe 'Group - SID' do
     let(:group_regex) { %r{.*\\tom:\(M\)} }
 
     it 'applies setup manifest' do
-      idempotent_apply(setup_manifest)
+      acl_idempotent_apply(setup_manifest)
     end
 
     it 'retrieves SID of user account' do
@@ -89,7 +89,7 @@ describe 'Group - SID' do
 
     it 'applies ACL manifest' do
       # TODO: find out why this is not idempotent
-      apply_manifest(acl_manifest)
+      apply_manifest(acl_manifest, catch_failures: true)
     end
 
     it 'verifies ACL rights' do
