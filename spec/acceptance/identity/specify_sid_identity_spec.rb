@@ -53,7 +53,7 @@ describe 'Module - Identity' do
     let(:acl_regex) { %r{.*\\bob:\(F\)} }
 
     it 'applies setup manifest' do
-      idempotent_apply(setup_manifest)
+      acl_idempotent_apply(setup_manifest)
     end
 
     it 'retrieves SID of user account' do
@@ -63,7 +63,7 @@ describe 'Module - Identity' do
     end
 
     it 'applies manifest' do
-      idempotent_apply(acl_manifest)
+      acl_idempotent_apply(acl_manifest)
     end
 
     it 'verifies ACL rights' do

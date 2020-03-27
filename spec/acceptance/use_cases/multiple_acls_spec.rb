@@ -103,7 +103,7 @@ describe 'Use Cases' do
     let(:user_id6_ace_regex) { %r{.*\\betty:\(OI\)\(CI\)\(DENY\)\(R\)} }
 
     it 'applies manifest' do
-      idempotent_apply(acl_manifest)
+      acl_idempotent_apply(acl_manifest)
     end
 
     it 'verifies ACL rights' do

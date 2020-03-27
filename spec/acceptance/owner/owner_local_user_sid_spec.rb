@@ -67,7 +67,7 @@ describe 'Owner - SID' do
     let(:owner_regex) { %r{.*\\#{owner_id}} }
 
     it 'applies setup manifest' do
-      idempotent_apply(setup_manifest)
+      acl_idempotent_apply(setup_manifest)
     end
 
     it 'retrieves SID of user account' do
@@ -77,7 +77,7 @@ describe 'Owner - SID' do
     end
 
     it 'applies manifest' do
-      idempotent_apply(acl_manifest)
+      acl_idempotent_apply(acl_manifest)
     end
 
     it 'verifies ACL rights' do

@@ -56,7 +56,7 @@ describe 'Purge' do
     let(:acl_regex_user_id2) { %r{.*\\#{user_id2}:\(OI\)\(CI\)\(F\)} }
 
     it 'applies manifest' do
-      idempotent_apply(acl_manifest)
+      acl_idempotent_apply(acl_manifest)
     end
 
     it 'verifies ACL rights' do
@@ -66,7 +66,7 @@ describe 'Purge' do
     end
 
     it 'executes purge' do
-      idempotent_apply(acl_manifest_purge)
+      acl_idempotent_apply(acl_manifest_purge)
     end
 
     it 'verifies ACL rights (post-purge)' do

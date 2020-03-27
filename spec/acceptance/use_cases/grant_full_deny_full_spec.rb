@@ -71,7 +71,7 @@ describe 'Use Cases' do
 
     it 'applies manifest' do
       # not idempotent
-      apply_manifest(acl_manifest)
+      apply_manifest(acl_manifest, catch_failures: true)
     end
 
     it 'verifies ACL child rights' do
@@ -89,7 +89,7 @@ describe 'Use Cases' do
 
     it 'verifies file data integrity' do
       # acl needs to be cleared so Administrator has access to read contents
-      apply_manifest(acl_clear_manifest)
+      apply_manifest(acl_clear_manifest, catch_failures: true)
       expect(file(target_child)).to be_file
       expect(file(target_child).content).to match(%r{#{file_content}})
     end
