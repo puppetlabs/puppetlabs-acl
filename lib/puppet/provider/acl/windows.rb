@@ -103,6 +103,8 @@ Puppet::Type.type(:acl).provide :windows do
     return [] if should.nil? || !should.is_a?(Array)
 
     sd = get_security_descriptor
+    return [] if sd.nil?
+
     should_aces = sync_aces(sd.dacl, should, @resource[:purge] == :true, @resource[:purge] == :listed_permissions)
 
     permissions_to_s(should_aces)
