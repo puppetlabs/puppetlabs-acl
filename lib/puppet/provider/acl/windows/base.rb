@@ -144,12 +144,12 @@ class Puppet::Provider::Acl
       def get_current_permissions
         sd = get_security_descriptor(DO_NOT_REFRESH_SD)
         permissions = []
-        permissions if sd.nil? || sd.dacl.nil?
-
-        sd.dacl.each do |ace|
-          permissions << Puppet::Type::Acl::Ace.new(convert_to_permissions_hash(ace), self)
+        unless sd.nil?
+          permissions if sd.dacl.nil?
+          sd.dacl.each do |ace|
+            permissions << Puppet::Type::Acl::Ace.new(convert_to_permissions_hash(ace), self)
+          end
         end
-
         permissions
       end
 
@@ -526,6 +526,7 @@ class Puppet::Provider::Acl
         # sometimes the name will come in with a SID
         # which will return nil when we call name_to_sid
         # if the user no longer exists
+        return unless name
         if valid_sid?(name)
           name
         else
@@ -564,7 +565,7 @@ class Puppet::Provider::Acl
           case @resource[:target_type]
           when :file
             begin
-              sd = Puppet::Util::Windows::Security.get_security_descriptor(@resource[:target])
+              sd = Puppet::Util::Windows::Security.get_security_descriptor(@resource[:target]) unless @resource.noop?
             rescue => detail
               raise Puppet::Error, "Failed to get security descriptor for path '#{@resource[:target]}': #{detail}", detail.backtrace
             end
