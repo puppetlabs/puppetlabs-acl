@@ -2,13 +2,17 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v3.1.1](https://github.com/puppetlabs/puppetlabs-acl/tree/v3.1.1) (2020-04-08)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-acl/compare/v3.1.0...v3.1.1)
+
+### Fixed
+
+- \[MODULES-1336\] Fix noop failure reports [\#188](https://github.com/puppetlabs/puppetlabs-acl/pull/188) ([carabasdaniel](https://github.com/carabasdaniel))
+
 ## [v3.1.0](https://github.com/puppetlabs/puppetlabs-acl/tree/v3.1.0) (2019-12-03)
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-acl/compare/v3.0.0...v3.1.0)
-
-### Added
-
-- \(FM-8192\) Convert tests to litmus [\#160](https://github.com/puppetlabs/puppetlabs-acl/pull/160) ([eimlav](https://github.com/eimlav))
 
 ## v3.0.0
   
