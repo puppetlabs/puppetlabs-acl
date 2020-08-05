@@ -38,7 +38,7 @@ Install this module with the following command:
 $ puppet module install [--modulepath <path>] puppetlabs/acl
 ~~~
 
-The above command also includes the optional argument to specify your Puppet master's `modulepath` as the location to install the module.
+The above command also includes the optional argument to specify your Puppet server's `modulepath` as the location to install the module.
 
 ### Beginning with acl
 
@@ -400,7 +400,7 @@ Valid identity formats:
 
  * `mask`: *Required if `rights => 'mask_specific'` is set.* Indicates rights granted or denied to the trustee. If the `rights` element isn't set to 'mask_specific', the `mask` element has no effect. Valid options: an integer representing a [permissions mask](http://msdn.microsoft.com/en-us/library/aa394063(v=vs.85).aspx).
 
-  If you want more granular detail about `mask` values, we've provided an [ACL Mask Rights Addition spreadsheet](https://github.com/puppetlabs/puppetlabs-acl/blob/master/tools/ACL_Access_Rights_Mask_Addition.xlsx) in the acl module's `tools` directory.
+  If you want more granular detail about `mask` values, we've provided an [ACL Mask Rights Addition spreadsheet](https://github.com/puppetlabs/puppetlabs-acl/blob/main/tools/ACL_Access_Rights_Mask_Addition.xlsx) in the acl module's `tools` directory.
 
  * `perm_type`: *Optional.* Specifies whether the target should or should *not* have the described permissions. Valid options: 'allow' and 'deny'. Default: 'allow'.
 
