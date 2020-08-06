@@ -27,7 +27,7 @@ Puppet::Type.newtype(:acl) do
     For very specific examples, see the readme[1] and learn
     about the different features of the `acl` type.
 
-    [1] https://github.com/puppetlabs/puppetlabs-acl/blob/master/README.md
+    [1] https://github.com/puppetlabs/puppetlabs-acl/blob/main/README.md
 
     **Autorequires:** If Puppet is managing the user, group or
     target of an acl resource, the acl type will autorequire
