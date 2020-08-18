@@ -13,7 +13,7 @@ before_install:
   - gem --version
   - bundle -v
 script:
-  - 'SIMPLECOV=yes bundle exec rake $CHECK'
+  - 'SIMPLECOV=no bundle exec rake $CHECK'
 bundler_args: --without system_tests
 rvm:
   - 2.5.7
