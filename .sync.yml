@@ -9,7 +9,7 @@
     - HONEYCOMB_WRITEKEY="7f3c63a70eecc61d635917de46bea4e6",HONEYCOMB_DATASET="litmus tests"
   deploy_to_forge:
     enabled: false
-  simplecov: true
+  simplecov: false
   notifications:
     slack:
       secure: >-
@@ -19,7 +19,7 @@ appveyor.yml:
     HONEYCOMB_WRITEKEY: 7f3c63a70eecc61d635917de46bea4e6
     HONEYCOMB_DATASET: litmus tests
   simplecov: true
-  use_litmus: true
+  use_litmus: false
   matrix_extras:
   - RUBY_VERSION: 25-x64
     ACCEPTANCE: 'yes'
