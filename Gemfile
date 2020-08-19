@@ -17,10 +17,10 @@ ruby_version_segments = Gem::Version.new(RUBY_VERSION.dup).segments
 minor_version = ruby_version_segments[0..1].join('.')
 
 group :development do
-  gem "puppet-module-posix-default-r#{minor_version}", '= 0.5.0', require: false, platforms: [:ruby], :source => "https://23ogEY-K79ZA4aKkg4k2EkPdhV0qSHZFPg@gem.fury.io/cmccrisken-puppet/"
-  gem "puppet-module-posix-dev-r#{minor_version}", '= 0.5.0',     require: false, platforms: [:ruby], :source => "https://23ogEY-K79ZA4aKkg4k2EkPdhV0qSHZFPg@gem.fury.io/cmccrisken-puppet/"
-  gem "puppet-module-win-default-r#{minor_version}", '= 0.5.0',   require: false, platforms: [:mswin, :mingw, :x64_mingw], :source => "https://23ogEY-K79ZA4aKkg4k2EkPdhV0qSHZFPg@gem.fury.io/cmccrisken-puppet/"
-  gem "puppet-module-win-dev-r#{minor_version}", '= 0.5.0',       require: false, platforms: [:mswin, :mingw, :x64_mingw], :source => "https://23ogEY-K79ZA4aKkg4k2EkPdhV0qSHZFPg@gem.fury.io/cmccrisken-puppet/"
+  gem "puppet-module-posix-default-r#{minor_version}", '= 0.5.0', require: false, platforms: [:ruby], :source => "https://PeApE-mMIKwnQmyCA6lZMEeJFj6qrZg@gem.fury.io/pmcmaw/"
+  gem "puppet-module-posix-dev-r#{minor_version}", '= 0.5.0',     require: false, platforms: [:ruby], :source => "https://PeApE-mMIKwnQmyCA6lZMEeJFj6qrZg@gem.fury.io/pmcmaw/"
+  gem "puppet-module-win-default-r#{minor_version}", '= 0.5.0',   require: false, platforms: [:mswin, :mingw, :x64_mingw], :source => "https://PeApE-mMIKwnQmyCA6lZMEeJFj6qrZg@gem.fury.io/pmcmaw/"
+  gem "puppet-module-win-dev-r#{minor_version}", '= 0.5.0',       require: false, platforms: [:mswin, :mingw, :x64_mingw], :source => "https://PeApE-mMIKwnQmyCA6lZMEeJFj6qrZg@gem.fury.io/pmcmaw/"
   gem "fast_gettext", '1.1.0',                                   require: false if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new('2.1.0')
   gem "fast_gettext",                                            require: false if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('2.1.0')
   gem "json_pure", '<= 2.0.1',                                   require: false if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new('2.0.0')
