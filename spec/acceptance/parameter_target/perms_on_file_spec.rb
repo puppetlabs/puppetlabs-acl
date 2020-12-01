@@ -50,29 +50,11 @@ describe 'Permissions - File' do
     include_examples 'execute manifest', false, true
   end
 
-  context 'Add Permissions to a File with a Long Name (259 chars)' do
-    skip 'This test requires PE-3075 to be resolved' do
-      let(:file_name) { 'dqcEjJarQzeeNxWihARGLytPggNssxewZsopUFUoncTKAgsxsBqRigMlZEdNTEybqlVTjkDWTRASaQPyeeAsuUohncMlarIRphqIdqwyimqPphRTcKpojhTHoAgTUWiaEkiOqbeeEZKvNAhFQiELGLZghRwhKXVHuUPxWghKXVHuUPxWqmeYCHejdQOoGRYqaxwdIqiYyhhSCAhEWlggsGToSLmrgPmotSACKrREyohRBPaKRUmlgCGVtrP' } # rubocop:disable Metrics/LineLength }
-      let(:file_content) { 'Salsa Mama! Caliente!' }
-
-      include_examples 'execute manifest', false, true
-    end
-  end
-
   context 'Remove Permissions from a File' do
     let(:file_name) { 'rem_perm_file.txt' }
     let(:file_content) { 'I love puppet, puppet love puppet, puppet love!' }
 
     include_examples 'execute manifest', true, true
-  end
-
-  context 'Remove Permissions from a File with a Long Name (259 chars)' do
-    skip 'This test requires PE-3075 to be resolved' do
-      let(:file_name) { 'rem_file_zeeNxWihARGLytPggNssxewZsopUFUoncTKAgsxsBqRigMlZEdNTEybqlVTjkDWTRASaQPyeeAsuUohncMlarIRphqIdqwyimqPphRTcKpojhTHoAgTUWiaEkiOqbeeEZKvNAhFQiELGLZghRwhKXVHuUPxWghKXVHuUPxWqmeYCHejdQOoGRYqaxwdIqiYyhhSCAhEWlggsGToSLmrgPmotSACKrREyohRBPaKRUmlgCGVtrP' } # rubocop:disable Metrics/LineLength
-      let(:file_content) { 'Happy Happy Happy Happy Happy!' }
-
-      include_examples 'execute manifest', true, true
-    end
   end
 
   context 'Add Permissions to a Unicode File' do
