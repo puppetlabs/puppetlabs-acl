@@ -42,6 +42,6 @@
   ],
   "description": "This module provides the ability to manage ACLs on nodes. Currently the only operating system supported is Windows",
   "pdk-version": "1.18.1",
-  "template-url": "https://github.com/puppetlabs/pdk-templates#main",
-  "template-ref": "heads/main-0-g5afcd3d"
+  "template-url": "https://github.com/DavidS/pdk-templates#rubocop-refresh",
+  "template-ref": "remotes/origin/rubocop-refresh-0-gc38d99a"
 }
