@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'puppet/parameter/value_collection'
 require 'pathname'
 
@@ -150,15 +152,15 @@ class Puppet::Type::Acl
     # An error is raised if a condition is invalid.
     def ensure_rights_values_compatible
       if @rights.include?(:mask_specific) && rights.count != 1
-        raise ArgumentError, "In each ace, when specifying rights, if you include 'mask_specific', it should be without anything else e.g. rights => ['mask_specific']. Please decide whether 'mask_specific' or predetermined rights and correct the manifest. Reference: #{inspect}" # rubocop:disable Metrics/LineLength
+        raise ArgumentError, "In each ace, when specifying rights, if you include 'mask_specific', it should be without anything else e.g. rights => ['mask_specific']. Please decide whether 'mask_specific' or predetermined rights and correct the manifest. Reference: #{inspect}" # rubocop:disable Layout/LineLength
       end
 
       if @rights.include?(:full) && rights.count != 1
-        Puppet.warning("In each ace, when specifying rights, if you include 'full', it should be without anything else e.g. rights => ['full']. Please remove the extraneous rights from the manifest to remove this warning. Reference: #{inspect}") # rubocop:disable Metrics/LineLength
+        Puppet.warning("In each ace, when specifying rights, if you include 'full', it should be without anything else e.g. rights => ['full']. Please remove the extraneous rights from the manifest to remove this warning. Reference: #{inspect}") # rubocop:disable Layout/LineLength
         @rights = [:full]
       end
       if @rights.include?(:modify) && rights.count != 1 # rubocop:disable Style/GuardClause  Changing this to a guard clause makes the line long and unreadable
-        Puppet.warning("In each ace, when specifying rights, if you include 'modify', it should be without anything else e.g. rights => ['modify']. Please remove the extraneous rights from the manifest to remove this warning. Reference: #{inspect}") # rubocop:disable Metrics/LineLength
+        Puppet.warning("In each ace, when specifying rights, if you include 'modify', it should be without anything else e.g. rights => ['modify']. Please remove the extraneous rights from the manifest to remove this warning. Reference: #{inspect}") # rubocop:disable Layout/LineLength
         @rights = [:modify]
       end
     end
@@ -435,13 +437,13 @@ class Puppet::Type::Acl
       # "--- !ruby/object:Puppet::Type::Acl::Ace\nidentity: Administrators\nrights:\n- full\n"
       coder.represent_map nil, to_hash
 
-      # rubocop:disable Metrics/LineLength
+      # rubocop:disable Layout/LineLength
       # without this method implemented, serialization varies based on Ruby version like:
       # Ruby 2.3
       # "--- !ruby/hash-with-ivars:Puppet::Type::Acl::Ace\nelements: {}\nivars:\n  :@provider: \n  :@identity: Administrators\n  :@hash: \n  :@id: S-32-12-0\n  :@mask: '2023422'\n  :@rights:\n  - :full\n  :@perm_type: :allow\n  :@child_types: :all\n  :@affects: :all\n  :@is_inherited: false\n"
       # Ruby 2.1.9
       # "--- !ruby/hash:Puppet::Type::Acl::Ace {}\n"
-      # rubocop:enable Metrics/LineLength
+      # rubocop:enable Layout/LineLength
     end
   end
 end

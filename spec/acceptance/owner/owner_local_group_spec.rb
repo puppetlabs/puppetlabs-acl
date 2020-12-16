@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper_acceptance'
 
 describe 'Owner - Local Group' do
@@ -51,7 +53,7 @@ describe 'Owner - Local Group' do
   context 'Change Owner to Local Group with Long Name' do
     let(:file_content) { 'Cow are animals with mooing capabilities.' }
     let(:target_name) { 'owner_local_long_group_name.txt' }
-    let(:owner_id) { 'jasqddweruwqiouroaysfyuasudyfaisoyfqoiuwyefiaysdiyfzixycivzixyvciqywifyiasdiufyasdygfasirfwerqiuwyeriatsdtfastdfqwyitfastdfawerfytasdytfasydgtaisdytfiasydfiosayghiayhidfhygiasftawyegyfhgaysgfuyasgdyugfasuiyfguaqyfgausydgfaywgfuasgdfuaisydgfausasdfuygsadfyg' } # rubocop:disable Metrics/LineLength
+    let(:owner_id) { 'jasqddweruwqiouroaysfyuasudyfaisoyfqoiuwyefiaysdiyfzixycivzixyvciqywifyiasdiufyasdygfasirfwerqiuwyeriatsdtfastdfqwyitfastdfawerfytasdytfasydgtaisdytfiasydfiosayghiayhidfhygiasftawyegyfhgaysgfuyasgdyugfasuiyfguaqyfgausydgfaywgfuasgdfuaisydgfausasdfuygsadfyg' } # rubocop:disable Layout/LineLength
     let(:acl_regex) { %r{.*\\jasq} }
 
     include_examples 'execute manifest and verify file'

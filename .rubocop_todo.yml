@@ -12,6 +12,6 @@ Metrics/BlockNesting:
   Max: 4
 
 # Offense count: 4
-Style/AccessorMethodName:
+Naming/AccessorMethodName:
   Exclude:
     - 'lib/puppet/provider/acl/windows/base.rb'

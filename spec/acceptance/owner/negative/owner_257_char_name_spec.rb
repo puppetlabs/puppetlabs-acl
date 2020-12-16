@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper_acceptance'
 
 describe 'Owner - Negative' do
@@ -36,7 +38,7 @@ describe 'Owner - Negative' do
   context 'Specify 257 Character String for Owner' do
     let(:file_content) { 'I AM TALKING VERY LOUD!' }
     let(:target_name)  { 'owner_257_char_name.txt' }
-    let(:owner_id) { 'jasqddsweruwqiouroaysfyuasudyfaisoyfqoiuwyefiaysdiyfzixycivzixyvciqywifyiasdiufyasdygfasirfwerqiuwyeriatsdtfastdfqwyitfastdfawerfytasdytfasydgtaisdytfiasydfiosayghiayhidfhygiasftawyegyfhgaysgfuyasgdyugfasuiyfguaqyfgausydgfaywgfuasgdfuaisydgfausasdfuygsadfyg' } # rubocop:disable Metrics/LineLength
+    let(:owner_id) { 'jasqddsweruwqiouroaysfyuasudyfaisoyfqoiuwyefiaysdiyfzixycivzixyvciqywifyiasdiufyasdygfasirfwerqiuwyeriatsdtfastdfqwyitfastdfawerfytasdytfasydgtaisdytfiasydfiosayghiayhidfhygiasftawyegyfhgaysgfuyasgdyugfasuiyfguaqyfgausydgfaywgfuasgdfuaisydgfausasdfuygsadfyg' } # rubocop:disable Layout/LineLength
 
     it 'applies manifest, raises error' do
       apply_manifest(acl_manifest, expect_failures: true) do |result|

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 shared_examples 'execute manifest' do |remove = false, file_verify = false|
   it 'applies manifest' do
     # acl_idempotent_apply(acl_manifest)

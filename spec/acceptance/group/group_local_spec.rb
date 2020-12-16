@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper_acceptance'
 
 describe 'Group' do
@@ -61,11 +63,11 @@ describe 'Group' do
   context 'Change Group to Local Group with Long Name' do
     let(:user_type) {  'local_long_group_name' }
     let(:file_content) { 'Uncontrolled napping.' }
-    # rubocop:disable Metrics/LineLength
+    # rubocop:disable Layout/LineLength
     let(:group_id) { 'jasqddweruwqiouroaysfyuasudyfaisoyfqoiuwyefiaysdiyfzixycivzixyvciqywifyiasdiufyasdygfasirfwerqiuwyeriatsdtfastdfqwyitfastdfawerfytasdytfasydgtaisdytfiasydfiosayghiayhidfhygiasftawyegyfhgaysgfuyasgdyugfasuiyfguaqyfgausydgfaywgfuasgdfuaisydgfausasdfuygsadfyg' }
     let(:acl_regex) { %r{.*\\jasqddweruwqiouroaysfyuasudyfaisoyfqoiuwyefiaysdiyfzixycivzixyvciqywifyiasdiufyasdygfasirfwerqiuwyeriatsdtfastdfqwyitfastdfawerfytasdytfasydgtaisdytfiasydfiosayghiayhidfhygiasftawyegyfhgaysgfuyasgdyugfasuiyfguaqyfgausydgfaywgfuasgdfuaisydgfausasdfuygsadfyg:\(M\)} }
 
-    # rubocop:enable Metrics/LineLength
+    # rubocop:enable Layout/LineLength
 
     include_examples 'execute manifest and verify file'
   end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper_acceptance'
 
 describe 'Identity' do
@@ -61,7 +63,7 @@ describe 'Identity' do
     let(:raw_group_id) { 'group_\uB81D\uB534\uC2AB\uC788\uCC98' }
     let(:group_id) { "group_\uB81D\uB534\uC2AB\uC788\uCC98" } # 렝딴슫있처
     let(:file_content) { 'Garbage bag full of money.' }
-    let(:verify_acl_command) { "(Get-ACL '#{target}' | ForEach-Object { $_.Access } | Where-Object { $_.IdentityReference -match ('\\\\' + [regex]::Unescape(\"#{raw_group_id}\")) -and $_.FileSystemRights -eq 'FullControl' } | Measure-Object).Count" } # rubocop:disable Metrics/LineLength
+    let(:verify_acl_command) { "(Get-ACL '#{target}' | ForEach-Object { $_.Access } | Where-Object { $_.IdentityReference -match ('\\\\' + [regex]::Unescape(\"#{raw_group_id}\")) -and $_.FileSystemRights -eq 'FullControl' } | Measure-Object).Count" } # rubocop:disable Layout/LineLength
 
     include_examples 'execute manifest and verify (with PowerShell)'
   end
@@ -73,7 +75,7 @@ describe 'Identity' do
     let(:raw_user_id) { 'user_\uB81D\uB534\uC2AB\uC788\uCC98' }
     let(:user_id) { "user_\uB81D\uB534\uC2AB\uC788\uCC98" } # 렝딴슫있처
     let(:file_content) { 'Flying Spaghetti Monster wants to save your soul.' }
-    let(:verify_acl_command) { "(Get-ACL '#{target}' | ForEach-Object { $_.Access } | Where-Object { $_.IdentityReference -match ('\\\\' + [regex]::Unescape(\"#{raw_user_id}\")) -and $_.FileSystemRights -eq 'FullControl' } | Measure-Object).Count" } # rubocop:disable Metrics/LineLength
+    let(:verify_acl_command) { "(Get-ACL '#{target}' | ForEach-Object { $_.Access } | Where-Object { $_.IdentityReference -match ('\\\\' + [regex]::Unescape(\"#{raw_user_id}\")) -and $_.FileSystemRights -eq 'FullControl' } | Measure-Object).Count" } # rubocop:disable Layout/LineLength
 
     include_examples 'execute manifest and verify (with PowerShell)'
   end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'pathname'
 
 # Base provider for Access Control List type
