@@ -24,6 +24,8 @@ class Puppet::Type::Acl
     attr_reader :mask
 
     def initialize(permission_hash, provider = nil)
+      super()
+
       @provider = provider
       id = permission_hash['identity']
       id = permission_hash['id'] if id.nil? || id.empty?
@@ -307,7 +309,7 @@ class Puppet::Type::Acl
       if id_has_value && (ignore_other || other_id_has_value)
         id = self.id
         other_id = other.id unless ignore_other
-      elsif @provider && @provider.respond_to?(:get_account_name)
+      elsif @provider&.respond_to?(:get_account_name)
         id = @provider.get_account_name(@identity)
         other_id = @provider.get_account_name(other.identity) unless ignore_other
       else

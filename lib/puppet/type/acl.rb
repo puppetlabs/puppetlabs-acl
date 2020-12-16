@@ -251,7 +251,7 @@ Puppet::Type.newtype(:acl) do
       super(current)
     end
 
-    def is_to_s(currentvalue) # rubocop:disable Style/PredicateName  False positive; this is an accepted puppet method name
+    def is_to_s(currentvalue) # rubocop:disable Naming/PredicateName  False positive; this is an accepted puppet method name
       if provider.respond_to?(:permissions_to_s)
         return provider.permissions_to_s(currentvalue)
       end
@@ -314,7 +314,7 @@ Puppet::Type.newtype(:acl) do
       super(current)
     end
 
-    def is_to_s(currentvalue) # rubocop:disable Style/PredicateName  False positive; this is an accepted puppet method name
+    def is_to_s(currentvalue) # rubocop:disable Naming/PredicateName  False positive; this is an accepted puppet method name
       if provider.respond_to?(:owner_to_s)
         return provider.owner_to_s(currentvalue)
       end
@@ -354,7 +354,7 @@ Puppet::Type.newtype(:acl) do
       super(current)
     end
 
-    def is_to_s(currentvalue) # rubocop:disable Style/PredicateName  False positive; this is an accepted puppet method name
+    def is_to_s(currentvalue) # rubocop:disable Naming/PredicateName  False positive; this is an accepted puppet method name
       if provider.respond_to?(:group_to_s)
         return provider.group_to_s(currentvalue)
       end
@@ -424,13 +424,11 @@ Puppet::Type.newtype(:acl) do
     end
 
     permissions = self[:permissions]
-    unless permissions.nil?
-      permissions.each do |permission|
-        if has_account_name_method
-          required_users << provider.get_account_name(permission.identity).to_s
-        end
-        required_users << permission.identity.to_s
+    permissions&.each do |permission|
+      if has_account_name_method
+        required_users << provider.get_account_name(permission.identity).to_s
       end
+      required_users << permission.identity.to_s
     end
 
     required_users.uniq
@@ -464,13 +462,11 @@ Puppet::Type.newtype(:acl) do
     end
 
     permissions = self[:permissions]
-    unless permissions.nil?
-      permissions.each do |permission|
-        if has_account_group_method
-          required_groups << provider.get_group_name(permission.identity).to_s
-        end
-        required_groups << permission.identity.to_s
+    permissions&.each do |permission|
+      if has_account_group_method
+        required_groups << provider.get_group_name(permission.identity).to_s
       end
+      required_groups << permission.identity.to_s
     end
 
     required_groups.uniq

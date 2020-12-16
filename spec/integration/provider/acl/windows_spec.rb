@@ -19,7 +19,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
   end
   let(:path) { top_level_path }
 
-  def set_path(sub_directory) # rubocop:disable Naming/AccessorMethodName
+  def set_path(sub_directory)
     path = File.join(top_level_path, sub_directory)
     Dir.mkdir(path) unless Dir.exist?(path)
 
