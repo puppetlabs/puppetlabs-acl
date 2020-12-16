@@ -304,9 +304,8 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         { min_kernel: 10.0, identity: 'ALL RESTRICTED APPLICATION PACKAGES' },
         { min_kernel: 10.0, identity: 'S-1-15-2-2' },
       ].each do |account|
-        it "should not error when referencing special account #{account[:identity]}",
+        it "does not error when referencing special account #{account[:identity]}",
            if: (Facter[:kernelmajversion].value.to_f >= account[:min_kernel]) do
-
           permissions = [Puppet::Type::Acl::Ace.new({ 'identity' => account[:identity], 'rights' => ['full'] }, provider)]
           expect(set_perms(permissions)).to eq permissions
           # permissions = get_permissions_for_path(resource[:target]).select { |p| !p.inherited? }
