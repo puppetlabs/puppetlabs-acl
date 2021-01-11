@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'pathname'
 
 # Base provider for Access Control List type
@@ -491,7 +493,7 @@ class Puppet::Provider::Acl
       def get_current_owner
         sd = get_security_descriptor
 
-        sd.owner unless sd.nil?
+        sd&.owner
       end
 
       # Retrieves group from current instance's SecurityDescriptor.
@@ -500,7 +502,7 @@ class Puppet::Provider::Acl
       def get_current_group
         sd = get_security_descriptor
 
-        sd.group unless sd.nil?
+        sd&.group
       end
 
       # Compares two SIDs to determine if they contain the same account id.

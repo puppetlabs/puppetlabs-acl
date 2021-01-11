@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper_acceptance'
 
 describe 'Identity' do
@@ -17,7 +19,6 @@ describe 'Identity' do
       acl_regex: %r{.*APPLICATION PACKAGE AUTHORITY\\ALL RESTRICTED APPLICATION PACKAGES:\(OI\)\(CI\)\(F\)},
       minimum_kernel: 10.0 },
   ].each do |account|
-
     target = "c:/#{SecureRandom.uuid}"
     verify_acl_command = "icacls #{target}"
 

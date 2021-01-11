@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Dir['./spec/support/**/*.rb'].sort.each { |f| require f }
 
 def target_parent

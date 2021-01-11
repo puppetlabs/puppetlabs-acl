@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 require 'puppet/type'
 require 'puppet/provider/acl/windows'
@@ -17,7 +19,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
   end
   let(:path) { top_level_path }
 
-  def set_path(sub_directory) # rubocop:disable Style/AccessorMethodName
+  def set_path(sub_directory)
     path = File.join(top_level_path, sub_directory)
     Dir.mkdir(path) unless Dir.exist?(path)
 
@@ -302,9 +304,8 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         { min_kernel: 10.0, identity: 'ALL RESTRICTED APPLICATION PACKAGES' },
         { min_kernel: 10.0, identity: 'S-1-15-2-2' },
       ].each do |account|
-        it "should not error when referencing special account #{account[:identity]}",
+        it "does not error when referencing special account #{account[:identity]}",
            if: (Facter[:kernelmajversion].value.to_f >= account[:min_kernel]) do
-
           permissions = [Puppet::Type::Acl::Ace.new({ 'identity' => account[:identity], 'rights' => ['full'] }, provider)]
           expect(set_perms(permissions)).to eq permissions
           # permissions = get_permissions_for_path(resource[:target]).select { |p| !p.inherited? }
@@ -462,7 +463,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         expect(set_perms(permissions)).to eq(permissions)
 
         # TODO: None of the following code is an expectation and rspec was not treating as such, however the tests are broken.  Disabling for the moment
-        # rubocop:disable Metrics/LineLength
+        # rubocop:disable Layout/LineLength
         # # child object
         # permissions = [
         #   Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'], 'affects' => 'all', 'is_inherited' => 'true' }, provider),
@@ -506,7 +507,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         #   Puppet::Type::Acl::Ace.new({ 'identity' => 'Users', 'rights' => ['modify'], 'child_types' => 'containers', 'affects' => 'children_only', 'is_inherited' => 'true' }, provider),
         # ]
         # get_permissions_for_path(grandchild_path) == permissions
-        # rubocop:enable Metrics/LineLength
+        # rubocop:enable Layout/LineLength
       end
     end
   end
