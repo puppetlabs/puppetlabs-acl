@@ -10,7 +10,7 @@
 
 ## Resource types
 
-### `acl`
+### <a name="acl"></a>`acl`
 
 Manages access control lists (ACLs).  The `acl` type is
 typically used when you need more complex management of
@@ -220,19 +220,25 @@ that to build a manifest.
 
 The following parameters are available in the `acl` type.
 
-##### `name`
+* [`name`](#name)
+* [`provider`](#provider)
+* [`purge`](#purge)
+* [`target`](#target)
+* [`target_type`](#target_type)
+
+##### <a name="name"></a>`name`
 
 namevar
 
 The name of the acl resource. Used for uniqueness. Will set
 the target to this value if target is unset.
 
-##### `provider`
+##### <a name="provider"></a>`provider`
 
 The specific backend to use for this `acl` resource. You will seldom need to specify this --- Puppet will usually
 discover the appropriate provider for your platform.
 
-##### `purge`
+##### <a name="purge"></a>`purge`
 
 Valid values: ``true``, ``false``, `listed_permissions`
 
@@ -248,13 +254,13 @@ The default is `false`.
 
 Default value: ``false``
 
-##### `target`
+##### <a name="target"></a>`target`
 
 The location the acl resource is pointing to. In the first
 release of ACL, this will be a file system location.
 The default is the name.
 
-##### `target_type`
+##### <a name="target_type"></a>`target_type`
 
 Valid values: `file`
 
