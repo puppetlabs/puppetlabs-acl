@@ -1,30 +1,9 @@
 ---
 ".gitlab-ci.yml":
   delete: true
-".travis.yml":
-  global_env:
-    - HONEYCOMB_WRITEKEY="7f3c63a70eecc61d635917de46bea4e6",HONEYCOMB_DATASET="litmus tests"
-  deploy_to_forge:
-    enabled: false
-  simplecov: true
-  notifications:
-    slack:
-      secure: >-
-        AlI3PETMDYeUke1uxWTNSoWYoG8edaPi/h0WgjSZvE72SJqwmxWIjP9hOfzzrefiKBsLT4PZdkuCuOuW22g/FAQ8xMwk1S4Vt/eu42KCYE5SSYtKgqO4XvzNqWflB52BfDsDh84W7eJzb2hMIhIrGido2RIs7oqpGJ//xi9xZAY=
 appveyor.yml:
-  environment:
-    HONEYCOMB_WRITEKEY: 7f3c63a70eecc61d635917de46bea4e6
-    HONEYCOMB_DATASET: litmus tests
-  simplecov: true
-  use_litmus: true
-  matrix_extras:
-  - RUBY_VERSION: 25-x64
-    ACCEPTANCE: 'yes'
-    TARGET_HOST: localhost
-  - RUBY_VERSION: 25-x64
-    ACCEPTANCE: 'yes'
-    TARGET_HOST: localhost
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+  delete: true
+
 Gemfile:
   optional:
     ":development":
@@ -43,3 +22,10 @@ spec/spec_helper.rb:
   unmanaged: false
 .github/workflows/auto_release.yml:
   unmanaged: false
+.github/workflows/spec.yml:
+  checks: 'syntax lint metadata_lint check:symlinks check:git_ignore check:dot_underscore check:test_file rubocop'
+  unmanaged: false
+.github/workflows/release.yml:
+  unmanaged: false
+.travis.yml:
+  delete: true
