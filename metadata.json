@@ -41,7 +41,7 @@
     "file permissions"
   ],
   "description": "This module provides the ability to manage ACLs on nodes. Currently the only operating system supported is Windows",
-  "pdk-version": "1.18.1",
+  "pdk-version": "2.0.0",
   "template-url": "https://github.com/puppetlabs/pdk-templates.git#main",
-  "template-ref": "heads/main-0-g12a5dea"
+  "template-ref": "heads/main-0-ge04486b"
 }
