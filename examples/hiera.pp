@@ -10,7 +10,7 @@ create_resources(acl, $acls)
 
 $_temp_acl = Acl['tempdir']
 
-file {'c:/temp':
+file { 'c:/temp':
   ensure => 'directory',
 }
 #
@@ -26,7 +26,7 @@ acl { 'c:\temp':
     }
   ],
   owner                      => 'Administrators',
-  inherit_parent_permissions => true
+  inherit_parent_permissions => true,
 }
 
 acl { 'temp_dir_module_name':
