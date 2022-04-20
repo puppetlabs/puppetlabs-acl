@@ -22,8 +22,8 @@ file { ['c:/tempperms',
     'c:/tempperms/same_user',
     'c:/tempperms/rights_ordering',
     'c:/tempperms/mask_specific',
-    'c:/tempperms/remove']:
-  ensure => directory,
+  'c:/tempperms/remove']:
+    ensure => directory,
 }
 
 acl { 'c:/tempperms/minimal':
@@ -49,7 +49,6 @@ acl { 'c:/tempperms/minimal':
 #        BUILTIN\Users:(I)(OI)(CI)(RX)
 #        NT AUTHORITY\Authenticated Users:(I)(M)
 #        NT AUTHORITY\Authenticated Users:(I)(OI)(CI)(IO)(M)
-
 
 # same as minimal but fully expressed
 acl { 'c:/tempperms/full':
@@ -87,7 +86,6 @@ acl { 'c:/tempperms/full':
 #     BUILTIN\Users:(I)(OI)(CI)(RX)
 #     NT AUTHORITY\Authenticated Users:(I)(M)
 #     NT AUTHORITY\Authenticated Users:(I)(OI)(CI)(IO)(M)
-
 
 acl { 'c:/tempperms/fqdn_sid':
   permissions => [
@@ -159,7 +157,6 @@ acl { 'tempperms_protected':
 #          NT AUTHORITY\Authenticated Users:(M)
 #          NT AUTHORITY\Authenticated Users:(OI)(CI)(IO)(M)
 
-
 acl { 'c:/tempperms/protected_purge':
   purge                      => true,
   permissions                => [
@@ -178,7 +175,6 @@ acl { 'c:/tempperms/protected_purge':
 #C:\tempperms>icacls protected_purge
 #protected_purge BUILTIN\Administrators:(OI)(CI)(F)
 #                BUILTIN\Users:(OI)(CI)(F)
-
 
 acl { 'c:/tempperms/inheritance':
   purge                      => true,
@@ -212,7 +208,6 @@ acl { 'c:/tempperms/inheritance':
 #            BUILTIN\Administrators:(CI)(F)
 #            WIN-QR952GIDHVE\Administrator:(OI)(F)
 #            BUILTIN\Users:(F)
-
 
 acl { 'c:/tempperms/propagation':
   purge                      => true,
@@ -254,8 +249,8 @@ acl { 'c:/tempperms/propagation':
 #            NT AUTHORITY\Authenticated Users:(OI)(CI)(NP)(R)
 
 file { ['c:/tempperms/propagation/child_container',
-    'c:/tempperms/propagation/child_container/grandchild_container']:
-  ensure => 'directory',
+  'c:/tempperms/propagation/child_container/grandchild_container']:
+    ensure => 'directory',
 }
 
 #C:\tempperms\propagation>icacls child_container
@@ -269,9 +264,9 @@ file { ['c:/tempperms/propagation/child_container',
 #                     BUILTIN\Users:(I)(OI)(CI)(F)
 
 file { ['c:/tempperms/propagation/child_object.txt',
-    'c:/tempperms/propagation/child_container/grandchild_object.txt']:
-  ensure  => 'file',
-  content => 'what',
+  'c:/tempperms/propagation/child_container/grandchild_object.txt']:
+    ensure  => 'file',
+    content => 'what',
 }
 
 #C:\tempperms\propagation>icacls child_object.txt
@@ -283,7 +278,6 @@ file { ['c:/tempperms/propagation/child_object.txt',
 #C:\tempperms\propagation\child_container>icacls grandchild_object.txt
 #grandchild_object.txt BUILTIN\Administrators:(I)(M)
 #                      BUILTIN\Users:(I)(F)
-
 
 acl { 'c:/tempperms/deny':
   permissions => [
@@ -304,7 +298,6 @@ acl { 'c:/tempperms/deny':
 #      BUILTIN\Users:(I)(OI)(CI)(RX)
 #      NT AUTHORITY\Authenticated Users:(I)(M)
 #      NT AUTHORITY\Authenticated Users:(I)(OI)(CI)(IO)(M)
-
 
 acl { 'c:/tempperms/same_user':
   purge                      => true,
@@ -338,13 +331,13 @@ acl { 'c:/tempperms/same_user':
     {
       identity    => 'SYSTEM',
       rights      => ['read','execute'],
-      child_types =>'containers',
+      child_types => 'containers',
       affects     => 'direct_children_only'
     },
     {
       identity    => 'SYSTEM',
       rights      => ['read','execute'],
-      child_types =>'objects',
+      child_types => 'objects',
       affects     => 'direct_children_only'
     },
     {
@@ -355,13 +348,13 @@ acl { 'c:/tempperms/same_user':
     {
       identity    => 'SYSTEM',
       rights      => ['full'],
-      child_types =>'containers',
+      child_types => 'containers',
       affects     => 'children_only'
     },
     {
       identity    => 'SYSTEM',
       rights      => ['full'],
-      child_types =>'objects',
+      child_types => 'objects',
       affects     => 'children_only'
     },
     {
@@ -372,13 +365,13 @@ acl { 'c:/tempperms/same_user':
     {
       identity    => 'SYSTEM',
       rights      => ['read'],
-      child_types =>'containers',
+      child_types => 'containers',
       affects     => 'self_and_direct_children_only'
     },
     {
       identity    => 'SYSTEM',
       rights      => ['read'],
-      child_types =>'objects',
+      child_types => 'objects',
       affects     => 'self_and_direct_children_only'
     }
   ],
@@ -400,7 +393,6 @@ acl { 'c:/tempperms/same_user':
 #          NT AUTHORITY\SYSTEM:(OI)(CI)(NP)(R)
 #          NT AUTHORITY\SYSTEM:(CI)(NP)(R)
 #          NT AUTHORITY\SYSTEM:(OI)(NP)(R)
-
 
 acl { 'c:/tempperms/rights_ordering':
   purge                      => true,
@@ -433,7 +425,6 @@ acl { 'c:/tempperms/rights_ordering':
 #                BUILTIN\Administrators:(OI)(CI)(F)
 #                WIN-QR952GIDHVE\Administrator:(OI)(CI)(M)
 
-
 acl { 'c:/tempperms/mask_specific':
   purge                      => true,
   permissions                => [
@@ -464,7 +455,6 @@ acl { 'c:/tempperms/mask_specific':
 #              NT AUTHORITY\SYSTEM:(OI)(CI)(M)
 #              BUILTIN\Users:(OI)(CI)(RX,WA)
 #              WIN-QR952GIDHVE\Administrator:(OI)(CI)(Rc,S,RA,WA)
-
 
 acl { 'c:/tempperms/remove':
   purge                      => true,
@@ -515,7 +505,7 @@ acl { 'remove_tempperms/remove':
 #       BUILTIN\Users:(OI)(CI)(W,Rc,X,RA)
 #       Everyone:(OI)(CI)(Rc,S,X,RA)
 
-file {'c:/tempperms/file.txt':
+file { 'c:/tempperms/file.txt':
   ensure  => file,
   content => 'yup',
 }
