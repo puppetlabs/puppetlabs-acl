@@ -566,7 +566,7 @@ class Puppet::Provider::Acl
           case @resource[:target_type]
           when :file
             begin
-              sd = Puppet::Util::Windows::Security.get_security_descriptor(@resource[:target]) unless @resource.noop?
+              sd = Puppet::Util::Windows::Security.get_security_descriptor(@resource[:target])
             rescue => detail
               raise Puppet::Error, "Failed to get security descriptor for path '#{@resource[:target]}': #{detail}", detail.backtrace
             end
