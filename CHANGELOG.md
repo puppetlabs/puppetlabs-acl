@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v4.1.1](https://github.com/puppetlabs/puppetlabs-acl/tree/v4.1.1) (2022-10-03)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-acl/compare/v4.1.0...v4.1.1)
+
+### Fixed
+
+- Removing unsupported windows versions [\#265](https://github.com/puppetlabs/puppetlabs-acl/pull/265) ([jordanbreen28](https://github.com/jordanbreen28))
+- \(GH-260\) Update mask docs [\#263](https://github.com/puppetlabs/puppetlabs-acl/pull/263) ([pmcmaw](https://github.com/pmcmaw))
+- \(MODULES-10908\) fix noop behavior [\#261](https://github.com/puppetlabs/puppetlabs-acl/pull/261) ([garrettrowell](https://github.com/garrettrowell))
+
 ## [v4.1.0](https://github.com/puppetlabs/puppetlabs-acl/tree/v4.1.0) (2022-05-23)
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-acl/compare/v4.0.0...v4.1.0)
