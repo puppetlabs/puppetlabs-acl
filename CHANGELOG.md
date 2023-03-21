@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v4.1.2](https://github.com/puppetlabs/puppetlabs-acl/tree/v4.1.2) (2023-03-21)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-acl/compare/v4.1.1...v4.1.2)
+
+### Fixed
+
+- pdksync - \(CONT-494\) Pin github\_changelog\_generator and JSON gem versions [\#270](https://github.com/puppetlabs/puppetlabs-acl/pull/270) ([david22swan](https://github.com/david22swan))
+
 ## [v4.1.1](https://github.com/puppetlabs/puppetlabs-acl/tree/v4.1.1) (2022-10-03)
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-acl/compare/v4.1.0...v4.1.1)

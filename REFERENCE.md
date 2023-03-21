@@ -145,7 +145,7 @@ will auto-require on user and group resources.
 
 ##### `inherit_parent_permissions`
 
-Valid values: ``true``, ``false``
+Valid values: `true`, `false`
 
 Inherit Parent Permissions specifies whether to inherit
 permissions from parent ACLs or not. The default is `true`.
@@ -220,27 +220,27 @@ that to build a manifest.
 
 The following parameters are available in the `acl` type.
 
-* [`name`](#name)
-* [`provider`](#provider)
-* [`purge`](#purge)
-* [`target`](#target)
-* [`target_type`](#target_type)
+* [`name`](#-acl--name)
+* [`provider`](#-acl--provider)
+* [`purge`](#-acl--purge)
+* [`target`](#-acl--target)
+* [`target_type`](#-acl--target_type)
 
-##### <a name="name"></a>`name`
+##### <a name="-acl--name"></a>`name`
 
 namevar
 
 The name of the acl resource. Used for uniqueness. Will set
 the target to this value if target is unset.
 
-##### <a name="provider"></a>`provider`
+##### <a name="-acl--provider"></a>`provider`
 
 The specific backend to use for this `acl` resource. You will seldom need to specify this --- Puppet will usually
 discover the appropriate provider for your platform.
 
-##### <a name="purge"></a>`purge`
+##### <a name="-acl--purge"></a>`purge`
 
-Valid values: ``true``, ``false``, `listed_permissions`
+Valid values: `true`, `false`, `listed_permissions`
 
 Purge specifies whether to remove other explicit permissions
 if not specified in the permissions set. This doesn't do anything
@@ -252,15 +252,15 @@ This also allows you to ensure the permissions listed are not on
 the ACL with `purge => listed_permissions`.
 The default is `false`.
 
-Default value: ``false``
+Default value: `false`
 
-##### <a name="target"></a>`target`
+##### <a name="-acl--target"></a>`target`
 
 The location the acl resource is pointing to. In the first
 release of ACL, this will be a file system location.
 The default is the name.
 
-##### <a name="target_type"></a>`target_type`
+##### <a name="-acl--target_type"></a>`target_type`
 
 Valid values: `file`
 
