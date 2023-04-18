@@ -268,12 +268,13 @@ Puppet::Type.newtype(:acl) do
     end
 
     def self.format_value_for_display(value)
-      if value.is_a? Array
+      case value
+      when Array
         formatted_values = value.map { |item| format_value_for_display(item) }.join(', ')
         "[#{formatted_values}\n]"
-      elsif value.is_a? Puppet::Type::Acl::Ace
+      when Puppet::Type::Acl::Ace
         value.inspect.to_s
-      elsif value.is_a? Hash
+      when Hash
         hash = value.keys.sort_by(&:to_s).map { |k|
           "#{k} => #{format_value_for_display(value[k])}"
         }.join(', ')
