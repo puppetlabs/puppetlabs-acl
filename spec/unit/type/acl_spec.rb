@@ -484,17 +484,17 @@ describe Puppet::Type.type(:acl) do
     end
 
     it "does not log a warning when an ace contains child_types => 'none' and affects => 'self_only'" do
-      expect(Puppet).to receive(:warning).never
+      expect(Puppet).not_to receive(:warning)
       resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'child_types' => 'none', 'affects' => 'self_only' }
     end
 
     it "does not log a warning when an ace contains child_types => 'none' and affects is set to 'all' (default)" do
-      expect(Puppet).to receive(:warning).never
+      expect(Puppet).not_to receive(:warning)
       resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'child_types' => 'none' }
     end
 
     it "does not log a warning when an ace contains affects => 'self_only' and child_types is set to 'all' (default)" do
-      expect(Puppet).to receive(:warning).never
+      expect(Puppet).not_to receive(:warning)
       resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'affects' => 'self_only' }
     end
 

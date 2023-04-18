@@ -73,12 +73,6 @@ RSpec/DescribeClass:
 RSpec/ExampleLength:
   Max: 40
 
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# RSpec/ExcessiveDocstringSpacing:
-#   Exclude:
-#     - 'spec/acceptance/use_cases/multiple_aces_spec.rb'
-
 # Offense count: 60
 # Configuration parameters: Max.
 RSpec/IndexedLet:
@@ -115,10 +109,10 @@ RSpec/NoExpectationExample:
 
 # Offense count: 4
 # This cop supports safe autocorrection (--autocorrect).
-RSpec/ReceiveNever:
-  Exclude:
-    - 'spec/integration/provider/acl/windows_spec.rb'
-    - 'spec/unit/type/acl_spec.rb'
+# RSpec/ReceiveNever:
+#   Exclude:
+#     - 'spec/integration/provider/acl/windows_spec.rb'
+#     - 'spec/unit/type/acl_spec.rb'
 
 # Offense count: 14
 RSpec/StubbedMock:

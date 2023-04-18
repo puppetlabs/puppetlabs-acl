@@ -192,7 +192,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         # puppet will not make this call if values are in sync
         # provider.inherit_parent_permissions = :true
 
-        expect(resource.provider).to receive(:set_security_descriptor).never
+        expect(resource.provider).not_to receive(:set_security_descriptor)
 
         resource.provider.flush
       end
