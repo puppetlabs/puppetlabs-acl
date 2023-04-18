@@ -334,10 +334,10 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         all_perms = get_permissions_for_path(resource[:target])
         all_perms.each do |perm|
           perms_not_empty = true
-          expect(perm.inherited?).to eq(false)
+          expect(perm.inherited?).to be(false)
         end
 
-        expect(perms_not_empty).to eq(true)
+        expect(perms_not_empty).to be(true)
       end
 
       it 'handles file permissions' do
