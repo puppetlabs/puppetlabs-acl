@@ -207,9 +207,7 @@ class Puppet::Type::Acl
     #
     # @return [Object] SID of ACE
     def id
-      if @id.nil? || @id.empty?
-        @id = @provider.get_account_id(@identity) if @identity && @provider && @provider.respond_to?(:get_account_id)
-      end
+      @id = @provider.get_account_id(@identity) if (@id.nil? || @id.empty?) && (@identity && @provider && @provider.respond_to?(:get_account_id))
 
       @id
     end
