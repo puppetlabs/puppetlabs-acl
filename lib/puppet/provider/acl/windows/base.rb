@@ -371,9 +371,7 @@ class Puppet::Provider::Acl
         mask = case target_resource_type
                when :file
                  begin
-                   if permission.rights.include?(:full)
-                     return FILE_ALL_ACCESS
-                   end
+                   return FILE_ALL_ACCESS if permission.rights.include?(:full)
 
                    if permission.rights.include?(:modify)
                      return DELETE |
@@ -383,17 +381,11 @@ class Puppet::Provider::Acl
                    end
 
                    filemask = 0x0
-                   if permission.rights.include?(:write)
-                     filemask |= FILE_GENERIC_WRITE
-                   end
+                   filemask |= FILE_GENERIC_WRITE if permission.rights.include?(:write)
 
-                   if permission.rights.include?(:read)
-                     filemask |= FILE_GENERIC_READ
-                   end
+                   filemask |= FILE_GENERIC_READ if permission.rights.include?(:read)
 
-                   if permission.rights.include?(:execute)
-                     filemask |= FILE_GENERIC_EXECUTE
-                   end
+                   filemask |= FILE_GENERIC_EXECUTE if permission.rights.include?(:execute)
 
                    filemask
                  end
@@ -434,9 +426,7 @@ class Puppet::Provider::Acl
                   Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE
         end
 
-        if permission.child_types == :none && flags != 0x0
-          flags = 0x0
-        end
+        flags = 0x0 if permission.child_types == :none && flags != 0x0
 
         flags
       end

@@ -11,12 +11,12 @@ class Puppet::Type::Acl
 
       @value = permission.downcase.to_sym unless @value.is_a?(Symbol)
       right = {
-        :full => 0,
-        :modify => 1,
-        :write => 2,
-        :read => 3,
-        :execute => 4,
-        :mask_specific => 5
+        full: 0,
+        modify: 1,
+        write: 2,
+        read: 3,
+        execute: 4,
+        mask_specific: 5
       }
       @order = right[@value]
     end

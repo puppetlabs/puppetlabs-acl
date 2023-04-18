@@ -80,12 +80,8 @@ class Puppet::Type::Acl
     # @param [Object] value Value to validate
     # @return [Object] Supplied value if it is non empty.
     def validate_non_empty(name, value)
-      if value.nil? || value == ''
-        raise ArgumentError, "A non-empty #{name} must be specified."
-      end
-      if value.is_a?(Array) && value.count.zero?
-        raise ArgumentError, "Value for #{name} should have least one element in the array."
-      end
+      raise ArgumentError, "A non-empty #{name} must be specified." if value.nil? || value == ''
+      raise ArgumentError, "Value for #{name} should have least one element in the array." if value.is_a?(Array) && value.count.zero?
 
       value
     end
@@ -176,9 +172,7 @@ class Puppet::Type::Acl
     # @param [Array] values
     # @return [Array] Return `values` with unique values else return `values`.
     def ensure_unique_values(values)
-      if values.is_a?(Array)
-        return values.uniq
-      end
+      return values.uniq if values.is_a?(Array)
 
       values
     end
@@ -214,9 +208,7 @@ class Puppet::Type::Acl
     # @return [Object] SID of ACE
     def id
       if @id.nil? || @id.empty?
-        if @identity && @provider && @provider.respond_to?(:get_account_id)
-          @id = @provider.get_account_id(@identity)
-        end
+        @id = @provider.get_account_id(@identity) if @identity && @provider && @provider.respond_to?(:get_account_id)
       end
 
       @id

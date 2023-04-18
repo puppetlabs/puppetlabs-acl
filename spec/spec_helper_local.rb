@@ -26,9 +26,7 @@ RSpec.configure do |config|
   config.after :suite do
     # return to original tmpdir
     ENV['TMPDIR'] = oldtmpdir
-    if Puppet::Util::Platform.windows?
-      take_ownership(tmpdir)
-    end
+    take_ownership(tmpdir) if Puppet::Util::Platform.windows?
     FileUtils.rm_rf(tmpdir)
   end
 end

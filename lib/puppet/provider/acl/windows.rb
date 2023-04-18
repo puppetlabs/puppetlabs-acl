@@ -86,9 +86,7 @@ Puppet::Type.type(:acl).provide :windows do
     when :file
       if File.file?(@resource[:target]) && permissions
         permissions.each do |perm|
-          if perm.affects == :all
-            perm.affects = :self_only
-          end
+          perm.affects = :self_only if perm.affects == :all
         end
       end
     end
