@@ -500,14 +500,14 @@ describe Puppet::Type.type(:acl) do
 
     it "logs a warning when an ace contains child_types => 'none' and affects is not 'all' (default) or 'self_only'" do
       expect(Puppet).to receive(:warning) do |v|
-        %r{If child_types => 'none', affects => value}.match(v)
+        v.include?("If child_types => 'none', affects => value")
       end
       resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'child_types' => 'none', 'affects' => 'children_only' }
     end
 
     it "logs a warning when an ace contains affects => 'self_only' and child_types is not 'all' (default) or 'none'" do
       expect(Puppet).to receive(:warning) do |v|
-        %r{If affects => 'self_only', child_types => value}.match(v)
+        v.include?("If affects => 'self_only', child_types => value")
       end
       resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'child_types' => 'containers', 'affects' => 'self_only' }
     end
@@ -620,7 +620,7 @@ describe Puppet::Type.type(:acl) do
 
       it "logs a warning when rights does not contain 'full' by itself" do
         expect(Puppet).to receive(:warning) do |v|
-          %r{In each ace, when specifying rights, if you include 'full'}.match(v)
+          v.include?("In each ace, when specifying rights, if you include 'full'")
         end
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full', 'read'] }
       end
@@ -632,7 +632,7 @@ describe Puppet::Type.type(:acl) do
 
       it "logs a warning when rights does not contain 'modify' by itself" do
         expect(Puppet).to receive(:warning) do |v|
-          %r{In each ace, when specifying rights, if you include 'modify'}.match(v)
+          v.include?("In each ace, when specifying rights, if you include 'modify'")
         end
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['modify', 'read'] }
       end

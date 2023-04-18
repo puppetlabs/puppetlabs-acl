@@ -814,7 +814,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
 
       it "logs a warning when child_types => 'none' and affects is not 'all' (default) or 'self_only'" do
         expect(Puppet).to receive(:warning) do |arg|
-          %r{If child_types => 'none', affects => value}.match(arg)
+          arg.include?("If child_types => 'none', affects => value")
         end
         ace.child_types = 'none'
         ace.affects = 'children_only'
