@@ -125,11 +125,6 @@ Style/ClassAndModuleChildren:
     - 'lib/puppet/type/acl/ace.rb'
     - 'lib/puppet/type/acl/rights.rb'
 
-# Offense count: 1
-Style/MixinUsage:
-  Exclude:
-    - 'spec/spec_helper.rb'
-
 # Offense count: 3
 # Configuration parameters: AllowedMethods.
 # AllowedMethods: respond_to_missing?
