@@ -736,7 +736,6 @@ describe Puppet::Type.type(:acl) do
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'type' => 'deny' }
         # expect(@logs[0].level).to equal(:warning)
         # expect(@logs[0].message).to match(%r{Permission `type` is deprecated and has been replaced with perm_type for allow or deny})
-        # rubocop:enable RSpec/InstanceVariable
       end
       context 'setting both type and permtype' do
         it 'throws error with different values' do
