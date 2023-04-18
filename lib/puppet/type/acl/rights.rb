@@ -9,6 +9,7 @@ class Puppet::Type::Acl
 
     def initialize(permission)
       return if permission.nil? || permission.empty?
+
       @value = permission.downcase.to_sym unless @value.is_a?(Symbol)
 
       @order = case @value

@@ -39,6 +39,7 @@ class Puppet::Type::Acl
         if permission_hash['perm_type'] && permission_hash['type'] != permission_hash['perm_type']
           raise ArgumentError, "Can not accept both `type` => #{permission_hash['type']} and `perm_type` => #{permission_hash['perm_type']}"
         end
+
         self.perm_type = permission_hash['type']
       end
       self.child_types = permission_hash['child_types']

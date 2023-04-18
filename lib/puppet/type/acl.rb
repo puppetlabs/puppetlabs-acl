@@ -229,6 +229,7 @@ Puppet::Type.newtype(:acl) do
       if value.nil? || value.empty?
         raise ArgumentError, 'A non-empty permissions must be specified.'
       end
+
       if value['is_inherited']
         raise ArgumentError,
               "Puppet can not manage inherited ACEs.

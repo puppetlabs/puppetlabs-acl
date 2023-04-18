@@ -184,6 +184,7 @@ class Puppet::Provider::Acl
         # TODO: v2 check that this is a file type and respond appropriately
         rights = []
         return rights if ace.nil?
+
         mask_specific_remainder = ace.mask
 
         # full
@@ -323,6 +324,7 @@ class Puppet::Provider::Acl
           current_local_permissions == specified_permissions
         elsif remove_permissions
           return true if specified_permissions.nil?
+
           (specified_permissions & current_local_permissions) == []
         else
           return true if specified_permissions.nil?
@@ -528,6 +530,7 @@ class Puppet::Provider::Acl
         # which will return nil when we call name_to_sid
         # if the user no longer exists
         return unless name
+
         if valid_sid?(name)
           name
         else
