@@ -4,7 +4,7 @@ require 'pathname'
 
 # Base provider for Access Control List type
 class Puppet::Provider::Acl
-  module Windows # rubocop:disable Style/ClassAndModuleChildren  Required to use the longform module name due to dependencies
+  module Windows
     # Provides the detailed implementation details for the provider and should shield the provider from legacy
     # support implementations that would happen here.
     #
