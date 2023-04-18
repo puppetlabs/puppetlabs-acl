@@ -570,8 +570,8 @@ class Puppet::Provider::Acl
           when :file
             begin
               sd = Puppet::Util::Windows::Security.get_security_descriptor(@resource[:target])
-            rescue => detail
-              raise Puppet::Error, "Failed to get security descriptor for path '#{@resource[:target]}': #{detail}", detail.backtrace
+            rescue => e
+              raise Puppet::Error, "Failed to get security descriptor for path '#{@resource[:target]}': #{e}", e.backtrace
             end
           end
 
@@ -590,8 +590,8 @@ class Puppet::Provider::Acl
         when :file
           begin
             Puppet::Util::Windows::Security.set_security_descriptor(@resource[:target], security_descriptor)
-          rescue => detail
-            raise Puppet::Error, "Failed to set security descriptor for path '#{@resource[:target]}': #{detail}", detail.backtrace
+          rescue => e
+            raise Puppet::Error, "Failed to set security descriptor for path '#{@resource[:target]}': #{e}", e.backtrace
           end
         end
 
