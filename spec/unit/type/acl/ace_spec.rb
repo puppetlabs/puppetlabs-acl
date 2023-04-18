@@ -6,7 +6,7 @@ require 'puppet/type/acl'
 require 'yaml'
 
 describe 'Ace' do
-  context '.hash' do
+  describe '.hash' do
     it 'is equal for two like aces' do
       left = Puppet::Type::Acl::Ace.new('identity' => 'Everyone', 'rights' => ['full']).hash
       right = Puppet::Type::Acl::Ace.new('identity' => 'Everyone', 'rights' => ['full']).hash
@@ -124,7 +124,7 @@ describe 'Ace' do
     end
   end
 
-  context '.==' do
+  describe '.==' do
     it 'is equal for two like aces' do
       left = Puppet::Type::Acl::Ace.new('identity' => 'Everyone', 'rights' => ['full'])
       right = Puppet::Type::Acl::Ace.new('identity' => 'Everyone', 'rights' => ['full'])
@@ -236,7 +236,7 @@ describe 'Ace' do
     end
   end
 
-  context '.same?' do
+  describe '.same?' do
     it 'is true for two like aces' do
       left = Puppet::Type::Acl::Ace.new('identity' => 'Everyone', 'rights' => ['full'])
       right = Puppet::Type::Acl::Ace.new('identity' => 'Everyone', 'rights' => ['full'])
@@ -423,7 +423,7 @@ describe 'Ace' do
     end
   end
 
-  context '.eql?' do
+  describe '.eql?' do
     it 'is true for two like aces' do
       left = Puppet::Type::Acl::Ace.new('identity' => 'Everyone', 'rights' => ['full'])
       right = Puppet::Type::Acl::Ace.new('identity' => 'Everyone', 'rights' => ['full'])
@@ -437,7 +437,7 @@ describe 'Ace' do
     end
   end
 
-  context '.equal?' do
+  describe '.equal?' do
     it 'is not equal for two like aces' do
       left = Puppet::Type::Acl::Ace.new('identity' => 'Everyone', 'rights' => ['full'])
       right = Puppet::Type::Acl::Ace.new('identity' => 'Everyone', 'rights' => ['full'])

@@ -78,7 +78,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
       expect(resource[:owner]).to be_nil
     end
 
-    context '.insync?' do
+    describe '.insync?' do
       it 'returns true for Administrators and S-1-5-32-544' do
         expect(provider).to be_owner_insync('S-1-5-32-544', 'Administrators')
       end
@@ -102,7 +102,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
       expect(resource[:group]).to be_nil
     end
 
-    context '.insync?' do
+    describe '.insync?' do
       it 'returns true for Administrators and S-1-5-32-544' do
         expect(provider).to be_group_insync('S-1-5-32-544', 'Administrators')
       end
@@ -124,7 +124,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
   context ':permissions' do
     let(:ace) { Puppet::Util::Windows::AccessControlEntry.new('S-1-5-32-544', 0x31) }
 
-    context '.get_ace_type' do
+    describe '.get_ace_type' do
       it 'returns allow if ace is nil' do
         allow(ace).to receive(:perm_type).and_return(1) # ensure no false readings
         expect(ace).to receive(:nil?).and_return(true)
@@ -145,7 +145,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
       end
     end
 
-    context '.get_ace_child_types' do
+    describe '.get_ace_child_types' do
       it 'returns all if ace is nil' do
         allow(ace).to receive(:container_inherit?).and_return(false) # ensure no false readings
         expect(ace).to receive(:nil?).and_return(true)
@@ -182,7 +182,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
       end
     end
 
-    context '.get_ace_propagation' do
+    describe '.get_ace_propagation' do
       before(:each) do
         allow(ace).to receive(:container_inherit?).and_return(true).at_most(:once)
         allow(ace).to receive(:object_inherit?).and_return(true).at_most(:once)
@@ -245,7 +245,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
       end
     end
 
-    context '.get_ace_rights_from_mask' do
+    describe '.get_ace_rights_from_mask' do
       it 'returns [] if ace is nil?' do
         expect(ace).to receive(:nil?).and_return(true)
 
@@ -393,7 +393,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
       end
     end
 
-    context '.insync?' do
+    describe '.insync?' do
       context 'when purge=>false (the default)' do
         it 'returns true for Administrators and specifying Administrators with same permissions' do
           admins = Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full'])
@@ -566,7 +566,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
       end
     end
 
-    context '.get_account_mask' do
+    describe '.get_account_mask' do
       let(:ace) { Puppet::Type::Acl::Ace.new('identity' => 'Administrator', 'rights' => ['full']) }
 
       it 'retuns 0 if the ace is nil' do
@@ -680,7 +680,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
       end
     end
 
-    context '.get_account_flags' do
+    describe '.get_account_flags' do
       let(:ace) { Puppet::Type::Acl::Ace.new('identity' => 'Administrator', 'rights' => ['full']) }
 
       it "returns (OI)(CI) for child_types => 'all', affects => 'all' (defaults)" do
@@ -821,7 +821,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
       end
     end
 
-    context '.sync_aces' do
+    describe '.sync_aces' do
       let(:current_dacl) { Puppet::Util::Windows::AccessControlList.new }
       let(:should_aces) { [Puppet::Type::Acl::Ace.new('identity' => 'Administrators', 'rights' => ['full']), Puppet::Type::Acl::Ace.new('identity' => 'Administrator', 'rights' => ['modify'])] }
       let(:should_purge) { false }
@@ -906,7 +906,7 @@ describe Puppet::Type.type(:acl).provider(:windows), if: Puppet.features.microso
       end
     end
 
-    context '.convert_to_dacl' do
+    describe '.convert_to_dacl' do
       it 'returns properly' do
         resource[:permissions] = { 'identity' => 'Administrator', 'rights' => ['full'] }
         dacl = provider.convert_to_dacl(resource[:permissions])

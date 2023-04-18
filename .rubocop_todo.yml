@@ -56,19 +56,14 @@ Naming/AccessorMethodName:
     - 'lib/puppet/provider/acl/windows/base.rb'
     - 'spec/integration/provider/acl/windows_spec.rb'
 
-# Offense count: 2
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# RSpec/BeEq:
-#   Exclude:
-#     - 'spec/integration/provider/acl/windows_spec.rb'
 
 # Offense count: 20
 # This cop supports safe autocorrection (--autocorrect).
-RSpec/ContextMethod:
-  Exclude:
-    - 'spec/integration/provider/acl/windows_spec.rb'
-    - 'spec/unit/provider/acl/windows_spec.rb'
-    - 'spec/unit/type/acl/ace_spec.rb'
+# RSpec/ContextMethod:
+#   Exclude:
+#     - 'spec/integration/provider/acl/windows_spec.rb'
+#     - 'spec/unit/provider/acl/windows_spec.rb'
+#     - 'spec/unit/type/acl/ace_spec.rb'
 
 # Offense count: 186
 # Configuration parameters: Prefixes, AllowedPatterns.

@@ -104,7 +104,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
       expect(provider.owner).to eq('S-1-5-32-544')
     end
 
-    context '.flush' do
+    describe '.flush' do
       before :each do
         resource[:target] = set_path('set_owner')
       end
@@ -141,7 +141,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
       expect(provider.group).not_to be_nil
     end
 
-    context '.flush' do
+    describe '.flush' do
       before :each do
         resource[:target] = set_path('set_group')
       end
@@ -181,7 +181,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
       expect(provider.inherit_parent_permissions).to be_truthy
     end
 
-    context '.flush' do
+    describe '.flush' do
       before :each do
         resource[:target] = set_path('set_inheritance')
       end
@@ -647,7 +647,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
     end
   end
 
-  context '.set_security_descriptor' do
+  describe '.set_security_descriptor' do
     it 'handles nil security descriptor appropriately' do
       expect {
         provider.set_security_descriptor(nil)
