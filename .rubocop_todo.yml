@@ -9,11 +9,6 @@ Lint/BooleanSymbol:
     - 'spec/unit/provider/acl/windows_spec.rb'
     - 'spec/unit/type/acl_spec.rb'
 
-# Offense count: 2
-Lint/NoReturnInBeginEndBlocks:
-  Exclude:
-    - 'lib/puppet/provider/acl/windows/base.rb'
-
 # Offense count: 16
 # Configuration parameters: AllowedMethods, AllowedPatterns, CountRepeatedAttributes.
 Metrics/AbcSize:
