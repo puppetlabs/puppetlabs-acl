@@ -16,7 +16,7 @@ class Puppet::Provider::Acl
     module Base
       # We need this as the libraries will not load properly on non-Windows platforms
       if Puppet::Util::Platform.windows?
-        require Pathname.new(__FILE__).dirname + '../../../../' + 'puppet/type/acl/ace'
+        require "#{Pathname.new(__FILE__).dirname}/../../../../puppet/type/acl/ace"
         require 'puppet/util/windows/security'
       end
 

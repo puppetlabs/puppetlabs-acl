@@ -4,7 +4,7 @@ require 'puppet/type'
 require 'pathname'
 
 Puppet::Type.newtype(:acl) do
-  require Pathname.new(__FILE__).dirname + '../../' + 'puppet/type/acl/ace'
+  require "#{Pathname.new(__FILE__).dirname}/../../puppet/type/acl/ace"
 
   @doc = <<-DOC
     Manages access control lists (ACLs).  The `acl` type is

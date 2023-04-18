@@ -127,16 +127,3 @@ Style/OptionalBooleanParameter:
   Exclude:
     - 'lib/puppet/provider/acl/windows/base.rb'
     - 'spec/integration/provider/acl/windows_spec.rb'
-
-# Offense count: 8
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: Mode.
-Style/StringConcatenation:
-  Exclude:
-    - 'lib/puppet/provider/acl/windows.rb'
-    - 'lib/puppet/provider/acl/windows/base.rb'
-    - 'lib/puppet/type/acl.rb'
-    - 'lib/puppet/type/acl/ace.rb'
-    - 'spec/acceptance/parameter_target/perms_on_dir_spec.rb'
-    - 'spec/acceptance/parameter_target/perms_on_file_spec.rb'
-    - 'spec/spec_helper_acceptance_local.rb'

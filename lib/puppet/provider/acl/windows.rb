@@ -10,8 +10,8 @@ Puppet::Type.type(:acl).provide :windows do
   confine operatingsystem: :windows
   defaultfor operatingsystem: :windows
 
-  require Pathname.new(__FILE__).dirname + '../../../' + 'puppet/type/acl/ace'
-  require Pathname.new(__FILE__).dirname + '../../../' + 'puppet/provider/acl/windows/base'
+  require "#{Pathname.new(__FILE__).dirname}/../../../puppet/type/acl/ace"
+  require "#{Pathname.new(__FILE__).dirname}/../../../puppet/provider/acl/windows/base"
   include Puppet::Provider::Acl::Windows::Base
 
   has_features :ace_order_required

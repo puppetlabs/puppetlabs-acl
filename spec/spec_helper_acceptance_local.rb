@@ -88,7 +88,7 @@ def powershell(command, args = {})
                end
   end
 
-  'powershell.exe ' + ps_args.join(' ')
+  "powershell.exe #{ps_args.join(' ')}"
 end
 
 # Convert the provided command string to Base64
