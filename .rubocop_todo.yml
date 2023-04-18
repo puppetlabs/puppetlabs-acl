@@ -21,9 +21,9 @@ Lint/BooleanSymbol:
 
 # Offense count: 1
 # This cop supports safe autocorrection (--autocorrect).
-Lint/DuplicateRegexpCharacterClassElement:
-  Exclude:
-    - 'spec/acceptance/identity/specify_app_package_authority_idents_spec.rb'
+# Lint/DuplicateRegexpCharacterClassElement:
+#   Exclude:
+#     - 'spec/acceptance/identity/specify_app_package_authority_idents_spec.rb'
 
 # Offense count: 2
 Lint/NoReturnInBeginEndBlocks:
