@@ -4,8 +4,7 @@
 class Puppet::Type::Acl
   # Simple ACL Rights object
   class Rights
-    attr_reader :value
-    attr_reader :order
+    attr_reader :value, :order
 
     def initialize(permission)
       return if permission.nil? || permission.empty?

@@ -119,10 +119,10 @@ RSpec/StubbedMock:
 # This cop supports safe autocorrection (--autocorrect).
 # Configuration parameters: EnforcedStyle.
 # SupportedStyles: separated, grouped
-Style/AccessorGrouping:
-  Exclude:
-    - 'lib/puppet/type/acl/ace.rb'
-    - 'lib/puppet/type/acl/rights.rb'
+# Style/AccessorGrouping:
+#   Exclude:
+#     - 'lib/puppet/type/acl/ace.rb'
+#     - 'lib/puppet/type/acl/rights.rb'
 
 # Offense count: 1
 # This cop supports unsafe autocorrection (--autocorrect-all).
