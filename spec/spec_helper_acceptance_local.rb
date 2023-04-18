@@ -55,10 +55,10 @@ end
 def powershell(command, args = {})
   ps_opts = {
     'ExecutionPolicy' => 'Bypass',
-    'InputFormat'     => 'None',
-    'NoLogo'          => '',
-    'NoProfile'       => '',
-    'NonInteractive'  => '',
+    'InputFormat' => 'None',
+    'NoLogo' => '',
+    'NoProfile' => '',
+    'NonInteractive' => '',
   }
   encoded = false
   ps_opts.merge!(args)
