@@ -58,7 +58,7 @@ def powershell(command, args = {})
     'InputFormat' => 'None',
     'NoLogo' => '',
     'NoProfile' => '',
-    'NonInteractive' => '',
+    'NonInteractive' => ''
   }
   encoded = false
   ps_opts.merge!(args)
