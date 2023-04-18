@@ -142,9 +142,9 @@ Style/OptionalBooleanParameter:
 
 # Offense count: 1
 # This cop supports safe autocorrection (--autocorrect).
-Style/RedundantCondition:
-  Exclude:
-    - 'lib/puppet/provider/acl/windows/base.rb'
+# Style/RedundantCondition:
+#   Exclude:
+#     - 'lib/puppet/provider/acl/windows/base.rb'
 
 # Offense count: 2
 # This cop supports safe autocorrection (--autocorrect).

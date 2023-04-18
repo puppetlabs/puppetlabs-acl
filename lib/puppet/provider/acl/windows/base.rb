@@ -530,7 +530,7 @@ class Puppet::Provider::Acl
       def get_account_name(current_value)
         name = sid_to_name(get_account_id(current_value))
 
-        name ? name : current_value
+        name || current_value
       end
       alias get_group_name get_account_name
 
