@@ -19,22 +19,16 @@ Lint/BooleanSymbol:
     - 'spec/unit/provider/acl/windows_spec.rb'
     - 'spec/unit/type/acl_spec.rb'
 
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Lint/DuplicateRegexpCharacterClassElement:
-#   Exclude:
-#     - 'spec/acceptance/identity/specify_app_package_authority_idents_spec.rb'
-
 # Offense count: 2
 Lint/NoReturnInBeginEndBlocks:
   Exclude:
     - 'lib/puppet/provider/acl/windows/base.rb'
 
 # Offense count: 6
-# This cop supports unsafe autocorrection (--autocorrect-all).
-Lint/NonAtomicFileOperation:
-  Exclude:
-    - 'spec/integration/provider/acl/windows_spec.rb'
+# # This cop supports unsafe autocorrection (--autocorrect-all).
+# Lint/NonAtomicFileOperation:
+#   Exclude:
+#     - 'spec/integration/provider/acl/windows_spec.rb'
 
 # Offense count: 1
 # This cop supports safe autocorrection (--autocorrect).

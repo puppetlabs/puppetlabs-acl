@@ -21,7 +21,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
 
   def set_path(sub_directory)
     path = File.join(top_level_path, sub_directory)
-    Dir.mkdir(path) unless Dir.exist?(path)
+    FileUtils.mkdir_p(path)
 
     path
   end
@@ -434,13 +434,13 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         path = set_path('set_perms_propagation')
         resource[:target] = path
         child_path = File.join(path, 'child_folder')
-        Dir.mkdir(child_path) unless Dir.exist?(child_path)
+        FileUtils.mkdir_p(child_path)
         child_file = File.join(path, 'child_file.txt')
         File.new(child_file, 'w').close
         grandchild_file = File.join(child_path, 'grandchild_file.txt')
         File.new(grandchild_file, 'w').close
         grandchild_path = File.join(child_path, 'grandchild_folder')
-        Dir.mkdir(grandchild_path) unless Dir.exist?(grandchild_path)
+        FileUtils.mkdir_p(grandchild_path)
 
         permissions = [
           Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'], 'affects' => 'all' }, provider),
