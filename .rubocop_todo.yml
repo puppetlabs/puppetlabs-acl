@@ -107,12 +107,6 @@ RSpec/NestedGroups:
 RSpec/NoExpectationExample:
   Enabled: false
 
-# Offense count: 4
-# This cop supports safe autocorrection (--autocorrect).
-# RSpec/ReceiveNever:
-#   Exclude:
-#     - 'spec/integration/provider/acl/windows_spec.rb'
-#     - 'spec/unit/type/acl_spec.rb'
 
 # Offense count: 14
 RSpec/StubbedMock:
@@ -122,9 +116,9 @@ RSpec/StubbedMock:
     - 'spec/unit/type/acl_spec.rb'
 
 # Offense count: 1
-Security/CompoundHash:
-  Exclude:
-    - 'lib/puppet/type/acl/ace.rb'
+# Security/CompoundHash:
+#   Exclude:
+#     - 'lib/puppet/type/acl/ace.rb'
 
 # Offense count: 8
 # This cop supports safe autocorrection (--autocorrect).

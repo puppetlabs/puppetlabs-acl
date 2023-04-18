@@ -359,12 +359,12 @@ class Puppet::Type::Acl
     #
     # @return [Hash] Hash of instance fields
     def hash
-      get_comparison_ids[0].hash ^
-        @rights.hash ^
-        @perm_type.hash ^
-        @child_types.hash ^
-        @affects.hash ^
-        @is_inherited.hash
+      [get_comparison_ids[0],
+       @rights,
+       @perm_type,
+       @child_types,
+       @affects,
+       is_inherited].hash
     end
 
     # Returns hash of instance's fields
