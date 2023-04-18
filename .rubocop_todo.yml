@@ -133,26 +133,14 @@ Style/OptionalBooleanParameter:
     - 'lib/puppet/provider/acl/windows/base.rb'
     - 'spec/integration/provider/acl/windows_spec.rb'
 
-# Offense count: 2
-# This cop supports safe autocorrection (--autocorrect).
-# Style/RedundantConstantBase:
-#   Exclude:
-#     - 'lib/puppet/provider/acl/windows.rb'
-
-# Offense count: 2
-# This cop supports safe autocorrection (--autocorrect).
-Style/RedundantRegexpEscape:
-  Exclude:
-    - 'spec/acceptance/purge/purge_all_other_perms_dir_spec.rb'
-
 # Offense count: 3
 # This cop supports safe autocorrection (--autocorrect).
 # Configuration parameters: EnforcedStyle.
 # SupportedStyles: implicit, explicit
-Style/RescueStandardError:
-  Exclude:
-    - 'lib/puppet/provider/acl/windows/base.rb'
-    - 'spec/spec_helper.rb'
+# Style/RescueStandardError:
+#   Exclude:
+#     - 'lib/puppet/provider/acl/windows/base.rb'
+#     - 'spec/spec_helper.rb'
 
 # Offense count: 1
 # This cop supports safe autocorrection (--autocorrect).
