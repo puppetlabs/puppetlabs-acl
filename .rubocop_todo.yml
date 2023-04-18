@@ -68,13 +68,6 @@ RSpec/ContextWording:
 RSpec/DescribeClass:
   Enabled: false
 
-# Offense count: 2
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AllowConsecutiveOneLiners.
-# RSpec/EmptyLineAfterExample:
-#   Exclude:
-#     - 'spec/unit/type/acl_spec.rb'
-
 # Offense count: 51
 # Configuration parameters: CountAsOne.
 RSpec/ExampleLength:
@@ -82,9 +75,9 @@ RSpec/ExampleLength:
 
 # Offense count: 1
 # This cop supports safe autocorrection (--autocorrect).
-RSpec/ExcessiveDocstringSpacing:
-  Exclude:
-    - 'spec/acceptance/use_cases/multiple_aces_spec.rb'
+# RSpec/ExcessiveDocstringSpacing:
+#   Exclude:
+#     - 'spec/acceptance/use_cases/multiple_aces_spec.rb'
 
 # Offense count: 60
 # Configuration parameters: Max.

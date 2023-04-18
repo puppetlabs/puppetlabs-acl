@@ -99,7 +99,7 @@ describe 'Use Cases' do
       acl_idempotent_apply(acl_manifest)
     end
 
-    it 'verifies ACL rights ' do
+    it 'verifies ACL rights' do
       run_shell(verify_acl_command) do |result|
         expect(result.stdout).to match(%r{#{user_id1_ace_regex}})
         expect(result.stdout).to match(%r{#{user_id2_ace_regex}})
