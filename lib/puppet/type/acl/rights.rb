@@ -10,21 +10,15 @@ class Puppet::Type::Acl
       return if permission.nil? || permission.empty?
 
       @value = permission.downcase.to_sym unless @value.is_a?(Symbol)
-
-      @order = case @value
-               when :full
-                 0
-               when :modify
-                 1
-               when :write
-                 2
-               when :read
-                 3
-               when :execute
-                 4
-               when :mask_specific
-                 5
-               end
+      right = {
+        :full => 0,
+        :modify => 1,
+        :write => 2,
+        :read => 3,
+        :execute => 4,
+        :mask_specific => 5
+      }
+      @order = right[@value]
     end
   end
 end

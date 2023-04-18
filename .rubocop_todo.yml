@@ -115,13 +115,6 @@ RSpec/StubbedMock:
     - 'spec/unit/type/acl/ace_spec.rb'
     - 'spec/unit/type/acl_spec.rb'
 
-# Offense count: 1
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: MinBranchesCount.
-# Style/CaseLikeIf:
-#   Exclude:
-#     - 'lib/puppet/type/acl.rb'
-
 # Offense count: 3
 # This cop supports unsafe autocorrection (--autocorrect-all).
 # Configuration parameters: EnforcedStyle.
@@ -134,9 +127,9 @@ Style/ClassAndModuleChildren:
 
 # Offense count: 1
 # Configuration parameters: MinBranchesCount.
-Style/HashLikeCase:
-  Exclude:
-    - 'lib/puppet/type/acl/rights.rb'
+# Style/HashLikeCase:
+#   Exclude:
+#     - 'lib/puppet/type/acl/rights.rb'
 
 # Offense count: 30
 # This cop supports safe autocorrection (--autocorrect).
