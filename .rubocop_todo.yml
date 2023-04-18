@@ -135,10 +135,10 @@ Style/OptionalBooleanParameter:
 
 # Offense count: 4
 # This cop supports safe autocorrection (--autocorrect).
-Style/RedundantAssignment:
-  Exclude:
-    - 'lib/puppet/provider/acl/windows/base.rb'
-    - 'spec/spec_helper_acceptance_local.rb'
+# Style/RedundantAssignment:
+#   Exclude:
+#     - 'lib/puppet/provider/acl/windows/base.rb'
+#     - 'spec/spec_helper_acceptance_local.rb'
 
 # Offense count: 1
 # This cop supports safe autocorrection (--autocorrect).

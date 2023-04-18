@@ -168,12 +168,10 @@ class Puppet::Provider::Acl
         child_types = get_ace_child_types(ace)
         affects = get_ace_propagation(ace)
         is_inherited = ace.inherited?
-        hash = { 'identity' => identity.to_s, 'id' => sid.to_s, 'rights' => rights,
-                 'perm_type' => ace_type, 'child_types' => child_types,
-                 'affects' => affects, 'is_inherited' => is_inherited,
-                 'mask' => ace.mask.to_s }
-
-        hash
+        { 'identity' => identity.to_s, 'id' => sid.to_s, 'rights' => rights,
+          'perm_type' => ace_type, 'child_types' => child_types,
+          'affects' => affects, 'is_inherited' => is_inherited,
+          'mask' => ace.mask.to_s }
       end
 
       # Retrieves the access rights from an ACE's access mask.
@@ -251,12 +249,10 @@ class Puppet::Provider::Acl
       def get_ace_type(ace)
         return :allow if ace.nil?
 
-        ace_type = case ace.type
-                   when Puppet::Util::Windows::AccessControlEntry::ACCESS_ALLOWED_ACE_TYPE then :allow
-                   when Puppet::Util::Windows::AccessControlEntry::ACCESS_DENIED_ACE_TYPE then :deny
-                   end
-
-        ace_type
+        case ace.type
+        when Puppet::Util::Windows::AccessControlEntry::ACCESS_ALLOWED_ACE_TYPE then :allow
+        when Puppet::Util::Windows::AccessControlEntry::ACCESS_DENIED_ACE_TYPE then :deny
+        end
       end
       module_function :get_ace_type
 
@@ -368,29 +364,28 @@ class Puppet::Provider::Acl
         return permission.mask.to_i if permission.mask
         return 0 if permission.rights.nil? || permission.rights.empty?
 
-        mask = case target_resource_type
-               when :file
-                 begin
-                   return FILE_ALL_ACCESS if permission.rights.include?(:full)
+        case target_resource_type
+        when :file
+          begin
+            return FILE_ALL_ACCESS if permission.rights.include?(:full)
 
-                   if permission.rights.include?(:modify)
-                     return DELETE |
-                            FILE_GENERIC_WRITE |
-                            FILE_GENERIC_READ  |
-                            FILE_GENERIC_EXECUTE
-                   end
+            if permission.rights.include?(:modify)
+              return DELETE |
+                     FILE_GENERIC_WRITE |
+                     FILE_GENERIC_READ  |
+                     FILE_GENERIC_EXECUTE
+            end
 
-                   filemask = 0x0
-                   filemask |= FILE_GENERIC_WRITE if permission.rights.include?(:write)
+            filemask = 0x0
+            filemask |= FILE_GENERIC_WRITE if permission.rights.include?(:write)
 
-                   filemask |= FILE_GENERIC_READ if permission.rights.include?(:read)
+            filemask |= FILE_GENERIC_READ if permission.rights.include?(:read)
 
-                   filemask |= FILE_GENERIC_EXECUTE if permission.rights.include?(:execute)
+            filemask |= FILE_GENERIC_EXECUTE if permission.rights.include?(:execute)
 
-                   filemask
-                 end
-               end
-        mask
+            filemask
+          end
+        end
       end
       module_function :get_account_mask
 
