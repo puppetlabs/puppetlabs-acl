@@ -375,11 +375,7 @@ Puppet::Type.newtype(:acl) do
   autorequire(:user) do
     required_users = []
 
-    has_account_name_method = if provider.respond_to?(:get_account_name)
-                                true
-                              else
-                                false
-                              end
+    has_account_name_method = provider.respond_to?(:get_account_name)
 
     if self[:owner]
       required_users << provider.get_account_name(self[:owner]).to_s if has_account_name_method
@@ -407,11 +403,7 @@ Puppet::Type.newtype(:acl) do
   autorequire(:group) do
     required_groups = []
 
-    has_account_group_method = if provider.respond_to?(:get_group_name)
-                                 true
-                               else
-                                 false
-                               end
+    has_account_group_method = provider.respond_to?(:get_group_name)
 
     if self[:owner]
       required_groups << provider.get_group_name(self[:owner]).to_s if has_account_group_method
