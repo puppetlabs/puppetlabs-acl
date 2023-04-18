@@ -115,11 +115,6 @@ RSpec/StubbedMock:
     - 'spec/unit/type/acl/ace_spec.rb'
     - 'spec/unit/type/acl_spec.rb'
 
-# Offense count: 1
-# Security/CompoundHash:
-#   Exclude:
-#     - 'lib/puppet/type/acl/ace.rb'
-
 # Offense count: 8
 # This cop supports safe autocorrection (--autocorrect).
 # Configuration parameters: EnforcedStyle.
