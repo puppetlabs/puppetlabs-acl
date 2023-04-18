@@ -30,7 +30,7 @@ Puppet::Type.type(:acl).provide :windows do
   def exists?
     case @resource[:target_type]
     when :file
-      ::File.exist?(@resource[:target])
+      File.exist?(@resource[:target])
     else
       raise Puppet::ResourceError, 'At present only :target_type => :file is supported on Windows.'
     end
@@ -39,7 +39,7 @@ Puppet::Type.type(:acl).provide :windows do
   def create
     case @resource[:target_type]
     when :file
-      raise Puppet::Error, "ACL cannot create target resources. Target resource will already have a security descriptor on it when created. Ensure target '#{@resource[:target]}' exists." unless ::File.exist?(@resource[:target]) # rubocop:disable Layout/LineLength
+      raise Puppet::Error, "ACL cannot create target resources. Target resource will already have a security descriptor on it when created. Ensure target '#{@resource[:target]}' exists." unless File.exist?(@resource[:target]) # rubocop:disable Layout/LineLength
     else
       raise Puppet::ResourceError, 'At present only :target_type => :file is supported on Windows.'
     end
