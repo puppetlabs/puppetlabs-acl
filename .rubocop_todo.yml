@@ -57,14 +57,6 @@ Naming/AccessorMethodName:
     - 'spec/integration/provider/acl/windows_spec.rb'
 
 
-# Offense count: 20
-# This cop supports safe autocorrection (--autocorrect).
-# RSpec/ContextMethod:
-#   Exclude:
-#     - 'spec/integration/provider/acl/windows_spec.rb'
-#     - 'spec/unit/provider/acl/windows_spec.rb'
-#     - 'spec/unit/type/acl/ace_spec.rb'
-
 # Offense count: 186
 # Configuration parameters: Prefixes, AllowedPatterns.
 # Prefixes: when, with, without
@@ -79,9 +71,9 @@ RSpec/DescribeClass:
 # Offense count: 2
 # This cop supports safe autocorrection (--autocorrect).
 # Configuration parameters: AllowConsecutiveOneLiners.
-RSpec/EmptyLineAfterExample:
-  Exclude:
-    - 'spec/unit/type/acl_spec.rb'
+# RSpec/EmptyLineAfterExample:
+#   Exclude:
+#     - 'spec/unit/type/acl_spec.rb'
 
 # Offense count: 51
 # Configuration parameters: CountAsOne.

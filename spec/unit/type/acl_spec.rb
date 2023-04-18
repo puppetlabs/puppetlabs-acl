@@ -737,12 +737,14 @@ describe Puppet::Type.type(:acl) do
         # expect(@logs[0].level).to equal(:warning)
         # expect(@logs[0].message).to match(%r{Permission `type` is deprecated and has been replaced with perm_type for allow or deny})
       end
+
       context 'setting both type and permtype' do
         it 'throws error with different values' do
           expect {
             resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'type' => 'deny', 'perm_type' => 'allow' }
           }.to raise_error(Puppet::ResourceError, %r{Can not accept both `type` => deny and `perm_type` => allow})
         end
+
         it 'does not throw an error if both are the same' do
           resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'type' => 'deny', 'perm_type' => 'deny' }
         end
