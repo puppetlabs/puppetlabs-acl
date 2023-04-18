@@ -33,7 +33,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
     if include_inherited
       provider.permissions
     else
-      provider.permissions.reject { |p| p.inherited? }
+      provider.permissions.reject(&:inherited?)
     end
   end
 
@@ -640,7 +640,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
             Puppet::Type::Acl::Ace.new({ 'identity' => sid, 'rights' => ['modify'] }, provider),
           ]
 
-          permissions = get_permissions_for_path(resource[:target]).reject { |p| p.inherited? }
+          permissions = get_permissions_for_path(resource[:target]).reject(&:inherited?)
           expect(set_perms(removing_perms)).to eq(permissions - removing_perms)
         end
       end

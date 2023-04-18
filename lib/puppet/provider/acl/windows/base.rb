@@ -313,7 +313,7 @@ class Puppet::Provider::Acl
         current_local_permissions = if current_permissions.nil?
                                       []
                                     else
-                                      current_permissions.reject { |p| p.inherited? }
+                                      current_permissions.reject(&:inherited?)
                                     end
 
         if should_purge

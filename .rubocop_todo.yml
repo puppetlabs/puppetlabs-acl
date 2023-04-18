@@ -133,13 +133,6 @@ Style/OptionalBooleanParameter:
     - 'lib/puppet/provider/acl/windows/base.rb'
     - 'spec/integration/provider/acl/windows_spec.rb'
 
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AllowModifier.
-# Style/SoleNestedConditional:
-#   Exclude:
-#     - 'lib/puppet/type/acl/ace.rb'
-
 # Offense count: 8
 # This cop supports unsafe autocorrection (--autocorrect-all).
 # Configuration parameters: Mode.
@@ -157,11 +150,11 @@ Style/StringConcatenation:
 # This cop supports unsafe autocorrection (--autocorrect-all).
 # Configuration parameters: AllowMethodsWithArguments, AllowedMethods, AllowedPatterns, AllowComments.
 # AllowedMethods: define_method
-Style/SymbolProc:
-  Exclude:
-    - 'lib/puppet/provider/acl/windows.rb'
-    - 'lib/puppet/provider/acl/windows/base.rb'
-    - 'spec/integration/provider/acl/windows_spec.rb'
+# Style/SymbolProc:
+#   Exclude:
+#     - 'lib/puppet/provider/acl/windows.rb'
+#     - 'lib/puppet/provider/acl/windows/base.rb'
+#     - 'spec/integration/provider/acl/windows_spec.rb'
 
 # Offense count: 2
 # This cop supports safe autocorrection (--autocorrect).

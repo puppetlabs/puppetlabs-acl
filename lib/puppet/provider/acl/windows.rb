@@ -113,7 +113,7 @@ Puppet::Type.type(:acl).provide :windows do
   def permissions_to_s(permissions)
     return [] if permissions.nil? || !permissions.is_a?(Array)
 
-    perms = permissions.reject { |p| p.is_inherited }
+    perms = permissions.reject(&:is_inherited)
 
     unless perms.nil?
       perms = perms.map do |perm|
