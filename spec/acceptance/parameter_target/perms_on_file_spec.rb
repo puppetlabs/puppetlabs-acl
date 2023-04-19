@@ -61,7 +61,7 @@ describe 'Permissions - File' do
 
   context 'Add Permissions to a Unicode File' do
     prefix = SecureRandom.uuid.to_s
-    let(:raw_filename) { prefix + '_\u3140\u3145\u3176\u3145\u3172\u3142\u3144\u3149\u3151\u3167\u3169\u3159\u3158.txt' }
+    let(:raw_filename) { "#{prefix}_\\u3140\\u3145\\u3176\\u3145\\u3172\\u3142\\u3144\\u3149\\u3151\\u3167\\u3169\\u3159\\u3158.txt" }
     let(:file_name) { "#{prefix}_\u3140\u3145\u3176\u3145\u3172\u3142\u3144\u3149\u3151\u3167\u3169\u3159\u3158.txt" }
     let(:file_content) { 'Puppets and Muppets! Cats on the Interwebs!' }
     let(:verify_acl_command) { "(Get-Acl ('#{target_parent}/' + [regex]::Unescape(\"#{raw_filename}\")) | ForEach-Object { $_.Access } | Where-Object { $_.IdentityReference -match '\\\\#{user_id}' -and $_.FileSystemRights -eq 'FullControl' } | Measure-Object).Count" } # rubocop:disable Layout/LineLength

@@ -4,7 +4,7 @@ require 'puppet/type'
 require 'pathname'
 
 Puppet::Type.newtype(:acl) do
-  require Pathname.new(__FILE__).dirname + '../../' + 'puppet/type/acl/ace'
+  require "#{Pathname.new(__FILE__).dirname}/../../puppet/type/acl/ace"
 
   @doc = <<-DOC
     Manages access control lists (ACLs).  The `acl` type is
@@ -136,9 +136,7 @@ Puppet::Type.newtype(:acl) do
       the target to this value if target is unset."
 
     validate do |value|
-      if value.nil? || value.empty?
-        raise ArgumentError, 'A non-empty name must be specified.'
-      end
+      raise ArgumentError, 'A non-empty name must be specified.' if value.nil? || value.empty?
     end
 
     isnamevar
@@ -150,9 +148,7 @@ Puppet::Type.newtype(:acl) do
       The default is the name."
 
     validate do |value|
-      if value.nil? || value.empty?
-        raise ArgumentError, 'A non-empty target must be specified.'
-      end
+      raise ArgumentError, 'A non-empty target must be specified.' if value.nil? || value.empty?
     end
   end
 
@@ -226,9 +222,8 @@ Puppet::Type.newtype(:acl) do
       that to build a manifest."
 
     validate do |value|
-      if value.nil? || value.empty?
-        raise ArgumentError, 'A non-empty permissions must be specified.'
-      end
+      raise ArgumentError, 'A non-empty permissions must be specified.' if value.nil? || value.empty?
+
       if value['is_inherited']
         raise ArgumentError,
               "Puppet can not manage inherited ACEs.
@@ -244,17 +239,13 @@ Puppet::Type.newtype(:acl) do
     end
 
     def insync?(current)
-      if provider.respond_to?(:permissions_insync?)
-        return provider.permissions_insync?(current, @should)
-      end
+      return provider.permissions_insync?(current, @should) if provider.respond_to?(:permissions_insync?)
 
       super(current)
     end
 
     def is_to_s(currentvalue) # rubocop:disable Naming/PredicateName  False positive; this is an accepted puppet method name
-      if provider.respond_to?(:permissions_to_s)
-        return provider.permissions_to_s(currentvalue)
-      end
+      return provider.permissions_to_s(currentvalue) if provider.respond_to?(:permissions_to_s)
 
       super(currentvalue)
     end
@@ -267,12 +258,13 @@ Puppet::Type.newtype(:acl) do
     end
 
     def self.format_value_for_display(value)
-      if value.is_a? Array
+      case value
+      when Array
         formatted_values = value.map { |item| format_value_for_display(item) }.join(', ')
         "[#{formatted_values}\n]"
-      elsif value.is_a? Puppet::Type::Acl::Ace
+      when Puppet::Type::Acl::Ace
         value.inspect.to_s
-      elsif value.is_a? Hash
+      when Hash
         hash = value.keys.sort_by(&:to_s).map { |k|
           "#{k} => #{format_value_for_display(value[k])}"
         }.join(', ')
@@ -299,25 +291,19 @@ Puppet::Type.newtype(:acl) do
       will auto-require on user and group resources."
 
     validate do |value|
-      if value.nil? || value.empty?
-        raise ArgumentError, 'A non-empty owner must be specified.'
-      end
+      raise ArgumentError, 'A non-empty owner must be specified.' if value.nil? || value.empty?
     end
 
     def insync?(current)
       return true if should.nil?
 
-      if provider.respond_to?(:owner_insync?)
-        return provider.owner_insync?(current, should)
-      end
+      return provider.owner_insync?(current, should) if provider.respond_to?(:owner_insync?)
 
       super(current)
     end
 
     def is_to_s(currentvalue) # rubocop:disable Naming/PredicateName  False positive; this is an accepted puppet method name
-      if provider.respond_to?(:owner_to_s)
-        return provider.owner_to_s(currentvalue)
-      end
+      return provider.owner_to_s(currentvalue) if provider.respond_to?(:owner_to_s)
 
       super(currentvalue)
     end
@@ -339,25 +325,19 @@ Puppet::Type.newtype(:acl) do
       will auto-require on user and group resources."
 
     validate do |value|
-      if value.nil? || value.empty?
-        raise ArgumentError, 'A non-empty group must be specified.'
-      end
+      raise ArgumentError, 'A non-empty group must be specified.' if value.nil? || value.empty?
     end
 
     def insync?(current)
       return true if should.nil?
 
-      if provider.respond_to?(:group_insync?)
-        return provider.group_insync?(current, should)
-      end
+      return provider.group_insync?(current, should) if provider.respond_to?(:group_insync?)
 
       super(current)
     end
 
     def is_to_s(currentvalue) # rubocop:disable Naming/PredicateName  False positive; this is an accepted puppet method name
-      if provider.respond_to?(:group_to_s)
-        return provider.group_to_s(currentvalue)
-      end
+      return provider.group_to_s(currentvalue) if provider.respond_to?(:group_to_s)
 
       super(currentvalue)
     end
@@ -376,13 +356,9 @@ Puppet::Type.newtype(:acl) do
   end
 
   validate do
-    if self[:permissions] == []
-      raise ArgumentError, 'Value for permissions should be an array with at least one element specified.'
-    end
+    raise ArgumentError, 'Value for permissions should be an array with at least one element specified.' if self[:permissions] == []
 
-    if provider.respond_to?(:validate)
-      provider.validate
-    end
+    provider.validate if provider.respond_to?(:validate)
   end
 
   autorequire(:file) do
@@ -399,25 +375,17 @@ Puppet::Type.newtype(:acl) do
   autorequire(:user) do
     required_users = []
 
-    has_account_name_method = if provider.respond_to?(:get_account_name)
-                                true
-                              else
-                                false
-                              end
+    has_account_name_method = provider.respond_to?(:get_account_name)
 
     if self[:owner]
-      if has_account_name_method
-        required_users << provider.get_account_name(self[:owner]).to_s
-      end
+      required_users << provider.get_account_name(self[:owner]).to_s if has_account_name_method
 
       # add the unqualified item whether qualified is found or not
       required_users << (self[:owner]).to_s
     end
 
     if self[:group]
-      if has_account_name_method
-        required_users << provider.get_account_name(self[:group]).to_s
-      end
+      required_users << provider.get_account_name(self[:group]).to_s if has_account_name_method
 
       # add the unqualified item whether qualified is found or not
       required_users << (self[:group]).to_s
@@ -425,9 +393,7 @@ Puppet::Type.newtype(:acl) do
 
     permissions = self[:permissions]
     permissions&.each do |permission|
-      if has_account_name_method
-        required_users << provider.get_account_name(permission.identity).to_s
-      end
+      required_users << provider.get_account_name(permission.identity).to_s if has_account_name_method
       required_users << permission.identity.to_s
     end
 
@@ -437,25 +403,17 @@ Puppet::Type.newtype(:acl) do
   autorequire(:group) do
     required_groups = []
 
-    has_account_group_method = if provider.respond_to?(:get_group_name)
-                                 true
-                               else
-                                 false
-                               end
+    has_account_group_method = provider.respond_to?(:get_group_name)
 
     if self[:owner]
-      if has_account_group_method
-        required_groups << provider.get_group_name(self[:owner]).to_s
-      end
+      required_groups << provider.get_group_name(self[:owner]).to_s if has_account_group_method
 
       # add the unqualified item whether qualified is found or not
       required_groups << (self[:owner]).to_s
     end
 
     if self[:group]
-      if has_account_group_method
-        required_groups << provider.get_group_name(self[:group]).to_s
-      end
+      required_groups << provider.get_group_name(self[:group]).to_s if has_account_group_method
 
       # add the unqualified item whether qualified is found or not
       required_groups << (self[:group]).to_s
@@ -463,9 +421,7 @@ Puppet::Type.newtype(:acl) do
 
     permissions = self[:permissions]
     permissions&.each do |permission|
-      if has_account_group_method
-        required_groups << provider.get_group_name(permission.identity).to_s
-      end
+      required_groups << provider.get_group_name(permission.identity).to_s if has_account_group_method
       required_groups << permission.identity.to_s
     end
 

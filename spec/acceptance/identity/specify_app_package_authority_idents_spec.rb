@@ -5,18 +5,18 @@ require 'spec_helper_acceptance'
 describe 'Identity' do
   [
     { id: 'S-1-15-2-1',
-      acl_regex: %r{.*APPLICATION PACKAGE AUTHORITY\\ALL APPLICATION PACKAGES:\(OI\)\(CI\)\(F\)},
+      acl_regx: %r{.*APPLICATION PACKAGE AUTHORITY\\ALL APPLICATION PACKAGES:\(OI\)\(CI\)\(F\)},
       minimum_kernel: 6.3 },
     # NOTE: 'APPLICATION PACKAGE AUTHORITY\\ALL APPLICATION PACKAGES' doesn't work due to Windows API
     { id: 'ALL APPLICATION PACKAGES',
-      acl_regex: %r{.*APPLICATION PACKAGE AUTHORITY\\ALL APPLICATION PACKAGES:\(OI\)\(CI\)\(F\)},
+      acl_regx: %r{.*APPLICATION PACKAGE AUTHORITY\\ALL APPLICATION PACKAGES:\(OI\)\(CI\)\(F\)},
       minimum_kernel: 6.3 },
     { id: 'S-1-15-2-2',
-      acl_regex: %r{.*APPLICATION PACKAGE AUTHORITY\\ALL RESTRICTED APPLICATION PACKAGES:\(OI\)\(CI\)\(F\)},
+      acl_regx: %r{.*APPLICATION PACKAGE AUTHORITY\\ALL RESTRICTED APPLICATION PACKAGES:\(OI\)\(CI\)\(F\)},
       minimum_kernel: 10.0 },
     # NOTE: 'APPLICATION PACKAGE AUTHORITY\\ALL RESTRICTED APPLICATION PACKAGES' doesn't work due to Windows API
     { id: 'ALL RESTRICTED APPLICATION PACKAGES',
-      acl_regex: %r{.*APPLICATION PACKAGE AUTHORITY\\ALL RESTRICTED APPLICATION PACKAGES:\(OI\)\(CI\)\(F\)},
+      acl_regx: %r{.*APPLICATION PACKAGE AUTHORITY\\ALL RESTRICTED APPLICATION PACKAGES:\(OI\)\(CI\)\(F\)},
       minimum_kernel: 10.0 },
   ].each do |account|
     target = "c:/#{SecureRandom.uuid}"
@@ -56,7 +56,7 @@ describe 'Identity' do
           it 'verifies ACL rights' do
             run_shell(verify_acl_command) do |result|
               original_acl_rights = result.stdout
-              expect(original_acl_rights).to match(%r{#{account[:acl_regex]}})
+              expect(original_acl_rights).to match(%r{#{account[:acl_regx]}})
             end
           end
 
@@ -68,7 +68,7 @@ describe 'Identity' do
 
           it 'verifies ACL rights again' do
             run_shell(verify_acl_command) do |result|
-              expect(result.stdout).to match(%r{account[:acl_regex]})
+              expect(result.stdout).to match(%r{account[:acl_regx]})
               expect(result.stdout).to eq(original_acl_rights)
             end
           end

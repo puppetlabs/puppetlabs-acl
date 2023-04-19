@@ -13,15 +13,10 @@ class Puppet::Type::Acl
     # does not work through quite the same code and needs to
     # believe this custom object is a Hash. If issues are later
     # found, this should be reviewed.
-    require Pathname.new(__FILE__).dirname + '../../../' + 'puppet/type/acl/rights'
+    require "#{Pathname.new(__FILE__).dirname}/../../../puppet/type/acl/rights"
 
     attr_reader :identity
-    attr_reader :rights
-    attr_reader :perm_type
-    attr_reader :child_types
-    attr_reader :affects
-    attr_reader :is_inherited
-    attr_reader :mask
+    attr_reader :rights, :perm_type, :child_types, :affects, :is_inherited, :mask
 
     def initialize(permission_hash, provider = nil)
       super()
@@ -39,6 +34,7 @@ class Puppet::Type::Acl
         if permission_hash['perm_type'] && permission_hash['type'] != permission_hash['perm_type']
           raise ArgumentError, "Can not accept both `type` => #{permission_hash['type']} and `perm_type` => #{permission_hash['perm_type']}"
         end
+
         self.perm_type = permission_hash['type']
       end
       self.child_types = permission_hash['child_types']
@@ -84,12 +80,8 @@ class Puppet::Type::Acl
     # @param [Object] value Value to validate
     # @return [Object] Supplied value if it is non empty.
     def validate_non_empty(name, value)
-      if value.nil? || value == ''
-        raise ArgumentError, "A non-empty #{name} must be specified."
-      end
-      if value.is_a?(Array) && value.count.zero?
-        raise ArgumentError, "Value for #{name} should have least one element in the array."
-      end
+      raise ArgumentError, "A non-empty #{name} must be specified." if value.nil? || value == ''
+      raise ArgumentError, "Value for #{name} should have least one element in the array." if value.is_a?(Array) && value.count.zero?
 
       value
     end
@@ -180,9 +172,7 @@ class Puppet::Type::Acl
     # @param [Array] values
     # @return [Array] Return `values` with unique values else return `values`.
     def ensure_unique_values(values)
-      if values.is_a?(Array)
-        return values.uniq
-      end
+      return values.uniq if values.is_a?(Array)
 
       values
     end
@@ -217,11 +207,7 @@ class Puppet::Type::Acl
     #
     # @return [Object] SID of ACE
     def id
-      if @id.nil? || @id.empty?
-        if @identity && @provider && @provider.respond_to?(:get_account_id)
-          @id = @provider.get_account_id(@identity)
-        end
-      end
+      @id = @provider.get_account_id(@identity) if (@id.nil? || @id.empty?) && (@identity && @provider && @provider.respond_to?(:get_account_id))
 
       @id
     end
@@ -309,7 +295,7 @@ class Puppet::Type::Acl
       if id_has_value && (ignore_other || other_id_has_value)
         id = self.id
         other_id = other.id unless ignore_other
-      elsif @provider&.respond_to?(:get_account_name)
+      elsif @provider.respond_to?(:get_account_name)
         id = @provider.get_account_name(@identity)
         other_id = @provider.get_account_name(other.identity) unless ignore_other
       else
@@ -358,12 +344,12 @@ class Puppet::Type::Acl
     #
     # @return [Hash] Hash of instance fields
     def hash
-      get_comparison_ids[0].hash ^
-        @rights.hash ^
-        @perm_type.hash ^
-        @child_types.hash ^
-        @affects.hash ^
-        @is_inherited.hash
+      [get_comparison_ids[0],
+       @rights,
+       @perm_type,
+       @child_types,
+       @affects,
+       is_inherited].hash
     end
 
     # Returns hash of instance's fields

@@ -21,7 +21,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
 
   def set_path(sub_directory)
     path = File.join(top_level_path, sub_directory)
-    Dir.mkdir(path) unless Dir.exist?(path)
+    FileUtils.mkdir_p(path)
 
     path
   end
@@ -33,7 +33,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
     if include_inherited
       provider.permissions
     else
-      provider.permissions.reject { |p| p.inherited? }
+      provider.permissions.reject(&:inherited?)
     end
   end
 
@@ -104,7 +104,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
       expect(provider.owner).to eq('S-1-5-32-544')
     end
 
-    context '.flush' do
+    describe '.flush' do
       before :each do
         resource[:target] = set_path('set_owner')
       end
@@ -141,7 +141,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
       expect(provider.group).not_to be_nil
     end
 
-    context '.flush' do
+    describe '.flush' do
       before :each do
         resource[:target] = set_path('set_group')
       end
@@ -181,7 +181,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
       expect(provider.inherit_parent_permissions).to be_truthy
     end
 
-    context '.flush' do
+    describe '.flush' do
       before :each do
         resource[:target] = set_path('set_inheritance')
       end
@@ -192,7 +192,7 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         # puppet will not make this call if values are in sync
         # provider.inherit_parent_permissions = :true
 
-        expect(resource.provider).to receive(:set_security_descriptor).never
+        expect(resource.provider).not_to receive(:set_security_descriptor)
 
         resource.provider.flush
       end
@@ -334,10 +334,10 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         all_perms = get_permissions_for_path(resource[:target])
         all_perms.each do |perm|
           perms_not_empty = true
-          expect(perm.inherited?).to eq(false)
+          expect(perm.inherited?).to be(false)
         end
 
-        expect(perms_not_empty).to eq(true)
+        expect(perms_not_empty).to be(true)
       end
 
       it 'handles file permissions' do
@@ -434,13 +434,13 @@ describe Puppet::Type.type(:acl).provider(:windows) do
         path = set_path('set_perms_propagation')
         resource[:target] = path
         child_path = File.join(path, 'child_folder')
-        Dir.mkdir(child_path) unless Dir.exist?(child_path)
+        FileUtils.mkdir_p(child_path)
         child_file = File.join(path, 'child_file.txt')
         File.new(child_file, 'w').close
         grandchild_file = File.join(child_path, 'grandchild_file.txt')
         File.new(grandchild_file, 'w').close
         grandchild_path = File.join(child_path, 'grandchild_folder')
-        Dir.mkdir(grandchild_path) unless Dir.exist?(grandchild_path)
+        FileUtils.mkdir_p(grandchild_path)
 
         permissions = [
           Puppet::Type::Acl::Ace.new({ 'identity' => 'Administrators', 'rights' => ['full'], 'affects' => 'all' }, provider),
@@ -640,14 +640,14 @@ describe Puppet::Type.type(:acl).provider(:windows) do
             Puppet::Type::Acl::Ace.new({ 'identity' => sid, 'rights' => ['modify'] }, provider),
           ]
 
-          permissions = get_permissions_for_path(resource[:target]).reject { |p| p.inherited? }
+          permissions = get_permissions_for_path(resource[:target]).reject(&:inherited?)
           expect(set_perms(removing_perms)).to eq(permissions - removing_perms)
         end
       end
     end
   end
 
-  context '.set_security_descriptor' do
+  describe '.set_security_descriptor' do
     it 'handles nil security descriptor appropriately' do
       expect {
         provider.set_security_descriptor(nil)

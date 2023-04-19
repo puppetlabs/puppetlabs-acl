@@ -4,7 +4,7 @@ require 'pathname'
 
 # Base provider for Access Control List type
 class Puppet::Provider::Acl
-  module Windows # rubocop:disable Style/ClassAndModuleChildren  Required to use the longform module name due to dependencies
+  module Windows
     # Provides the detailed implementation details for the provider and should shield the provider from legacy
     # support implementations that would happen here.
     #
@@ -16,7 +16,7 @@ class Puppet::Provider::Acl
     module Base
       # We need this as the libraries will not load properly on non-Windows platforms
       if Puppet::Util::Platform.windows?
-        require Pathname.new(__FILE__).dirname + '../../../../' + 'puppet/type/acl/ace'
+        require "#{Pathname.new(__FILE__).dirname}/../../../../puppet/type/acl/ace"
         require 'puppet/util/windows/security'
       end
 
@@ -168,12 +168,10 @@ class Puppet::Provider::Acl
         child_types = get_ace_child_types(ace)
         affects = get_ace_propagation(ace)
         is_inherited = ace.inherited?
-        hash = { 'identity' => identity.to_s, 'id' => sid.to_s, 'rights' => rights,
-                 'perm_type' => ace_type, 'child_types' => child_types,
-                 'affects' => affects, 'is_inherited' => is_inherited,
-                 'mask' => ace.mask.to_s }
-
-        hash
+        { 'identity' => identity.to_s, 'id' => sid.to_s, 'rights' => rights,
+          'perm_type' => ace_type, 'child_types' => child_types,
+          'affects' => affects, 'is_inherited' => is_inherited,
+          'mask' => ace.mask.to_s }
       end
 
       # Retrieves the access rights from an ACE's access mask.
@@ -184,6 +182,7 @@ class Puppet::Provider::Acl
         # TODO: v2 check that this is a file type and respond appropriately
         rights = []
         return rights if ace.nil?
+
         mask_specific_remainder = ace.mask
 
         # full
@@ -250,12 +249,10 @@ class Puppet::Provider::Acl
       def get_ace_type(ace)
         return :allow if ace.nil?
 
-        ace_type = case ace.type
-                   when Puppet::Util::Windows::AccessControlEntry::ACCESS_ALLOWED_ACE_TYPE then :allow
-                   when Puppet::Util::Windows::AccessControlEntry::ACCESS_DENIED_ACE_TYPE then :deny
-                   end
-
-        ace_type
+        case ace.type
+        when Puppet::Util::Windows::AccessControlEntry::ACCESS_ALLOWED_ACE_TYPE then :allow
+        when Puppet::Util::Windows::AccessControlEntry::ACCESS_DENIED_ACE_TYPE then :deny
+        end
       end
       module_function :get_ace_type
 
@@ -316,13 +313,14 @@ class Puppet::Provider::Acl
         current_local_permissions = if current_permissions.nil?
                                       []
                                     else
-                                      current_permissions.reject { |p| p.inherited? }
+                                      current_permissions.reject(&:inherited?)
                                     end
 
         if should_purge
           current_local_permissions == specified_permissions
         elsif remove_permissions
           return true if specified_permissions.nil?
+
           (specified_permissions & current_local_permissions) == []
         else
           return true if specified_permissions.nil?
@@ -366,37 +364,28 @@ class Puppet::Provider::Acl
         return permission.mask.to_i if permission.mask
         return 0 if permission.rights.nil? || permission.rights.empty?
 
-        mask = case target_resource_type
-               when :file
-                 begin
-                   if permission.rights.include?(:full)
-                     return FILE_ALL_ACCESS
-                   end
+        case target_resource_type
+        when :file
+          begin
+            return FILE_ALL_ACCESS if permission.rights.include?(:full)
 
-                   if permission.rights.include?(:modify)
-                     return DELETE |
-                            FILE_GENERIC_WRITE |
-                            FILE_GENERIC_READ  |
-                            FILE_GENERIC_EXECUTE
-                   end
+            if permission.rights.include?(:modify)
+              return DELETE |
+                     FILE_GENERIC_WRITE |
+                     FILE_GENERIC_READ  |
+                     FILE_GENERIC_EXECUTE
+            end
 
-                   filemask = 0x0
-                   if permission.rights.include?(:write)
-                     filemask |= FILE_GENERIC_WRITE
-                   end
+            filemask = 0x0
+            filemask |= FILE_GENERIC_WRITE if permission.rights.include?(:write)
 
-                   if permission.rights.include?(:read)
-                     filemask |= FILE_GENERIC_READ
-                   end
+            filemask |= FILE_GENERIC_READ if permission.rights.include?(:read)
 
-                   if permission.rights.include?(:execute)
-                     filemask |= FILE_GENERIC_EXECUTE
-                   end
+            filemask |= FILE_GENERIC_EXECUTE if permission.rights.include?(:execute)
 
-                   filemask
-                 end
-               end
-        mask
+            filemask
+          end
+        end
       end
       module_function :get_account_mask
 
@@ -432,9 +421,7 @@ class Puppet::Provider::Acl
                   Puppet::Util::Windows::AccessControlEntry::INHERIT_ONLY_ACE
         end
 
-        if permission.child_types == :none && flags != 0x0
-          flags = 0x0
-        end
+        flags = 0x0 if permission.child_types == :none && flags != 0x0
 
         flags
       end
@@ -528,6 +515,7 @@ class Puppet::Provider::Acl
         # which will return nil when we call name_to_sid
         # if the user no longer exists
         return unless name
+
         if valid_sid?(name)
           name
         else
@@ -542,7 +530,7 @@ class Puppet::Provider::Acl
       def get_account_name(current_value)
         name = sid_to_name(get_account_id(current_value))
 
-        name ? name : current_value
+        name || current_value
       end
       alias get_group_name get_account_name
 
@@ -567,8 +555,8 @@ class Puppet::Provider::Acl
           when :file
             begin
               sd = Puppet::Util::Windows::Security.get_security_descriptor(@resource[:target])
-            rescue => detail
-              raise Puppet::Error, "Failed to get security descriptor for path '#{@resource[:target]}': #{detail}", detail.backtrace
+            rescue StandardError => e
+              raise Puppet::Error, "Failed to get security descriptor for path '#{@resource[:target]}': #{e}", e.backtrace
             end
           end
 
@@ -587,8 +575,8 @@ class Puppet::Provider::Acl
         when :file
           begin
             Puppet::Util::Windows::Security.set_security_descriptor(@resource[:target], security_descriptor)
-          rescue => detail
-            raise Puppet::Error, "Failed to set security descriptor for path '#{@resource[:target]}': #{detail}", detail.backtrace
+          rescue StandardError => e
+            raise Puppet::Error, "Failed to set security descriptor for path '#{@resource[:target]}': #{e}", e.backtrace
           end
         end
 

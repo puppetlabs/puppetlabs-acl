@@ -57,7 +57,7 @@ describe 'Purge' do
 
     let(:verify_acl_command) { "icacls #{target}" }
     let(:acl_regex_user_id1) { %r{.*\\bob:\(OI\)\(CI\)\(F\)} }
-    let(:acl_regex_user_id2) { %r{\Ac:\/temp\/purge_all_other_no_inherit.*\\#{user_id2}:\(OI\)\(CI\)\(F\)(\\r|\\n|\r|\n)*Successfully} }
+    let(:acl_regex_user_id2) { %r{\Ac:/temp/purge_all_other_no_inherit.*\\#{user_id2}:\(OI\)\(CI\)\(F\)(\\r|\\n|\r|\n)*Successfully} }
 
     it 'applies manifest' do
       acl_idempotent_apply(acl_manifest)

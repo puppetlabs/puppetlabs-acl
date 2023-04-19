@@ -10,8 +10,8 @@ Puppet::Type.type(:acl).provide :windows do
   confine operatingsystem: :windows
   defaultfor operatingsystem: :windows
 
-  require Pathname.new(__FILE__).dirname + '../../../' + 'puppet/type/acl/ace'
-  require Pathname.new(__FILE__).dirname + '../../../' + 'puppet/provider/acl/windows/base'
+  require "#{Pathname.new(__FILE__).dirname}/../../../puppet/type/acl/ace"
+  require "#{Pathname.new(__FILE__).dirname}/../../../puppet/provider/acl/windows/base"
   include Puppet::Provider::Acl::Windows::Base
 
   has_features :ace_order_required
@@ -30,7 +30,7 @@ Puppet::Type.type(:acl).provide :windows do
   def exists?
     case @resource[:target_type]
     when :file
-      ::File.exist?(@resource[:target])
+      File.exist?(@resource[:target])
     else
       raise Puppet::ResourceError, 'At present only :target_type => :file is supported on Windows.'
     end
@@ -39,7 +39,7 @@ Puppet::Type.type(:acl).provide :windows do
   def create
     case @resource[:target_type]
     when :file
-      raise Puppet::Error, "ACL cannot create target resources. Target resource will already have a security descriptor on it when created. Ensure target '#{@resource[:target]}' exists." unless ::File.exist?(@resource[:target]) # rubocop:disable Layout/LineLength
+      raise Puppet::Error, "ACL cannot create target resources. Target resource will already have a security descriptor on it when created. Ensure target '#{@resource[:target]}' exists." unless File.exist?(@resource[:target]) # rubocop:disable Layout/LineLength
     else
       raise Puppet::ResourceError, 'At present only :target_type => :file is supported on Windows.'
     end
@@ -86,9 +86,7 @@ Puppet::Type.type(:acl).provide :windows do
     when :file
       if File.file?(@resource[:target]) && permissions
         permissions.each do |perm|
-          if perm.affects == :all
-            perm.affects = :self_only
-          end
+          perm.affects = :self_only if perm.affects == :all
         end
       end
     end
@@ -115,7 +113,7 @@ Puppet::Type.type(:acl).provide :windows do
   def permissions_to_s(permissions)
     return [] if permissions.nil? || !permissions.is_a?(Array)
 
-    perms = permissions.reject { |p| p.is_inherited }
+    perms = permissions.reject(&:is_inherited)
 
     unless perms.nil?
       perms = perms.map do |perm|

@@ -55,10 +55,10 @@ end
 def powershell(command, args = {})
   ps_opts = {
     'ExecutionPolicy' => 'Bypass',
-    'InputFormat'     => 'None',
-    'NoLogo'          => '',
-    'NoProfile'       => '',
-    'NonInteractive'  => '',
+    'InputFormat' => 'None',
+    'NoLogo' => '',
+    'NoProfile' => '',
+    'NonInteractive' => ''
   }
   encoded = false
   ps_opts.merge!(args)
@@ -88,7 +88,7 @@ def powershell(command, args = {})
                end
   end
 
-  'powershell.exe ' + ps_args.join(' ')
+  "powershell.exe #{ps_args.join(' ')}"
 end
 
 # Convert the provided command string to Base64
@@ -99,6 +99,5 @@ def encode_command(cmd)
   cmd = cmd.chars.to_a.join("\x00").chomp
   cmd << "\x00" unless cmd[-1].eql? "\x00"
   # use strict_encode because linefeeds are not correctly handled in our model
-  cmd = Base64.strict_encode64(cmd).chomp
-  cmd
+  Base64.strict_encode64(cmd).chomp
 end

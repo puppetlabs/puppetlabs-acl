@@ -484,30 +484,30 @@ describe Puppet::Type.type(:acl) do
     end
 
     it "does not log a warning when an ace contains child_types => 'none' and affects => 'self_only'" do
-      expect(Puppet).to receive(:warning).never
+      expect(Puppet).not_to receive(:warning)
       resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'child_types' => 'none', 'affects' => 'self_only' }
     end
 
     it "does not log a warning when an ace contains child_types => 'none' and affects is set to 'all' (default)" do
-      expect(Puppet).to receive(:warning).never
+      expect(Puppet).not_to receive(:warning)
       resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'child_types' => 'none' }
     end
 
     it "does not log a warning when an ace contains affects => 'self_only' and child_types is set to 'all' (default)" do
-      expect(Puppet).to receive(:warning).never
+      expect(Puppet).not_to receive(:warning)
       resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'affects' => 'self_only' }
     end
 
     it "logs a warning when an ace contains child_types => 'none' and affects is not 'all' (default) or 'self_only'" do
       expect(Puppet).to receive(:warning) do |v|
-        %r{If child_types => 'none', affects => value}.match(v)
+        v.include?("If child_types => 'none', affects => value")
       end
       resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'child_types' => 'none', 'affects' => 'children_only' }
     end
 
     it "logs a warning when an ace contains affects => 'self_only' and child_types is not 'all' (default) or 'none'" do
       expect(Puppet).to receive(:warning) do |v|
-        %r{If affects => 'self_only', child_types => value}.match(v)
+        v.include?("If affects => 'self_only', child_types => value")
       end
       resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'child_types' => 'containers', 'affects' => 'self_only' }
     end
@@ -620,7 +620,7 @@ describe Puppet::Type.type(:acl) do
 
       it "logs a warning when rights does not contain 'full' by itself" do
         expect(Puppet).to receive(:warning) do |v|
-          %r{In each ace, when specifying rights, if you include 'full'}.match(v)
+          v.include?("In each ace, when specifying rights, if you include 'full'")
         end
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full', 'read'] }
       end
@@ -632,7 +632,7 @@ describe Puppet::Type.type(:acl) do
 
       it "logs a warning when rights does not contain 'modify' by itself" do
         expect(Puppet).to receive(:warning) do |v|
-          %r{In each ace, when specifying rights, if you include 'modify'}.match(v)
+          v.include?("In each ace, when specifying rights, if you include 'modify'")
         end
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['modify', 'read'] }
       end
@@ -736,14 +736,15 @@ describe Puppet::Type.type(:acl) do
         resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'type' => 'deny' }
         # expect(@logs[0].level).to equal(:warning)
         # expect(@logs[0].message).to match(%r{Permission `type` is deprecated and has been replaced with perm_type for allow or deny})
-        # rubocop:enable RSpec/InstanceVariable
       end
+
       context 'setting both type and permtype' do
         it 'throws error with different values' do
           expect {
             resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'type' => 'deny', 'perm_type' => 'allow' }
           }.to raise_error(Puppet::ResourceError, %r{Can not accept both `type` => deny and `perm_type` => allow})
         end
+
         it 'does not throw an error if both are the same' do
           resource[:permissions] = { 'identity' => 'bob', 'rights' => ['full'], 'type' => 'deny', 'perm_type' => 'deny' }
         end

@@ -69,7 +69,7 @@ describe 'Permissions - Directory' do
 
   context 'Add Permissions to a Unicode Directory' do
     prefix = SecureRandom.uuid.to_s
-    let(:raw_dirname) { prefix + '_\u3140\u3145\u3176\u3145\u3172\u3142\u3144\u3149\u3151\u3167\u3169\u3159\u3158' }
+    let(:raw_dirname) { "#{prefix}_\\u3140\\u3145\\u3176\\u3145\\u3172\\u3142\\u3144\\u3149\\u3151\\u3167\\u3169\\u3159\\u3158" }
     let(:dirname) { "#{prefix}_\u3140\u3145\u3176\u3145\u3172\u3142\u3144\u3149\u3151\u3167\u3169\u3159\u3158" }
     let(:target) { "#{target_parent}/#{dirname}" }
     let(:verify_acl_command) { "(Get-ACL ('#{target_parent}/' + [regex]::Unescape(\"#{raw_dirname}\")) | ForEach-Object { $_.Access } | Where-Object { $_.IdentityReference -match '\\\\bob' -and $_.FileSystemRights -eq 'FullControl' -and $_.InheritanceFlags -eq 'ContainerInherit, ObjectInherit' } | Measure-Object).Count" } # rubocop:disable Layout/LineLength

@@ -1,0 +1,129 @@
+# Offense count: 43
+# This cop supports unsafe autocorrection (--autocorrect-all).
+Lint/BooleanSymbol:
+  Exclude:
+    - 'lib/puppet/provider/acl/windows.rb'
+    - 'lib/puppet/provider/acl/windows/base.rb'
+    - 'lib/puppet/type/acl.rb'
+    - 'spec/integration/provider/acl/windows_spec.rb'
+    - 'spec/unit/provider/acl/windows_spec.rb'
+    - 'spec/unit/type/acl_spec.rb'
+
+# Offense count: 16
+# Configuration parameters: AllowedMethods, AllowedPatterns, CountRepeatedAttributes.
+Metrics/AbcSize:
+  Max: 50
+
+# Offense count: 7
+# Configuration parameters: CountComments, CountAsOne, AllowedMethods, AllowedPatterns, inherit_mode.
+# AllowedMethods: refine
+Metrics/BlockLength:
+  Max: 381
+
+# Offense count: 1
+# Configuration parameters: CountComments, CountAsOne.
+Metrics/ClassLength:
+  Max: 252
+
+# Offense count: 12
+# Configuration parameters: AllowedMethods, AllowedPatterns.
+Metrics/CyclomaticComplexity:
+  Max: 15
+
+# Offense count: 20
+# Configuration parameters: CountComments, CountAsOne, AllowedMethods, AllowedPatterns.
+Metrics/MethodLength:
+  Max: 46
+
+# Offense count: 1
+# Configuration parameters: CountComments, CountAsOne.
+Metrics/ModuleLength:
+  Max: 364
+
+# Offense count: 10
+# Configuration parameters: AllowedMethods, AllowedPatterns.
+Metrics/PerceivedComplexity:
+  Max: 16
+
+# Offense count: 5
+Naming/AccessorMethodName:
+  Exclude:
+    - 'lib/puppet/provider/acl/windows/base.rb'
+    - 'spec/integration/provider/acl/windows_spec.rb'
+
+
+# Offense count: 186
+# Configuration parameters: Prefixes, AllowedPatterns.
+# Prefixes: when, with, without
+RSpec/ContextWording:
+  Enabled: false
+
+# Offense count: 41
+# Configuration parameters: IgnoredMetadata.
+RSpec/DescribeClass:
+  Enabled: false
+
+# Offense count: 51
+# Configuration parameters: CountAsOne.
+RSpec/ExampleLength:
+  Max: 40
+
+# Offense count: 60
+# Configuration parameters: Max.
+RSpec/IndexedLet:
+  Exclude:
+    - 'spec/acceptance/propagation/prop_file_spec.rb'
+    - 'spec/acceptance/purge/purge_all_other_perms_dir_spec.rb'
+    - 'spec/acceptance/purge/purge_all_other_perms_file_spec.rb'
+    - 'spec/acceptance/purge/purge_explicit_perms_dir_spec.rb'
+    - 'spec/acceptance/purge/purge_explicit_perms_file_spec.rb'
+    - 'spec/acceptance/use_cases/complex_prop_inherit_spec.rb'
+    - 'spec/acceptance/use_cases/multiple_aces_spec.rb'
+    - 'spec/acceptance/use_cases/multiple_acls_shared_ident_spec.rb'
+    - 'spec/acceptance/use_cases/multiple_acls_spec.rb'
+
+# Offense count: 100
+RSpec/MultipleExpectations:
+  Max: 12
+
+# Offense count: 102
+# Configuration parameters: AllowSubject.
+RSpec/MultipleMemoizedHelpers:
+  Max: 27
+
+# Offense count: 8
+# Configuration parameters: AllowedGroups.
+RSpec/NestedGroups:
+  Max: 4
+
+# Offense count: 104
+# Configuration parameters: AllowedPatterns.
+# AllowedPatterns: ^expect_, ^assert_
+RSpec/NoExpectationExample:
+  Enabled: false
+
+
+# Offense count: 14
+RSpec/StubbedMock:
+  Exclude:
+    - 'spec/unit/provider/acl/windows_spec.rb'
+    - 'spec/unit/type/acl/ace_spec.rb'
+    - 'spec/unit/type/acl_spec.rb'
+
+# Offense count: 3
+# This cop supports unsafe autocorrection (--autocorrect-all).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: nested, compact
+Style/ClassAndModuleChildren:
+  Exclude:
+    - 'lib/puppet/provider/acl/windows/base.rb'
+    - 'lib/puppet/type/acl/ace.rb'
+    - 'lib/puppet/type/acl/rights.rb'
+
+# Offense count: 3
+# Configuration parameters: AllowedMethods.
+# AllowedMethods: respond_to_missing?
+Style/OptionalBooleanParameter:
+  Exclude:
+    - 'lib/puppet/provider/acl/windows/base.rb'
+    - 'spec/integration/provider/acl/windows_spec.rb'
