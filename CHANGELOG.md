@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v5.0.0](https://github.com/puppetlabs/puppetlabs-acl/tree/v5.0.0) (2023-04-19)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-acl/compare/v4.1.2...v5.0.0)
+
+### Changed
+
+- \(CONT-686\) - Add Puppet 8/Drop Puppet 6 [\#279](https://github.com/puppetlabs/puppetlabs-acl/pull/279) ([jordanbreen28](https://github.com/jordanbreen28))
+
 ## [v4.1.2](https://github.com/puppetlabs/puppetlabs-acl/tree/v4.1.2) (2023-03-21)
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-acl/compare/v4.1.1...v4.1.2)
@@ -19,6 +27,7 @@ All notable changes to this project will be documented in this file. The format 
 - Removing unsupported windows versions [\#265](https://github.com/puppetlabs/puppetlabs-acl/pull/265) ([jordanbreen28](https://github.com/jordanbreen28))
 - \(GH-260\) Update mask docs [\#263](https://github.com/puppetlabs/puppetlabs-acl/pull/263) ([pmcmaw](https://github.com/pmcmaw))
 - \(MODULES-10908\) fix noop behavior [\#261](https://github.com/puppetlabs/puppetlabs-acl/pull/261) ([garrettrowell](https://github.com/garrettrowell))
+- \(IAC-976\) - Removal of inappropriate terminology [\#203](https://github.com/puppetlabs/puppetlabs-acl/pull/203) ([pmcmaw](https://github.com/pmcmaw))
 
 ## [v4.1.0](https://github.com/puppetlabs/puppetlabs-acl/tree/v4.1.0) (2022-05-23)
 
@@ -51,10 +60,6 @@ All notable changes to this project will be documented in this file. The format 
 ### Added
 
 - pdksync - \(IAC-973\) - Update travis/appveyor to run on new default branch main [\#199](https://github.com/puppetlabs/puppetlabs-acl/pull/199) ([david22swan](https://github.com/david22swan))
-
-### Fixed
-
-- \(IAC-976\) - Removal of inappropriate terminology [\#203](https://github.com/puppetlabs/puppetlabs-acl/pull/203) ([pmcmaw](https://github.com/pmcmaw))
 
 ## [v3.1.1](https://github.com/puppetlabs/puppetlabs-acl/tree/v3.1.1) (2020-04-08)
 
