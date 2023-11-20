@@ -22,6 +22,7 @@
     * [Use same identity, multiple ACEs](#use-same-identity-multiple-aces)
 1. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
 1. [Limitations - Known issues in acl](#limitations)
+1. [License](#license)
 1. [Development - Guide for contributing to the module](#development)
 
 ## Module Description
@@ -448,6 +449,10 @@ To ensure that a specific set of permissions are absent from the ACL, set `purge
     * `S-1-15-2-2` or `ALL RESTRICTED APPLICATION PACKAGES`, but *not* `APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APPLICATION PACKAGES`. This account may only be referenced on Windows 2016 (kernel 10.0) or newer.
 
 Please log tickets and issues at our [Module Issue Tracker](https://tickets.puppet.com/browse/MODULES).
+
+## License
+
+This codebase is licensed under the Apache2.0 licensing, however due to the nature of the codebase the open source dependencies may also use a combination of [AGPL](https://www.gnu.org/licenses/agpl-3.0.en.html), [BSD-2](https://opensource.org/license/bsd-2-claus), [BSD-3](https://opensource.org/license/bsd-3-claus), [GPL2.0](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html), [LGPL](https://opensource.org/license/lgpl-3-0/), [MIT](https://opensource.org/license/mit/) and [MPL](https://opensource.org/license/mpl-2-0/) Licensing.
 
 ## Development
 
