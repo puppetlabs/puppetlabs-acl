@@ -108,11 +108,9 @@ class Puppet::Provider::Acl
       #
       # @note Puppet 3.7 deprecated methods at old locations in favor of SID class
       def name_to_sid(name)
-        if Puppet::Util::Windows::SID.respond_to?(:name_to_sid)
-          Puppet::Util::Windows::SID.name_to_sid(name)
-        else
-          Puppet::Util::Windows::Security.name_to_sid(name)
-        end
+        return Puppet::Util::Windows::SID.name_to_sid(name) if Puppet::Util::Windows::SID.respond_to?(:name_to_sid)
+
+        defined?(Puppet::Util::Windows::Security) && Puppet::Util::Windows::Security.respond_to?(:name_to_sid) && Puppet::Util::Windows::Security.name_to_sid(name)
       end
 
       # Converts an SID string to an account name.
@@ -120,11 +118,9 @@ class Puppet::Provider::Acl
       # @param [String] value SID string
       # @return [String] Extracted name
       def sid_to_name(value)
-        if Puppet::Util::Windows::SID.respond_to?(:sid_to_name)
-          Puppet::Util::Windows::SID.sid_to_name(value)
-        else
-          Puppet::Util::Windows::Security.sid_to_name(value)
-        end
+        return Puppet::Util::Windows::SID.sid_to_name(value) if Puppet::Util::Windows::SID.respond_to?(:sid_to_name)
+
+        defined?(Puppet::Util::Windows::Security) && Puppet::Util::Windows::Security.respond_to?(:sid_to_name) && Puppet::Util::Windows::Security.sid_to_name(value)
       end
 
       # Checks if supplied SID string is valid
@@ -132,11 +128,9 @@ class Puppet::Provider::Acl
       # @param [String] string_sid SID string
       # @return [Bool] Whether supplied string is a valid SID
       def valid_sid?(string_sid)
-        if Puppet::Util::Windows::SID.respond_to?(:valid_sid?)
-          Puppet::Util::Windows::SID.valid_sid?(string_sid)
-        else
-          Puppet::Util::Windows::Security.valid_sid?(string_sid)
-        end
+        return Puppet::Util::Windows::SID.valid_sid?(string_sid) if Puppet::Util::Windows::SID.respond_to?(:valid_sid?)
+
+        defined?(Puppet::Util::Windows::Security) && Puppet::Util::Windows::Security.respond_to?(:valid_sid?) && Puppet::Util::Windows::Security.valid_sid?(string_sid)
       end
 
       # Retrieves permissions of current instance.

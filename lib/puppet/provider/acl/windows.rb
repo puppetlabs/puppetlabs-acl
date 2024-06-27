@@ -58,7 +58,7 @@ Puppet::Type.type(:acl).provide :windows do
     case @resource[:target_type]
     when :file
       # Target may not be set, this is called prior to initialize
-      if Puppet::Util::Windows::File.symlink?(@resource[:target] || @resource[:name])
+      if Puppet::Util::Windows::File.respond_to?(:symlink?) && Puppet::Util::Windows::File.symlink?(@resource[:target] || @resource[:name])
         raise Puppet::ResourceError, "Puppet cannot manage ACLs of symbolic links (symlinks) on Windows. Resource target '#{@resource[:target] || @resource[:name]}' is a symlink."
       end
     end
