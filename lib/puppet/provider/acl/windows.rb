@@ -7,8 +7,8 @@ Puppet::Type.type(:acl).provide :windows do
   @doc = 'Windows specific provider for acl type.'
 
   # confine :feature => :microsoft_windows
-  confine operatingsystem: :windows
-  defaultfor operatingsystem: :windows
+  confine 'os.name': :windows
+  defaultfor 'os.name': :windows
 
   require "#{Pathname.new(__FILE__).dirname}/../../../puppet/type/acl/ace"
   require "#{Pathname.new(__FILE__).dirname}/../../../puppet/provider/acl/windows/base"
