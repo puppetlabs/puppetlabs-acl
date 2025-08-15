@@ -482,7 +482,7 @@ describe 'Ace' do
                                        'is_inherited' => 'true')
 
       ace_hash = ace.to_hash
-      ace_from_yaml = YAML.load(YAML.dump(ace)) # rubocop:disable Security/YAMLLoad
+      ace_from_yaml = YAML.load(YAML.dump(ace))
 
       expect(ace_hash.keys).to eq(ace_from_yaml.keys)
       expect(ace_hash.instance_variables).to eq(ace_from_yaml.instance_variables)
@@ -491,7 +491,7 @@ describe 'Ace' do
     it 'deserializes as a plain Ruby Hash object' do
       ace = Puppet::Type::Acl::Ace.new('identity' => 'Everyone', 'rights' => ['full'])
 
-      ace_from_yaml = YAML.load(YAML.dump(ace)) # rubocop:disable Security/YAMLLoad
+      ace_from_yaml = YAML.load(YAML.dump(ace))
 
       expect(ace_from_yaml.class).to be(Hash)
     end
