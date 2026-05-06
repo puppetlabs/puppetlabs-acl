@@ -40,9 +40,8 @@ describe Puppet::Type.type(:acl).provider(:windows) do
   def get_permissions_for_path(path)
     sd = Puppet::Util::Windows::Security.get_security_descriptor(path)
 
-    permissions = []
-    sd.dacl.each do |ace|
-      permissions << Puppet::Type::Acl::Ace.new(provider.convert_to_permissions_hash(ace), self)
+    permissions = sd.dacl.map do |ace|
+      Puppet::Type::Acl::Ace.new(provider.convert_to_permissions_hash(ace), self)
     end
 
     permissions

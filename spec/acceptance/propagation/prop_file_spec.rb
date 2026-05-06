@@ -55,8 +55,8 @@ describe 'Propagate - Negative' do
     # instead of emitting a [Puppet::Type::Acl::Ace] for rendering to the console
     # a [Hash] is emitted in the permissions_to_s method
     # Puppet 4 and 5 have different behavior for rendering this data structure
-    let(:verify_manifest_pup4) { %r{\{ affects => 'self_only', identity => '.*\\bob', rights => \['full'\s+\] \}} }
-    let(:verify_manifest_pup5) { %r{\{"identity"=>".*\\bob", "rights"=>\["full"\], "affects"=>:self_only\}} }
+    let(:verify_manifest_pup4x) { %r{\{ affects => 'self_only', identity => '.*\\bob', rights => \['full'\s+\] \}} }
+    let(:verify_manifest_pup5x) { %r{\{"identity"=>".*\\bob", "rights"=>\["full"\], "affects"=>:self_only\}} }
 
     let(:verify_acl_command) { "icacls #{target_parent}/#{target_name}" }
     let(:acl_regex) { %r{.*\\bob:\(F\)} }

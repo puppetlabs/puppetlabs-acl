@@ -62,21 +62,18 @@ def powershell(command, args = {})
   }
   encoded = false
   ps_opts.merge!(args)
-  ps_args = []
-
   # determine if the command should be encoded
   if ps_opts.key?('EncodedCommand')
     v = ps_opts.delete('EncodedCommand')
     # encode the commend if v is true, nil or empty
     encoded = v || v.eql?('') || v.nil?
   end
-
-  ps_opts.each do |key, value|
-    ps_args << if value.eql?('') || value.nil?
-                 "-#{key}"
-               else
-                 "-#{key} #{value}"
-               end
+  ps_args = ps_opts.map do |key, value|
+    if value.eql?('') || value.nil?
+      "-#{key}"
+    else
+      "-#{key} #{value}"
+    end
   end
 
   # may not have a command if executing a file

@@ -87,11 +87,11 @@ describe 'Use Cases' do
     let(:target_child) { "#{target}/#{target_child_name}" }
     let(:target_grand_child) { "#{target_child}/#{target_grand_child_name}" }
 
-    let(:group1) { 'jerks' }
-    let(:group2) { 'cool_peeps' }
+    let(:group1_jerks) { 'jerks' }
+    let(:group2_cool_peeps) { 'cool_peeps' }
 
-    let(:user_id1) { 'bob' }
-    let(:user_id2) { random_username }
+    let(:user_id1_bob) { 'bob' }
+    let(:user_id2_random_username) { random_username }
 
     let(:verify_acl_command) { "icacls #{target}" }
     let(:verify_acl_child_command) { "icacls #{target_child}" }

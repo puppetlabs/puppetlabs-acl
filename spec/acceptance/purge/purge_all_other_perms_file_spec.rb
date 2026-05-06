@@ -53,8 +53,8 @@ describe 'Purge' do
 
   context 'Purge All Other Permissions from File without Inheritance' do
     let(:target) { "#{target_parent}/purge_all_other_no_inherit.txt" }
-    let(:user_id1) { 'bob' }
-    let(:user_id2) { random_username }
+    let(:user_id1_bob) { 'bob' }
+    let(:user_id2_random_username) { random_username }
 
     let(:file_content) { 'All your base are belong to us.' }
 

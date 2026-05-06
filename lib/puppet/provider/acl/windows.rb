@@ -18,7 +18,7 @@ Puppet::Type.type(:acl).provide :windows do
   has_features :can_inherit_parent_permissions
 
   def initialize(value = {})
-    super(value)
+    super
     @property_flush = {}
     @security_descriptor = nil
   end

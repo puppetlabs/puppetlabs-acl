@@ -88,12 +88,12 @@ describe 'Use Cases' do
     let(:target) { "#{target_parent}/#{target_name}" }
     let(:target_child) { "#{target}/#{target_child_name}" }
 
-    let(:user_id1) { 'bob' }
-    let(:user_id2) { random_username }
-    let(:user_id3) { 'billy' }
-    let(:user_id4) { 'sarah' }
-    let(:user_id5) { 'sally' }
-    let(:user_id6) { 'betty' }
+    let(:user_id1_bob) { 'bob' }
+    let(:user_id2_random_username) { random_username }
+    let(:user_id3_billy) { 'billy' }
+    let(:user_id4_sarah) { 'sarah' }
+    let(:user_id5_sally) { 'sally' }
+    let(:user_id6_betty) { 'betty' }
 
     let(:verify_acl_command) { "icacls #{target}" }
     let(:verify_acl_child_command) { "icacls #{target_child}" }

@@ -78,12 +78,12 @@ describe 'Use Cases' do
     let(:target_name) { "use_case_#{test_short_name}.txt" }
     let(:target) { "#{target_parent}/#{target_name}" }
 
-    let(:user_id1) { 'bob' }
-    let(:user_id2) { random_username }
-    let(:user_id3) { 'billy' }
-    let(:user_id4) { 'sarah' }
-    let(:user_id5) { 'sally' }
-    let(:user_id6) { 'betty' }
+    let(:user_id1_bob) { 'bob' }
+    let(:user_id2_random_username) { random_username }
+    let(:user_id3_billy) { 'billy' }
+    let(:user_id4_sarah) { 'sarah' }
+    let(:user_id5_sally) { 'sally' }
+    let(:user_id6_betty) { 'betty' }
 
     let(:verify_content_path) { "#{target_parent}/#{target_name}" }
 

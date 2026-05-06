@@ -138,11 +138,11 @@ class Puppet::Provider::Acl
       # @return [Array] ACEs of current instance.
       def get_current_permissions
         sd = get_security_descriptor(DO_NOT_REFRESH_SD)
-        permissions = []
         unless sd.nil?
-          permissions if sd.dacl.nil?
-          sd.dacl.each do |ace|
-            permissions << Puppet::Type::Acl::Ace.new(convert_to_permissions_hash(ace), self)
+          return permissions if sd.dacl.nil?
+
+          permissions = sd.dacl.map do |ace|
+            Puppet::Type::Acl::Ace.new(convert_to_permissions_hash(ace), self)
           end
         end
         permissions
@@ -180,36 +180,36 @@ class Puppet::Provider::Acl
         mask_specific_remainder = ace.mask
 
         # full
-        if (ace.mask & GENERIC_ALL) == GENERIC_ALL ||
-           (ace.mask & FILE_ALL_ACCESS) == FILE_ALL_ACCESS
+        if ace.mask.allbits?(GENERIC_ALL) ||
+           ace.mask.allbits?(FILE_ALL_ACCESS)
           rights << :full
           mask_specific_remainder = 0
         end
 
         if rights == []
-          if (ace.mask & FILE_GENERIC_WRITE) == FILE_GENERIC_WRITE
+          if ace.mask.allbits?(FILE_GENERIC_WRITE)
             rights << :write
             mask_specific_remainder &= ~FILE_GENERIC_WRITE
           end
-          if (ace.mask & GENERIC_WRITE) == GENERIC_WRITE
+          if ace.mask.allbits?(GENERIC_WRITE)
             rights << :write
             mask_specific_remainder &= ~GENERIC_WRITE
           end
 
-          if (ace.mask & FILE_GENERIC_READ) == FILE_GENERIC_READ
+          if ace.mask.allbits?(FILE_GENERIC_READ)
             rights << :read
             mask_specific_remainder &= ~FILE_GENERIC_READ
           end
-          if (ace.mask & GENERIC_READ) == GENERIC_READ
+          if ace.mask.allbits?(GENERIC_READ)
             rights << :read
             mask_specific_remainder &= ~GENERIC_READ
           end
 
-          if (ace.mask & FILE_GENERIC_EXECUTE) == FILE_GENERIC_EXECUTE
+          if ace.mask.allbits?(FILE_GENERIC_EXECUTE)
             rights << :execute
             mask_specific_remainder &= ~FILE_GENERIC_EXECUTE
           end
-          if (ace.mask & GENERIC_EXECUTE) == GENERIC_EXECUTE
+          if ace.mask.allbits?(GENERIC_EXECUTE)
             rights << :execute
             mask_specific_remainder &= ~GENERIC_EXECUTE
           end
@@ -219,7 +219,7 @@ class Puppet::Provider::Acl
         # if the rights appending changes above, we'll
         # need to ensure this check is still good
         if rights == [:write, :read, :execute] &&
-           (ace.mask & DELETE) == DELETE
+           ace.mask.allbits?(DELETE)
           rights = [:modify]
           mask_specific_remainder &= ~DELETE
         end
@@ -321,7 +321,7 @@ class Puppet::Provider::Acl
 
           # intersect will return order by left item in intersect
           #  order is guaranteed checked when specified_permissions
-          (current_local_permissions & specified_permissions) == specified_permissions
+          current_local_permissions.allbits?(specified_permissions)
         end
       end
 

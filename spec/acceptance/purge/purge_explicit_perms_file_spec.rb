@@ -52,15 +52,15 @@ describe 'Purge' do
     random_username = generate_random_username
 
     let(:target) { "#{target_parent}/purge_exp_inherit.txt" }
-    let(:user_id1) { 'bob' }
-    let(:user_id2) { random_username }
+    let(:user_id1_bob) { 'bob' }
+    let(:user_id2_random_username) { random_username }
 
     let(:file_content) { 'Surge Purge Merge' }
     let(:verify_content_path) { target }
 
     let(:verify_acl_command) { "icacls #{target}" }
-    let(:acl_regex_user_id1) { %r{.*\\bob:\(F\)} }
-    let(:acl_regex_user_id2) { %r{.*\\#{user_id2}:\(F\)} }
+    let(:acl_regex_user_id1_bob) { %r{.*\\bob:\(F\)} }
+    let(:acl_regex_user_id2_user_id) { %r{.*\\#{user_id2}:\(F\)} }
 
     it 'applies manifest' do
       acl_idempotent_apply(acl_manifest)

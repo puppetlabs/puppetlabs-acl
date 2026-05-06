@@ -114,12 +114,9 @@ class Puppet::Type::Acl
     # @param [Array] values Array of strings.
     # @return [Array] Converted symbols `values`.
     def convert_to_symbols(values)
-      value_syms = []
-      values.each do |value|
-        value_syms << convert_to_symbol(value)
+      values.map do |value|
+        convert_to_symbol(value)
       end
-
-      value_syms
     end
 
     # Converts an array of symbols into strings.
@@ -127,12 +124,9 @@ class Puppet::Type::Acl
     # @param [Array] symbols Array of symbols.
     # @return [Array] Converted strings of `symbols`.
     def convert_from_symbols(symbols)
-      values = []
-      symbols.each do |value|
-        values << value.to_s
+      symbols.map do |value|
+        value.to_s
       end
-
-      values
     end
 
     # Returns `rights` sorted in reverse order
@@ -153,7 +147,7 @@ class Puppet::Type::Acl
         Puppet.warning("In each ace, when specifying rights, if you include 'full', it should be without anything else e.g. rights => ['full']. Please remove the extraneous rights from the manifest to remove this warning. Reference: #{inspect}") # rubocop:disable Layout/LineLength
         @rights = [:full]
       end
-      if @rights.include?(:modify) && rights.count != 1 # rubocop:disable Style/GuardClause  Changing this to a guard clause makes the line long and unreadable
+      if @rights.include?(:modify) && rights.count != 1 # rubocop:disable Style/GuardClause -- Changing this to a guard clause makes the line long and unreadable
         Puppet.warning("In each ace, when specifying rights, if you include 'modify', it should be without anything else e.g. rights => ['modify']. Please remove the extraneous rights from the manifest to remove this warning. Reference: #{inspect}") # rubocop:disable Layout/LineLength
         @rights = [:modify]
       end
@@ -162,7 +156,7 @@ class Puppet::Type::Acl
     # Ensures that `mask` is set to `value` when `rights` is set to `mask_specific`.
     # An error is raised if the condition is not matched.
     def ensure_mask_when_mask_specific
-      if @rights.include?(:mask_specific) && (@mask.nil? || @mask.empty?) # rubocop:disable Style/GuardClause  Changing this to a guard clause makes the line long and unreadable
+      if @rights.include?(:mask_specific) && (@mask.nil? || @mask.empty?) # rubocop:disable Style/GuardClause -- Changing this to a guard clause makes the line long and unreadable
         raise ArgumentError, "If you specify rights => ['mask_specific'], you must also include mask => 'value'. Reference: #{inspect}"
       end
     end
@@ -207,7 +201,7 @@ class Puppet::Type::Acl
     #
     # @return [Object] SID of ACE
     def id
-      @id = @provider.get_account_id(@identity) if (@id.nil? || @id.empty?) && (@identity && @provider && @provider.respond_to?(:get_account_id))
+      @id = @provider.get_account_id(@identity) if (@id.nil? || @id.empty?) && (@identity && @provider&.respond_to?(:get_account_id))
 
       @id
     end

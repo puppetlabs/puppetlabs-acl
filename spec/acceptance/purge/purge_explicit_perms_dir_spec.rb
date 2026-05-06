@@ -50,12 +50,12 @@ describe 'Purge' do
   context 'Only Purge Explicit Permissions from Directory with Inheritance' do
     random_username = generate_random_username
     let(:target) { 'c:/temp/purge_exp_inherit' }
-    let(:user_id1) { 'bob' }
-    let(:user_id2) { random_username }
+    let(:user_id1_bob) { 'bob' }
+    let(:user_id2_random_username) { random_username }
 
     let(:verify_acl_command) { "icacls #{target}" }
-    let(:acl_regex_user_id1) { %r{.*\\bob:\(OI\)\(CI\)\(F\)} }
-    let(:acl_regex_user_id2) { %r{.*\\#{user_id2}:\(OI\)\(CI\)\(F\)} }
+    let(:acl_regex_user_id1_bob) { %r{.*\\bob:\(OI\)\(CI\)\(F\)} }
+    let(:acl_regex_user_id2_user_id) { %r{.*\\#{user_id2}:\(OI\)\(CI\)\(F\)} }
 
     it 'applies manifest' do
       acl_idempotent_apply(acl_manifest)

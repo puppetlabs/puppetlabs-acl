@@ -52,12 +52,12 @@ describe 'Purge' do
 
   context 'Purge All Other Permissions from Directory without Inheritance' do
     let(:target) { "#{target_parent}/purge_all_other_no_inherit" }
-    let(:user_id1) { 'bob' }
-    let(:user_id2) { random_username }
+    let(:user_id1_bob) { 'bob' }
+    let(:user_id2_random_username) { random_username }
 
     let(:verify_acl_command) { "icacls #{target}" }
-    let(:acl_regex_user_id1) { %r{.*\\bob:\(OI\)\(CI\)\(F\)} }
-    let(:acl_regex_user_id2) { %r{\Ac:/temp/purge_all_other_no_inherit.*\\#{user_id2}:\(OI\)\(CI\)\(F\)(\\r|\\n|\r|\n)*Successfully} }
+    let(:acl_regex_user_id1_bob) { %r{.*\\bob:\(OI\)\(CI\)\(F\)} }
+    let(:acl_regex_user_id2_user_id) { %r{\Ac:/temp/purge_all_other_no_inherit.*\\#{user_id2}:\(OI\)\(CI\)\(F\)(\\r|\\n|\r|\n)*Successfully} }
 
     it 'applies manifest' do
       acl_idempotent_apply(acl_manifest)

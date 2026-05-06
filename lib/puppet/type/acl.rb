@@ -241,20 +241,20 @@ Puppet::Type.newtype(:acl) do
     def insync?(current)
       return provider.permissions_insync?(current, @should) if provider.respond_to?(:permissions_insync?)
 
-      super(current)
+      super
     end
 
-    def is_to_s(currentvalue) # rubocop:disable Naming/PredicateName  False positive; this is an accepted puppet method name
+    def is_to_s(currentvalue) # rubocop:disable Naming/PredicateName -- False positive; this is an accepted puppet method name
       return provider.permissions_to_s(currentvalue) if provider.respond_to?(:permissions_to_s)
 
-      super(currentvalue)
+      super
     end
 
     def should_to_s(shouldvalue)
       return provider.permissions_should_to_s(shouldvalue) if provider.respond_to?(:permissions_should_to_s)
       return provider.permissions_to_s(shouldvalue) if provider.respond_to?(:permissions_to_s)
 
-      super(shouldvalue)
+      super
     end
 
     def self.format_value_for_display(value)
@@ -263,7 +263,7 @@ Puppet::Type.newtype(:acl) do
         formatted_values = value.map { |item| format_value_for_display(item) }.join(', ')
         "[#{formatted_values}\n]"
       when Puppet::Type::Acl::Ace
-        value.inspect.to_s
+        value.inspect
       when Hash
         hash = value.keys.sort_by(&:to_s).map { |k|
           "#{k} => #{format_value_for_display(value[k])}"
@@ -299,13 +299,13 @@ Puppet::Type.newtype(:acl) do
 
       return provider.owner_insync?(current, should) if provider.respond_to?(:owner_insync?)
 
-      super(current)
+      super
     end
 
-    def is_to_s(currentvalue) # rubocop:disable Naming/PredicateName  False positive; this is an accepted puppet method name
+    def is_to_s(currentvalue) # rubocop:disable Naming/PredicateName -- False positive; this is an accepted puppet method name
       return provider.owner_to_s(currentvalue) if provider.respond_to?(:owner_to_s)
 
-      super(currentvalue)
+      super
     end
     alias_method :should_to_s, :is_to_s
   end
@@ -333,13 +333,13 @@ Puppet::Type.newtype(:acl) do
 
       return provider.group_insync?(current, should) if provider.respond_to?(:group_insync?)
 
-      super(current)
+      super
     end
 
-    def is_to_s(currentvalue) # rubocop:disable Naming/PredicateName  False positive; this is an accepted puppet method name
+    def is_to_s(currentvalue) # rubocop:disable Naming/PredicateName -- False positive; this is an accepted puppet method name
       return provider.group_to_s(currentvalue) if provider.respond_to?(:group_to_s)
 
-      super(currentvalue)
+      super
     end
     alias_method :should_to_s, :is_to_s
   end
