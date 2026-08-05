@@ -49,6 +49,8 @@ group :system_tests do
   gem "serverspec", '~> 2.41',     require: false
 end
 
+gem "concurrent-ruby", ">= 1.3.7", require: false
+
 gems = {}
 puppet_version = ENV.fetch('PUPPET_GEM_VERSION', nil)
 facter_version = ENV.fetch('FACTER_GEM_VERSION', nil)
