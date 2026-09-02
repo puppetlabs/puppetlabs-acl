@@ -22,8 +22,8 @@ acl { 'c:\temp':
   permissions                => [
     {
       identity => 'Administrators',
-      rights   => [full]
-    }
+      rights   => [full],
+    },
   ],
   owner                      => 'Administrators',
   inherit_parent_permissions => true,
@@ -38,8 +38,8 @@ acl { 'temp_dir_module_name':
     },
     {
       identity => 'tim',
-      rights   => [read,execute]
-    }
+      rights   => [read,execute],
+    },
   ],
 }
 
@@ -54,8 +54,8 @@ acl { 'temp_dir_module2_name':
     ,
     {
       identity => 'tim',
-      rights   => [read,execute]
-    }
+      rights   => [read,execute],
+    },
   ],
 }
 
