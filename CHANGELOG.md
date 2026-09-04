@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v6.0.0](https://github.com/puppetlabs/puppetlabs-acl/tree/v6.0.0) - 2026-09-04
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-acl/compare/v5.0.3...v6.0.0)
+
+### Changed
+
+- (CAT-2360) Prepare module for Puppetcore / Drop Support for Puppet 7 [#310](https://github.com/puppetlabs/puppetlabs-acl/pull/310) ([david22swan](https://github.com/david22swan))
+
+### Added
+
+- MODULES-11712: Add Puppet 9 support [#315](https://github.com/puppetlabs/puppetlabs-acl/pull/315) ([span786](https://github.com/span786))
+
 ## [v5.0.3](https://github.com/puppetlabs/puppetlabs-acl/tree/v5.0.3) - 2025-01-28
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-acl/compare/v5.0.2...v5.0.3)
