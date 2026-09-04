@@ -52,16 +52,20 @@ gems = {}
 puppet_version = ENV.fetch('PUPPET_GEM_VERSION', nil)
 facter_version = ENV.fetch('FACTER_GEM_VERSION', nil)
 hiera_version = ENV.fetch('HIERA_GEM_VERSION', nil)
-gemsource_puppetcore = 'https://rubygems-puppetcore.puppet.com'
+gemsource_puppetcore = if ENV['PUPPET_FORGE_TOKEN']
+  'https://rubygems-puppetcore.puppet.com'
+else
+  ENV['GEM_SOURCE_PUPPETCORE'] || (ENV['GEM_SOURCE'] || 'https://rubygems.org')
+end
 
 # Puppet 9.0.0 is a released gem on the standard puppetcore source (confirmed:
 # puppetlabs-windows_eventlog#100's CI resolves `puppet (9.0.0)` from
-# gemsource_puppetcore with no PUPPET_GEM_SOURCE set), so unlike the prerelease-era
-# version this replaces, no branching on the requested Puppet version or on
-# PUPPET_FORGE_TOKEN is needed anymore -- puppet/facter always resolve from
-# gemsource_puppetcore regardless of which version is requested. Uses the literal
-# array form (not location_for) because this file's location_for is the 2-arg
-# variant that doesn't accept/merge a :source option.
+# gemsource_puppetcore with no PUPPET_GEM_SOURCE set). Falls back to the public
+# rubygems.org source when no PUPPET_FORGE_TOKEN is present (e.g. release_prep.yml
+# via cat-github-actions, which never sets it), since Puppet 9.0.0 is also
+# published there. Uses the literal array form (not location_for) because this
+# file's location_for is the 2-arg variant that doesn't accept/merge a :source
+# option.
 gems['puppet'] = [puppet_version, { require: false, source: gemsource_puppetcore }]
 gems['facter'] = [facter_version, { require: false, source: gemsource_puppetcore }]
 
