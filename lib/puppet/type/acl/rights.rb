@@ -16,7 +16,7 @@ class Puppet::Type::Acl
         write: 2,
         read: 3,
         execute: 4,
-        mask_specific: 5
+        mask_specific: 5,
       }
       @order = right[@value]
     end
