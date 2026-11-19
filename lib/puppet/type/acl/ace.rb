@@ -15,8 +15,7 @@ class Puppet::Type::Acl
     # found, this should be reviewed.
     require "#{Pathname.new(__FILE__).dirname}/../../../puppet/type/acl/rights"
 
-    attr_reader :identity
-    attr_reader :rights, :perm_type, :child_types, :affects, :is_inherited, :mask
+    attr_reader :identity, :rights, :perm_type, :child_types, :affects, :is_inherited, :mask
 
     def initialize(permission_hash, provider = nil)
       super()
